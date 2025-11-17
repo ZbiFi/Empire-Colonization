@@ -4,3 +4,4 @@ eventy z lokalnymi
 espedycje - cos ciekawego
 armia i walka?
 piractwo?
+save/load
