@@ -54,7 +54,7 @@ STATES = {
         ]
     },
     "Anglia": {
-        "bonus": "lepszy handel", "trade": 1.3,
+        "bonus": "lepszy handel i szybsze statki", "trade": 0.1, "speed": 1.1,
         "rulers": [
             {"name": "Henryk VII Tudor", "start": 1485, "end": 1509},
             {"name": "Henryk VIII", "start": 1509, "end": 1547},
@@ -75,7 +75,7 @@ STATES = {
         ]
     },
     "Francja": {
-        "bonus": "lepsza dyplomacja", "diplo_bonus": 15,
+        "bonus": "lepsza dyplomacja", "reputation_threshold": 750,
         "rulers": [
             {"name": "Karol VIII", "start": 1483, "end": 1498},
             {"name": "Ludwik XII", "start": 1498, "end": 1515},
@@ -148,7 +148,7 @@ STATES = {
         ]
     },
     "Wenecja": {
-        "bonus": "lepszy handel", "trade": 1.5,
+        "bonus": "lepszy handel", "trade": 0.2,
         "rulers": [
             {"name": "Agostino Barbarigo", "start": 1486, "end": 1501},
             {"name": "Leonardo Loredan", "start": 1501, "end": 1521},
@@ -200,7 +200,7 @@ STATES = {
         ]
     },
     "Genua": {
-        "bonus": "bogate kopalnie", "mine": 1.4,
+        "bonus": "bogate kopalnie", "mine": 1.2,
         "rulers": [
             {"name": "Battista Fregoso", "start": 1478, "end": 1483},
             {"name": "Paolo Fregoso", "start": 1483, "end": 1488},
@@ -253,77 +253,77 @@ STATES = {
             {"name": "Stanisław August Poniatowski", "start": 1764, "end": 1795}
         ]
     },
-    "Szkocja": {
-        "bonus": "odporni na choroby", "health": 1.5,
-        "rulers": [
-            {"name": "Jakub III", "start": 1460, "end": 1488},
-            {"name": "Jakub IV", "start": 1488, "end": 1513},
-            {"name": "Jakub V", "start": 1513, "end": 1542},
-            {"name": "Maria Stuart", "start": 1542, "end": 1567},
-            {"name": "Jakub VI", "start": 1567, "end": 1625},
-            {"name": "Karol I", "start": 1625, "end": 1649},
-            {"name": "Karol II", "start": 1649, "end": 1685},
-            {"name": "Jakub VII", "start": 1685, "end": 1688},
-            {"name": "Maria II i Wilhelm III", "start": 1689, "end": 1702},
-            {"name": "Anna", "start": 1702, "end": 1707}
-        ]
-    },
-    "Neapol": {
-        "bonus": "szybkie plantacje", "plantation": 1.4,
-        "rulers": [
-            {"name": "Ferdynand I", "start": 1458, "end": 1494},
-            {"name": "Alfons II", "start": 1494, "end": 1495},
-            {"name": "Ferdynand II", "start": 1495, "end": 1496},
-            {"name": "Fryderyk I", "start": 1496, "end": 1501},
-            {"name": "Ludwik XII Francji", "start": 1501, "end": 1504},
-            {"name": "Ferdynand III Aragoński", "start": 1504, "end": 1516},
-            {"name": "Joanna III", "start": 1516, "end": 1555},
-            {"name": "Karol V", "start": 1516, "end": 1556},
-            {"name": "Filip I", "start": 1556, "end": 1598},
-            {"name": "Filip II", "start": 1598, "end": 1621},
-            {"name": "Filip III", "start": 1621, "end": 1665},
-            {"name": "Karol II Hiszpański", "start": 1665, "end": 1700},
-            {"name": "Filip IV", "start": 1700, "end": 1707},
-            {"name": "Karol VI Habsburg", "start": 1707, "end": 1734},
-            {"name": "Karol VII Burbon", "start": 1734, "end": 1759},
-            {"name": "Ferdynand IV", "start": 1759, "end": 1799}
-        ]
-    },
-    "Aragonia": {
-        "bonus": "lepsza marynarka", "ships": 1.3,
-        "rulers": [
-            {"name": "Jan II", "start": 1458, "end": 1479},
-            {"name": "Ferdynand II", "start": 1479, "end": 1516},
-            {"name": "Joanna Szalona", "start": 1516, "end": 1555},
-            {"name": "Karol I", "start": 1516, "end": 1556},
-            {"name": "Filip II", "start": 1556, "end": 1598},
-            {"name": "Filip III", "start": 1598, "end": 1621},
-            {"name": "Filip IV", "start": 1621, "end": 1665},
-            {"name": "Karol II", "start": 1665, "end": 1700},
-            {"name": "Filip V", "start": 1700, "end": 1746},
-            {"name": "Ferdynand VI", "start": 1746, "end": 1759},
-            {"name": "Karol III", "start": 1759, "end": 1788},
-            {"name": "Karol IV", "start": 1788, "end": 1808}
-        ]
-    },
-    "Kastylia": {
-        "bonus": "dużo złota", "gold_find": 1.6,
-        "rulers": [
-            {"name": "Jan II", "start": 1406, "end": 1454},
-            {"name": "Henryk IV", "start": 1454, "end": 1474},
-            {"name": "Izabela I", "start": 1474, "end": 1504},
-            {"name": "Joanna Szalona", "start": 1504, "end": 1555},
-            {"name": "Karol I", "start": 1516, "end": 1556},
-            {"name": "Filip II", "start": 1556, "end": 1598},
-            {"name": "Filip III", "start": 1598, "end": 1621},
-            {"name": "Filip IV", "start": 1621, "end": 1665},
-            {"name": "Karol II", "start": 1665, "end": 1700},
-            {"name": "Filip V", "start": 1700, "end": 1746},
-            {"name": "Ferdynand VI", "start": 1746, "end": 1759},
-            {"name": "Karol III", "start": 1759, "end": 1788},
-            {"name": "Karol IV", "start": 1788, "end": 1808}
-        ]
-    },
+    # "Szkocja": {
+    #     "bonus": "odporni na choroby", "health": 1.5,
+    #     "rulers": [
+    #         {"name": "Jakub III", "start": 1460, "end": 1488},
+    #         {"name": "Jakub IV", "start": 1488, "end": 1513},
+    #         {"name": "Jakub V", "start": 1513, "end": 1542},
+    #         {"name": "Maria Stuart", "start": 1542, "end": 1567},
+    #         {"name": "Jakub VI", "start": 1567, "end": 1625},
+    #         {"name": "Karol I", "start": 1625, "end": 1649},
+    #         {"name": "Karol II", "start": 1649, "end": 1685},
+    #         {"name": "Jakub VII", "start": 1685, "end": 1688},
+    #         {"name": "Maria II i Wilhelm III", "start": 1689, "end": 1702},
+    #         {"name": "Anna", "start": 1702, "end": 1707}
+    #     ]
+    # },
+    # "Neapol": {
+    #     "bonus": "szybkie plantacje", "plantation": 1.4,
+    #     "rulers": [
+    #         {"name": "Ferdynand I", "start": 1458, "end": 1494},
+    #         {"name": "Alfons II", "start": 1494, "end": 1495},
+    #         {"name": "Ferdynand II", "start": 1495, "end": 1496},
+    #         {"name": "Fryderyk I", "start": 1496, "end": 1501},
+    #         {"name": "Ludwik XII Francji", "start": 1501, "end": 1504},
+    #         {"name": "Ferdynand III Aragoński", "start": 1504, "end": 1516},
+    #         {"name": "Joanna III", "start": 1516, "end": 1555},
+    #         {"name": "Karol V", "start": 1516, "end": 1556},
+    #         {"name": "Filip I", "start": 1556, "end": 1598},
+    #         {"name": "Filip II", "start": 1598, "end": 1621},
+    #         {"name": "Filip III", "start": 1621, "end": 1665},
+    #         {"name": "Karol II Hiszpański", "start": 1665, "end": 1700},
+    #         {"name": "Filip IV", "start": 1700, "end": 1707},
+    #         {"name": "Karol VI Habsburg", "start": 1707, "end": 1734},
+    #         {"name": "Karol VII Burbon", "start": 1734, "end": 1759},
+    #         {"name": "Ferdynand IV", "start": 1759, "end": 1799}
+    #     ]
+    # },
+    # "Aragonia": {
+    #     "bonus": "lepsza marynarka", "ships": 1.3,
+    #     "rulers": [
+    #         {"name": "Jan II", "start": 1458, "end": 1479},
+    #         {"name": "Ferdynand II", "start": 1479, "end": 1516},
+    #         {"name": "Joanna Szalona", "start": 1516, "end": 1555},
+    #         {"name": "Karol I", "start": 1516, "end": 1556},
+    #         {"name": "Filip II", "start": 1556, "end": 1598},
+    #         {"name": "Filip III", "start": 1598, "end": 1621},
+    #         {"name": "Filip IV", "start": 1621, "end": 1665},
+    #         {"name": "Karol II", "start": 1665, "end": 1700},
+    #         {"name": "Filip V", "start": 1700, "end": 1746},
+    #         {"name": "Ferdynand VI", "start": 1746, "end": 1759},
+    #         {"name": "Karol III", "start": 1759, "end": 1788},
+    #         {"name": "Karol IV", "start": 1788, "end": 1808}
+    #     ]
+    # },
+    # "Kastylia": {
+    #     "bonus": "dużo złota", "gold_find": 1.6,
+    #     "rulers": [
+    #         {"name": "Jan II", "start": 1406, "end": 1454},
+    #         {"name": "Henryk IV", "start": 1454, "end": 1474},
+    #         {"name": "Izabela I", "start": 1474, "end": 1504},
+    #         {"name": "Joanna Szalona", "start": 1504, "end": 1555},
+    #         {"name": "Karol I", "start": 1516, "end": 1556},
+    #         {"name": "Filip II", "start": 1556, "end": 1598},
+    #         {"name": "Filip III", "start": 1598, "end": 1621},
+    #         {"name": "Filip IV", "start": 1621, "end": 1665},
+    #         {"name": "Karol II", "start": 1665, "end": 1700},
+    #         {"name": "Filip V", "start": 1700, "end": 1746},
+    #         {"name": "Ferdynand VI", "start": 1746, "end": 1759},
+    #         {"name": "Karol III", "start": 1759, "end": 1788},
+    #         {"name": "Karol IV", "start": 1788, "end": 1808}
+    #     ]
+    # },
     "Brandenburgia": {
         "bonus": "lepsza stal", "steel": 1.5,
         "rulers": [

@@ -8,10 +8,11 @@ from functools import partial
 from map_generator import generate_map, MAP_SIZE
 from constants import *
 from missions import MissionsMixin
+from relations import RelationsMixin
 from ships import ShipsMixin
 
 
-class ColonySimulator(MissionsMixin, ShipsMixin):
+class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
     def __init__(self, root):
         self.root = root
         self.root.title("Symulator Kolonii")
@@ -23,7 +24,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
         self.people = 10
         self.busy_people = 0
 
-        self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
+        # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
+        self.resources = {r: 0 for r in RESOURCES}
+        self.resources["żywność"] = 1000
+        self.resources["drewno"] = 50
+        self.resources["żelazo"] = 20
+        self.resources["srebro"] = 10
+        self.resources["medykamenty"] = 10
         self.resources["dukaty"] = 0
 
         self.buildings = []
@@ -40,6 +47,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
         # kumulacja wartości handlu (do progów reputacji)
         self.native_trade_value = {tribe: 0 for tribe in self.native_relations}
         self.europe_trade_value = {s: 0 for s in self.europe_relations}
+        self.trade_reputation_threshold = 1000
+
+        if self.state == "Francja":
+            self.trade_reputation_threshold += STATES[self.state]["reputation_threshold"]
 
         self.map_size = MAP_SIZE
         self.map_grid = None
@@ -51,8 +62,12 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
         self.current_mission = None  # (end_date, required, sent, difficulty, mission_text, index)
         self.last_mission_date = None
         self.mission_multiplier = 1.0
+        self.first_mission_given = False
 
         self.start_screen()
+        self.completed_missions = 0
+
+        self.current_monarch = ""
 
     # === Pomocnicze ===
     def log(self, text, color="black"):
@@ -84,9 +99,30 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
         self.log_text.config(state=tk.DISABLED)
 
     def free_workers(self): return max(0, self.people - self.busy_people)
-    def can_afford(self, cost): return all(self.resources.get(r, 0) >= a for r, a in cost.items())
+
+    def can_afford(self, cost):
+        # tworzymy kopię, by nie modyfikować oryginału
+        real_cost = cost.copy()
+
+        # --- BONUS HOLANDII ---
+        if self.state == "Holandia":
+            mult = STATES[self.state].get("build_cost", 1)
+            real_cost = {r: int(a * mult) for r, a in real_cost.items()}
+
+        return all(self.resources.get(r, 0) >= a for r, a in real_cost.items())
+
     def spend_resources(self, cost):
-        for r, a in cost.items(): self.resources[r] -= a
+        # tworzymy kopię, by nie modyfikować oryginału
+        real_cost = cost.copy()
+
+        # --- BONUS HOLANDII ---
+        if self.state == "Holandia":
+            mult = STATES[self.state].get("build_cost", 1)
+            real_cost = {r: int(a * mult) for r, a in real_cost.items()}
+
+        # faktyczne pobranie zasobów
+        for r, a in real_cost.items():
+            self.resources[r] -= a
 
     def get_settlement_areas(self):
         return [(y, x) for y in range(self.map_size) for x in range(self.map_size)
@@ -120,6 +156,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
     def get_monarch(self):
         for monarch in STATES[self.state]['rulers']:
             if self.current_date.year > monarch["start"] and self.current_date.year <= monarch["end"]:
+                if self.current_monarch != monarch["name"]:
+                    self.europe_relations[self.state] = 50
                 return monarch["name"]
         return "Nieznany"
 
@@ -182,9 +220,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
 
             prod = {}
             for res, amt in base.get("base_prod", {}).items():
+                print(res, amt)
                 bonus = 1
                 if self.state == "Szwecja" and res == "drewno": bonus = STATES[self.state]["wood"]
                 if self.state == "Dania" and res == "żywność": bonus = STATES[self.state]["food"]
+                if self.state == "Brandenburgia" and res == "stal": bonus = STATES[self.state]["steel"]
                 prod[res] = amt * workers * bonus
 
             if level > 0:
@@ -194,7 +234,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
 
             if b["base"] == "kopalnia" and b.get("resource"):
                 resource = b["resource"]
-                prod[resource] = (1 + level * 0.5) * workers
+                base_amount = (1 + level * 0.5) * workers
+
+                if self.state == "Genua":
+                    bonus = STATES[self.state]["mine"]
+                    base_amount *= bonus
+
+                prod[resource] = base_amount
 
             cons = {}
             if "consumes" in base:
@@ -400,6 +446,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
         cost = upgrade.get("cost", {})
         workers_needed = upgrade.get("workers", 1)
         build_time = upgrade.get("build_time", 7)
+
+        if self.state == "Holandia":
+            mult = STATES[self.state]["build_cost"]  # 0.8
+            cost = cost * mult
 
         if not self.can_afford(cost):
             self.log("Za mało surowców na ulepszenie!", "red"); return
@@ -631,6 +681,18 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
         self.cap_lbl = ttk.Label(top, text=""); self.cap_lbl.pack(side="left")
         self.work_lbl = ttk.Label(top, text=""); self.work_lbl.pack(side="left")
 
+        # === LICZNIK MISJI KRÓLEWSKICH (warunek zwycięstwa) ===
+        if not hasattr(self, "completed_missions"):
+            self.completed_missions = 0
+
+        self.mission_counter_label = ttk.Label(
+            top,
+            text=f"Misje królewskie wykonane: {self.completed_missions} / 100",
+            font=("Arial", 11, "bold"),
+            foreground="purple"
+        )
+        self.mission_counter_label.pack(side="right", padx=10)
+
         res_frame = ttk.LabelFrame(self.root, text="Surowce"); res_frame.pack(fill="x", padx=10, pady=5)
         self.res_labels = {}
         row = ttk.Frame(res_frame); row.pack(fill="x")
@@ -673,7 +735,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
         self.log_text.config(yscrollcommand=scrollbar.set)
 
         self.log("Kolonizacja rozpoczęta!", "green")
-        self.log(f'Na mocy rozkazu monarchy: {self.get_monarch()}, kolonia założona.', "green")
+        self.log(f'{self.get_monarch()}, nasz monarcha wydał rozkaz, byś prowadził kolonię i ją rozbudował dla dobra naszego Imperium.', "green")
         self.update_display()
 
     def advance_date(self, days):
@@ -760,7 +822,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
 
         # --- czas i misje ---
         self.current_date += timedelta(days=days)
-        self.log(f"Minęło {days} dni.", "blue")
+        # self.log(f"Minęło {days} dni.", "blue")
 
         if self.current_mission is not None and self.current_mission[0] < self.current_date:
             end, req, sent, diff, text, idx = self.current_mission
@@ -857,9 +919,14 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
     def build_menu(self):
         win = tk.Toplevel(self.root); win.title("Buduj")
         for name, data in BUILDINGS.items():
-            cost = ", ".join(f"{k}: {v}" for k, v in data["base_cost"].items()) or "brak"
-            btn = ttk.Button(win, text=f"{name} | {data['build_time']} dni | {cost}",
-                             command=lambda n=name: self.select_for_building(n, win))
+            display_cost = data["base_cost"].copy()
+            if self.state == "Holandia":
+                mult = STATES[self.state]["build_cost"]  # np. 0.8
+                display_cost = {k: int(v * mult) for k, v in display_cost.items()}
+
+            cost = ", ".join(f"{k}: {v}" for k, v in display_cost.items()) or "brak"
+
+            btn = ttk.Button(win, text=f"{name} | {data['build_time']} dni | {cost}", command=lambda n=name: self.select_for_building(n, win))
             btn.pack(fill="x", padx=20, pady=2)
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=10)
 
@@ -946,269 +1013,41 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
 
         ttk.Button(win, text="Zatwierdź", command=save).pack(pady=10)
 
-    def native_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Handel z Indianami")
-        for tribe in self.native_relations:
-            rel = self.native_relations[tribe]
-            frame = ttk.Frame(win)
-            frame.pack(fill="x", padx=20, pady=3)
-
-            ttk.Label(frame, text=f"{tribe}: {rel}/100", width=25).pack(side="left")
-
-            # przycisk INTEGRACJA – nowy
-            ttk.Button(
-                frame,
-                text="Integracja",
-                command=lambda t=tribe: self.integrate_natives(t)
-            ).pack(side="right", padx=5)
-
-            ttk.Button(
-                frame,
-                text="Handel",
-                command=lambda t=tribe: self.open_native_trade(t, win)
-            ).pack(side="right", padx=5)
-
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
-
-    def integrate_natives(self, tribe):
-        """Integracja Indian z danym plemieniem: 1 osoba za 10 reputacji z tym plemieniem."""
-        current_rel = self.native_relations.get(tribe, 0)
-
-        if current_rel < 80:
-            self.log(f"Za mało reputacji u {tribe}, aby prowadzić integrację (min. 80).", "red")
-            return
-
-        max_people = current_rel // 10
-        if max_people <= 0:
-            self.log(f"Brak reputacji na integrację z {tribe}.", "red")
-            return
-
-        win = tk.Toplevel(self.root)
-        win.title(f"Integracja z {tribe}")
-        win.geometry("460x320")
-        win.resizable(False, False)
-
-        ttk.Label(
-            win,
-            text=f"Integracja z {tribe}",
-            font=("Arial", 14, "bold")
-        ).pack(pady=10)
-
-        ttk.Label(
-            win,
-            text=f"Reputacja z tym plemieniem: {current_rel}/100\n"
-                 f"Koszt: 10 reputacji za 1 osobę.\n"
-                 f"Maksymalnie możesz zintegrować: {max_people} osób.",
-            justify="center"
-        ).pack(pady=5)
-
-        amount_frame = ttk.Frame(win)
-        amount_frame.pack(pady=10, fill="x", padx=20)
-
-        ttk.Label(amount_frame, text="Liczba osób do integracji:", font=("Arial", 10)).pack(anchor="w")
-
-        amount_var = tk.IntVar(value=1)
-        slider = tk.Scale(
-            amount_frame,
-            from_=1,
-            to=max_people,
-            orient="horizontal",
-            variable=amount_var,
-            length=360
-        )
-        slider.pack(pady=5)
-
-        amount_lbl = ttk.Label(
-            amount_frame,
-            text=f"1 (koszt: 10 reputacji)",
-            foreground="blue",
-            font=("Arial", 11, "bold")
-        )
-        amount_lbl.pack(anchor="w")
-
-        def update_amount_label(*_):
-            n = amount_var.get()
-            amount_lbl.config(text=f"{n} (koszt: {n * 10} reputacji)")
-
-        amount_var.trace_add("write", update_amount_label)
-
-        btn_frame = ttk.Frame(win)
-        btn_frame.pack(pady=15)
-
-        def confirm_integration():
-            n = amount_var.get()
-            cost = n * 10
-
-            if self.native_relations.get(tribe, 0) < cost:
-                self.log(
-                    f"Za mało reputacji u {tribe}! Potrzeba {cost}, masz {self.native_relations.get(tribe, 0)}.",
-                    "red"
-                )
-                return
-
-            # zapłata reputacją + wzrost populacji
-            self.native_relations[tribe] -= cost
-            self.people += n
-
-            self.log(
-                f"Zintegrowano {n} osób z plemienia {tribe}. "
-                f"Kosztowało to {cost} reputacji z tym plemieniem.",
-                "purple"
-            )
-
-            win.destroy()
-
-        ttk.Button(btn_frame, text="Integruj", command=confirm_integration).pack(side="left", padx=8)
-        ttk.Button(btn_frame, text="Anuluj", command=win.destroy).pack(side="left", padx=8)
-
-    def get_native_price_modifier(self, rel):
-        rel_norm = rel / 100.0
-        sell_mod = 0.01 + 0.99 * rel_norm
-        buy_mod = 2.0 - rel_norm
-        if rel == 100: sell_mod, buy_mod = 1.5, 0.5
-        return sell_mod, buy_mod
-
-    def open_native_trade(self, tribe, parent):
-        trade_win = tk.Toplevel(parent); trade_win.title(f"Handel z {tribe}")
-        rel = self.native_relations[tribe]
-        sell_mod, buy_mod = self.get_native_price_modifier(rel)
-        ttk.Label(trade_win, text=f"Relacje: {rel}/100 | Sprzedaż: x{sell_mod:.2f} | Kupno: x{buy_mod:.2f}").pack(pady=5)
-        sell_frame = ttk.LabelFrame(trade_win, text="Sprzedajesz"); sell_frame.pack(fill="x", padx=15, pady=5)
-        buy_frame = ttk.LabelFrame(trade_win, text="Kupujesz"); buy_frame.pack(fill="x", padx=15, pady=5)
-        sell_vars = {}
-        buy_vars = {}
-        def update_sums(*args):
-            sell_total = sum(v.get() * NATIVE_PRICES[r] * sell_mod for r, v in sell_vars.items())
-            buy_total = sum(v.get() * NATIVE_PRICES[r] * buy_mod for r, v in buy_vars.items())
-            self.sell_sum_lbl.config(text=f"Sprzedaż: {int(sell_total)} szt.")
-            self.buy_sum_lbl.config(text=f"Kupno: {int(buy_total)} szt.")
-        sum_frame = ttk.Frame(trade_win); sum_frame.pack(pady=8)
-        self.sell_sum_lbl = ttk.Label(sum_frame, text="Sprzedaż: 0 szt.", foreground="green")
-        self.buy_sum_lbl = ttk.Label(sum_frame, text="Kupno: 0 szt.", foreground="red")
-        self.sell_sum_lbl.pack(side="left", padx=20); self.buy_sum_lbl.pack(side="right", padx=20)
-        for res in NATIVE_PRICES.keys():
-            base = NATIVE_PRICES[res]
-            sell_price = int(base * sell_mod); buy_price = int(base * buy_mod)
-            if self.resources[res] > 0:
-                f = ttk.Frame(sell_frame); f.pack(fill="x", pady=1)
-                ttk.Label(f, text=f"{res}", width=15).pack(side="left")
-                var = tk.IntVar()
-                spin = tk.Spinbox(f, from_=0, to=self.resources[res], textvariable=var, width=8)
-                spin.pack(side="right")
-                ttk.Label(f, text=f"→ {sell_price} szt.").pack(side="right", padx=5)
-                sell_vars[res] = var
-                var.trace_add("write", update_sums)
-            f = ttk.Frame(buy_frame); f.pack(fill="x", pady=1)
-            ttk.Label(f, text=f"{res}", width=15).pack(side="left")
-            var = tk.IntVar()
-            spin = tk.Spinbox(f, from_=0, to=100, textvariable=var, width=8)
-            spin.pack(side="right")
-            ttk.Label(f, text=f"← {buy_price} szt.").pack(side="right", padx=5)
-            buy_vars[res] = var
-            var.trace_add("write", update_sums)
-        update_sums()
-
-        def execute_trade():
-            sell = {r: v.get() for r, v in sell_vars.items() if v.get() > 0}
-            buy = {r: v.get() for r, v in buy_vars.items() if v.get() > 0}
-
-            if not sell and not buy:
-                self.log("Brak transakcji!", "red")
-                return
-
-            # wartość tego, co MY kupujemy od Indian
-            total_cost = sum(
-                buy.get(r, 0) * NATIVE_PRICES[r] * buy_mod
-                for r in buy
-            )
-            # wartość tego, co MY sprzedajemy Indianom
-            total_gain = sum(
-                sell.get(r, 0) * NATIVE_PRICES[r] * sell_mod
-                for r in sell
-            )
-
-            # dalej jak wcześniej – musimy mieć czym zapłacić
-            if total_cost > total_gain:
-                self.log("Za mało towarów!", "red")
-                return
-
-            for r, a in sell.items():
-                self.resources[r] -= a
-            for r, a in buy.items():
-                self.resources[r] += a
-
-            net = total_gain - total_cost
-
-            self.log(
-                f"Handel z {tribe}: "
-                f"{'zysk' if net > 0 else 'strata' if net < 0 else 'na zero'} "
-                f"{abs(int(net))} szt.",
-                "green" if net > 0 else "orange" if net < 0 else "gray"
-            )
-
-            # === NOWA LOGIKA REPUTACJI ===
-
-            # 1) "wartość obrotu" tej transakcji
-            #    - bierzemy max z tego, co kupiliśmy i co sprzedaliśmy,
-            #      żeby odzwierciedlić skalę transakcji
-            trade_value = int(max(total_cost, total_gain))
-
-            # dodajemy do kumulacji dla tego plemienia
-            previous = self.native_trade_value.get(tribe, 0)
-            cumulative = previous + trade_value
-
-            # ile pełnych "tysięcy" przekroczyliśmy
-            rep_from_volume = cumulative // 1000
-            # zostaje reszta do następnych transakcji
-            self.native_trade_value[tribe] = cumulative % 1000
-
-            rep_change = 0
-            if rep_from_volume > 0:
-                rep_change += rep_from_volume
-
-            # 2) BONUS za wyjątkowo korzystny dla Indian handel:
-            #    jeśli ich "zysk" (nasza strata) jest >= 2x tego,
-            #    ile wart jest towar, który nam dali.
-            #
-            # z punktu widzenia Indian:
-            # - zarabiają, gdy my bardziej kupujemy niż sprzedajemy
-            profit_for_natives = max(abs(total_cost - total_gain), 0)
-            value_they_give_us = total_cost  # wartość tego, co od nich kupujemy
-
-            if value_they_give_us > 100 and profit_for_natives >= 2 * value_they_give_us:
-                rep_change += 1
-
-            if rep_change > 0:
-                old_rel = self.native_relations.get(tribe, 0)
-                new_rel = min(100, old_rel + rep_change)
-                self.native_relations[tribe] = new_rel
-                self.log(
-                    f"Relacje z {tribe}: +{rep_change} (nowe: {new_rel}/100).",
-                    "purple"
-                )
-
-            trade_win.destroy()
-        ttk.Button(trade_win, text="Wykonaj handel", command=execute_trade).pack(pady=10)
-
     def explore(self):
         if self.free_workers() < 3: self.log("Za mało ludzi!", "red"); return
-        if self.resources["żywność"] < 15: self.log("Za mało żywności!", "red"); return
+        if self.resources["żywność"] < 15 and self.resources["drewno"] < 10: self.log("Za mało żywności lub drewna!", "red"); return
         self.show_explore_map()
 
     def show_explore_map(self):
         win = tk.Toplevel(self.root)
         win.title("Eksploracja")
 
+        # === INFORMACJE O KOSZTACH ===
+        info_frame = ttk.Frame(win)
+        info_frame.pack(pady=5)
+
+        ttk.Label(
+            info_frame,
+            text="Koszt eksploracji:",
+            font=("Arial", 12, "bold")
+        ).pack()
+
+        ttk.Label(
+            info_frame,
+            text="• 3 ludzie • 15 żywności • 10 drewna",
+            justify="center",
+            font=("Arial", 10)
+        ).pack()
+
         canvas_width = 850
         canvas_height = 850
         canvas = tk.Canvas(win, width=canvas_width, height=canvas_height)
-        canvas.pack(pady=10)
+        canvas.pack(pady=1)
 
         cell_size = self.get_cell_size()
         map_pixel_size = self.map_size * cell_size
         offset_x = (canvas_width - map_pixel_size) // 2
-        offset_y = 40
+        offset_y = 20
 
         def draw():
             canvas.delete("all")
@@ -1264,276 +1103,62 @@ class ColonySimulator(MissionsMixin, ShipsMixin):
                         if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
                     ]
                     if any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
+
+                        # ==== OBLICZ KOSZT I CZAS ====
                         days = random.randint(1, 3) + int(
                             math.hypot(y - self.settlement_pos[0], x - self.settlement_pos[1])
                         )
-                        self.busy_people += 3
-                        self.resources["żywność"] -= 15
-                        self.resources["drewno"] -= 10
-                        end_date = self.current_date + timedelta(days=days)
-                        self.expeditions.append((end_date, (y, x), "explore"))
-                        self.log(
-                            f"Eksploracja ({y},{x}): powrót {end_date.strftime('%d %b %Y')}",
-                            "blue"
-                        )
-                        win.destroy()
+                        cost_food = 15
+                        cost_wood = 10
+
+                        # ==== OKNO POTWIERDZENIA ====
+                        confirm = tk.Toplevel(win)
+                        confirm.title("Potwierdź ekspedycję")
+
+                        ttk.Label(
+                            confirm,
+                            text=f"Wyślij ekspedycję na pole ({y},{x})?",
+                            font=("Arial", 12, "bold")
+                        ).pack(pady=10)
+
+                        ttk.Label(
+                            confirm,
+                            text=(
+                                f"Czas wyprawy: {days} dni\n"
+                                f"Koszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna"
+                            ),
+                            justify="center"
+                        ).pack(pady=5)
+
+                        def do_explore():
+                            if self.free_workers() < 3:
+                                self.log("Za mało ludzi!", "red")
+                                confirm.destroy()
+                                return
+                            if self.resources["żywność"] < cost_food or self.resources["drewno"] < cost_wood:
+                                self.log("Za mało surowców!", "red")
+                                confirm.destroy()
+                                return
+
+                            self.busy_people += 3
+                            self.resources["żywność"] -= cost_food
+                            self.resources["drewno"] -= cost_wood
+
+                            end_date = self.current_date + timedelta(days=days)
+                            self.expeditions.append((end_date, (y, x), "explore"))
+                            self.log(
+                                f"Eksploracja ({y},{x}): powrót {end_date.strftime('%d %b %Y')}",
+                                "blue"
+                            )
+                            confirm.destroy()
+                            win.destroy()
+
+                        ttk.Button(confirm, text="Wyślij", command=do_explore).pack(side="left", padx=10, pady=10)
+                        ttk.Button(confirm, text="Anuluj", command=confirm.destroy).pack(side="right", padx=10, pady=10)
 
         canvas.bind("<Button-1>", click)
         draw()
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
-
-    def diplomacy_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Dyplomacja")
-
-        for state, rel in self.europe_relations.items():
-            frame = ttk.Frame(win)
-            frame.pack(fill="x", padx=20, pady=3)
-
-            ttk.Label(frame, text=f"{state}: {rel}/100", width=25).pack(side="left")
-
-            # --- przyciski zależne od tego, czy to nasze państwo, czy inne ---
-            if state == self.state:
-                # Twój kraj: Dar + Zamówienie kolonistów
-                ttk.Button(
-                    frame,
-                    text="Zamówienie",
-                    command=lambda s=state: self.order_colonists(s)
-                ).pack(side="right")
-
-                ttk.Button(
-                    frame,
-                    text="Dar (+5)",
-                    command=lambda s=state: self.send_diplomatic_gift(s)
-                ).pack(side="right", padx=5)
-
-            else:
-                # Inne kraje: Handel za dukaty + Dar
-                ttk.Button(
-                    frame,
-                    text="Handel",
-                    command=lambda s=state: self.open_europe_trade(s, win)
-                ).pack(side="right")
-
-                ttk.Button(
-                    frame,
-                    text="Dar (+5)",
-                    command=lambda s=state: self.send_diplomatic_gift(s)
-                ).pack(side="right", padx=5)
-
-        ttk.Label(
-            win,
-            text="Dar: koszt 100 złota + 500 żywności + 200 srebra + 100 stali"
-        ).pack(pady=10)
-
-        if self.current_mission:
-            ttk.Button(win, text="Misja Królewska", command=self.show_mission_window).pack(pady=10)
-
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
-
-    def open_europe_trade(self, state, parent):
-        """Handel z innym państwem za dukaty.
-        Marża zależy liniowo od reputacji:
-        - przy reputacji 0: sprzedaż 0.5x, kupno 1.5x
-        - przy reputacji 100: sprzedaż 0.9x, kupno 1.1x
-        Reputacja rośnie jak u Indian (progi 1000 + bonus za bardzo korzystny handel dla nich).
-        """
-        trade_win = tk.Toplevel(parent)
-        trade_win.title(f"Handel z {state}")
-
-        def get_margins():
-            rel = self.europe_relations.get(state, 0)
-            t = max(0, min(100, rel)) / 100.0
-            sell_mult = 0.5 + 0.4 * t  # 0 -> 0.5, 100 -> 0.9
-            buy_mult = 1.5 - 0.4 * t  # 0 -> 1.5, 100 -> 1.1
-            return sell_mult, buy_mult
-
-        rel = self.europe_relations[state]
-        sell_mult, buy_mult = get_margins()
-
-        ttk.Label(
-            trade_win,
-            text=(
-                f"Relacje z {state}: {rel}/100\n"
-                f"Ceny zależą od reputacji (sprzedaż: {(sell_mult * 100):.0f}% ceny, "
-                f"kupno: {(buy_mult * 100):.0f}% ceny)."
-            ),
-            justify="center"
-        ).pack(pady=5)
-
-        sell_frame = ttk.LabelFrame(trade_win, text="Sprzedajesz (otrzymujesz dukaty)")
-        sell_frame.pack(fill="x", padx=15, pady=5)
-
-        buy_frame = ttk.LabelFrame(trade_win, text="Kupujesz (płacisz dukaty)")
-        buy_frame.pack(fill="x", padx=15, pady=5)
-
-        sell_vars = {}
-        buy_vars = {}
-
-        def update_sums(*args):
-            sell_mult, buy_mult = get_margins()
-            total_gain = 0  # dukaty, które dostajemy
-            total_cost = 0  # dukaty, które płacimy
-
-            for r, var in sell_vars.items():
-                qty = var.get()
-                if qty > 0:
-                    price = EUROPE_PRICES.get(r, 0) * sell_mult
-                    total_gain += qty * price
-
-            for r, var in buy_vars.items():
-                qty = var.get()
-                if qty > 0:
-                    price = EUROPE_PRICES.get(r, 0) * buy_mult
-                    total_cost += qty * price
-
-            self.sell_sum_lbl.config(text=f"Sprzedaż: +{int(total_gain)} dukatów")
-            self.buy_sum_lbl.config(text=f"Kupno: -{int(total_cost)} dukatów")
-            net = total_gain - total_cost
-            self.net_sum_lbl.config(
-                text=f"Bilans: {'+' if net >= 0 else ''}{int(net)} dukatów"
-            )
-
-        sum_frame = ttk.Frame(trade_win)
-        sum_frame.pack(pady=8)
-
-        self.sell_sum_lbl = ttk.Label(sum_frame, text="Sprzedaż: +0 dukatów", foreground="green")
-        self.buy_sum_lbl = ttk.Label(sum_frame, text="Kupno: -0 dukatów", foreground="red")
-        self.net_sum_lbl = ttk.Label(sum_frame, text="Bilans: 0 dukatów", foreground="blue")
-
-        self.sell_sum_lbl.pack(side="left", padx=10)
-        self.buy_sum_lbl.pack(side="left", padx=10)
-        self.net_sum_lbl.pack(side="left", padx=10)
-
-        # pola dla zasobów z EUROPE_PRICES
-        sell_mult, buy_mult = get_margins()
-        for res in EUROPE_PRICES.keys():
-            # SPRZEDAŻ
-            if self.resources.get(res, 0) > 0:
-                f = ttk.Frame(sell_frame)
-                f.pack(fill="x", pady=1)
-                ttk.Label(f, text=f"{res}", width=15).pack(side="left")
-                var = tk.IntVar()
-                spin = tk.Spinbox(
-                    f,
-                    from_=0,
-                    to=self.resources[res],
-                    textvariable=var,
-                    width=8
-                )
-                spin.pack(side="right")
-                price = int(EUROPE_PRICES[res] * sell_mult)
-                ttk.Label(f, text=f"→ {price} duk./szt.").pack(side="right", padx=5)
-                sell_vars[res] = var
-                var.trace_add("write", update_sums)
-
-            # KUPNO (zakładamy limit np. 999 sztuk)
-            f = ttk.Frame(buy_frame)
-            f.pack(fill="x", pady=1)
-            ttk.Label(f, text=f"{res}", width=15).pack(side="left")
-            var = tk.IntVar()
-            spin = tk.Spinbox(
-                f,
-                from_=0,
-                to=999,
-                textvariable=var,
-                width=8
-            )
-            spin.pack(side="right")
-            price = int(EUROPE_PRICES[res] * buy_mult)
-            ttk.Label(f, text=f"← {price} duk./szt.").pack(side="right", padx=5)
-            buy_vars[res] = var
-            var.trace_add("write", update_sums)
-
-        update_sums()
-
-        def execute_trade():
-            sell = {r: v.get() for r, v in sell_vars.items() if v.get() > 0}
-            buy = {r: v.get() for r, v in buy_vars.items() if v.get() > 0}
-
-            if not sell and not buy:
-                self.log("Brak transakcji!", "red")
-                return
-
-            sell_mult, buy_mult = get_margins()
-
-            total_gain = sum(
-                sell.get(r, 0) * EUROPE_PRICES.get(r, 0) * sell_mult
-                for r in sell
-            )
-            total_cost = sum(
-                buy.get(r, 0) * EUROPE_PRICES.get(r, 0) * buy_mult
-                for r in buy
-            )
-
-            net = total_gain - total_cost  # >0 zysk, <0 koszt netto
-
-            # sprawdzamy zasoby i dukaty
-            for r, a in sell.items():
-                if self.resources.get(r, 0) < a:
-                    self.log(f"Za mało {r}, aby sprzedać!", "red")
-                    return
-
-            if self.resources["dukaty"] + net < 0:
-                self.log("Za mało dukatów na tę transakcję!", "red")
-                return
-
-            # aktualizacja zasobów
-            for r, a in sell.items():
-                self.resources[r] -= a
-            for r, a in buy.items():
-                self.resources[r] = self.resources.get(r, 0) + a
-
-            self.resources["dukaty"] += net
-
-            self.log(
-                f"Handel z {state}: "
-                f"{'zysk' if net > 0 else 'strata' if net < 0 else 'na zero'} "
-                f"{abs(int(net))} dukatów.",
-                "green" if net > 0 else "orange" if net < 0 else "gray"
-            )
-
-            # === REPUTACJA: jak z Indianami ===
-
-            # 1) wartość obrotu (skala transakcji)
-            trade_value = int(max(total_gain, total_cost))
-            prev = self.europe_trade_value.get(state, 0)
-            cumulative = prev + trade_value
-
-            rep_from_volume = cumulative // 1000
-            self.europe_trade_value[state] = cumulative % 1000
-
-            rep_change = 0
-            if rep_from_volume > 0:
-                rep_change += rep_from_volume
-
-            # 2) BONUS: jeśli dla nich zysk >= 2× wartości tego, co nam dali
-            profit_for_them = max(total_cost - total_gain, 0)
-            value_they_give_us = total_cost  # wartość towarów, które od nich kupujemy
-
-            if value_they_give_us > 100 and profit_for_them >= 2 * value_they_give_us:
-                rep_change += 1
-
-            if rep_change > 0:
-                old_rel = self.europe_relations.get(state, 0)
-                new_rel = min(100, old_rel + rep_change)
-                self.europe_relations[state] = new_rel
-                self.log(
-                    f"Relacje z {state}: +{rep_change} (nowe: {new_rel}/100).",
-                    "purple"
-                )
-
-            trade_win.destroy()
-
-        ttk.Button(trade_win, text="Wykonaj handel", command=execute_trade).pack(pady=10)
-        ttk.Button(trade_win, text="Anuluj", command=trade_win.destroy).pack(pady=5)
-
-    def send_diplomatic_gift(self, state):
-        cost = {"złoto": 100, "żywność": 500, "srebro": 200, "stal": 100}
-        if not self.can_afford(cost): self.log(f"Za mało na dar dla {state}!", "red"); return
-        self.spend_resources(cost)
-        self.europe_relations[state] = min(100, self.europe_relations[state] + 5)
-        self.log(f"Dar do {state}: +5 relacji", "purple")
 
     def finish_expedition(self, exp):
         self.busy_people -= 3

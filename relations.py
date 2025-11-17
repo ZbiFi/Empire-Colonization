@@ -2,10 +2,17 @@
 import tkinter as tk
 from tkinter import ttk
 
-from constants import NATIVE_PRICES, EUROPE_PRICES
+from constants import NATIVE_PRICES, EUROPE_PRICES, STATES
 
 
 class RelationsMixin:
+
+    def safe_int(self, var):
+        try:
+            return int(var.get())
+        except:
+            return 0
+
     # === Relacje z Indianami ===
     def native_menu(self):
         win = tk.Toplevel(self.root)
@@ -129,110 +136,166 @@ class RelationsMixin:
         buy_mod = 2.0 - rel_norm
         if rel == 100:
             sell_mod, buy_mod = 1.5, 0.5
+        if self.state == "Anglia":
+            sell_mod += STATES[self.state]["trade"]
+            buy_mod -= STATES[self.state]["trade"]
         return sell_mod, buy_mod
 
     def open_native_trade(self, tribe, parent):
+        """Handel z Indianami — UI takie jak handel z państwami,
+        ale zamiast dukatów jest bilans ilościowy (value units)."""
+
         trade_win = tk.Toplevel(parent)
         trade_win.title(f"Handel z {tribe}")
+
         rel = self.native_relations[tribe]
         sell_mod, buy_mod = self.get_native_price_modifier(rel)
+        if self.state == "Anglia":
+            sell_mod += STATES[self.state]["trade"]
+            buy_mod -= STATES[self.state]["trade"]
 
         ttk.Label(
             trade_win,
-            text=f"Relacje: {rel}/100 | Sprzedaż: x{sell_mod:.2f} | Kupno: x{buy_mod:.2f}"
+            text=(
+                f"Relacje z {tribe}: {rel}/100\n"
+                f"Ceny zależą od reputacji (sprzedaż x{sell_mod:.2f}, kupno x{buy_mod:.2f})."
+            ),
+            justify="center"
         ).pack(pady=5)
 
-        sell_frame = ttk.LabelFrame(trade_win, text="Sprzedajesz")
+        # --- SEKCJE (tak jak u Europejczyków) ---
+        sell_frame = ttk.LabelFrame(trade_win, text="Sprzedajesz (otrzymujesz wartość)")
         sell_frame.pack(fill="x", padx=15, pady=5)
-        buy_frame = ttk.LabelFrame(trade_win, text="Kupujesz")
+
+        buy_frame = ttk.LabelFrame(trade_win, text="Kupujesz (oddajesz wartość)")
         buy_frame.pack(fill="x", padx=15, pady=5)
 
         sell_vars = {}
         buy_vars = {}
 
+        # --- SUMY (identyczny wygląd jak w open_europe_trade) ---
         def update_sums(*args):
-            sell_total = sum(v.get() * NATIVE_PRICES[r] * sell_mod for r, v in sell_vars.items())
-            buy_total = sum(v.get() * NATIVE_PRICES[r] * buy_mod for r, v in buy_vars.items())
-            self.sell_sum_lbl.config(text=f"Sprzedaż: {int(sell_total)} szt.")
-            self.buy_sum_lbl.config(text=f"Kupno: {int(buy_total)} szt.")
+            total_gain = 0  # co Ty zyskujesz
+            total_cost = 0  # co oni od Ciebie dostają
+
+            for r, var in sell_vars.items():
+                qty = self.safe_int(var)
+                if qty > 0:
+                    price = NATIVE_PRICES[r] * sell_mod
+                    total_gain += qty * price
+
+            for r, var in buy_vars.items():
+                qty = self.safe_int(var)
+                if qty > 0:
+                    price = NATIVE_PRICES[r] * buy_mod
+                    total_cost += qty * price
+
+            net = total_gain - total_cost
+
+            self.sell_sum_lbl.config(text=f"Sprzedaż: +{int(total_gain)}")
+            self.buy_sum_lbl.config(text=f"Kupno: -{int(total_cost)}")
+            self.net_sum_lbl.config(
+                text=f"Bilans: {'+' if net >= 0 else ''}{int(net)}"
+            )
 
         sum_frame = ttk.Frame(trade_win)
         sum_frame.pack(pady=8)
 
-        self.sell_sum_lbl = ttk.Label(sum_frame, text="Sprzedaż: 0 szt.", foreground="green")
-        self.buy_sum_lbl = ttk.Label(sum_frame, text="Kupno: 0 szt.", foreground="red")
-        self.sell_sum_lbl.pack(side="left", padx=20)
-        self.buy_sum_lbl.pack(side="right", padx=20)
+        self.sell_sum_lbl = ttk.Label(sum_frame, text="Sprzedaż: +0", foreground="green")
+        self.buy_sum_lbl = ttk.Label(sum_frame, text="Kupno: -0", foreground="red")
+        self.net_sum_lbl = ttk.Label(sum_frame, text="Bilans: 0", foreground="blue")
 
+        self.sell_sum_lbl.pack(side="left", padx=10)
+        self.buy_sum_lbl.pack(side="left", padx=10)
+        self.net_sum_lbl.pack(side="left", padx=10)
+
+        # --- LISTA TOWARÓW ---
         for res in NATIVE_PRICES.keys():
             base = NATIVE_PRICES[res]
             sell_price = int(base * sell_mod)
             buy_price = int(base * buy_mod)
 
+            # SPRZEDAJESZ
             if self.resources[res] > 0:
                 f = ttk.Frame(sell_frame)
                 f.pack(fill="x", pady=1)
-                ttk.Label(f, text=f"{res}", width=15).pack(side="left")
+                ttk.Label(f, text=res, width=15).pack(side="left")
+
                 var = tk.IntVar()
-                spin = tk.Spinbox(f, from_=0, to=self.resources[res], textvariable=var, width=8)
+                spin = tk.Spinbox(f, from_=0, to=self.resources[res],
+                                  textvariable=var, width=8)
                 spin.pack(side="right")
-                ttk.Label(f, text=f"→ {sell_price} szt.").pack(side="right", padx=5)
+
+                ttk.Label(f, text=f"→ {sell_price}").pack(side="right", padx=5)
+
                 sell_vars[res] = var
                 var.trace_add("write", update_sums)
 
+            # KUPUJESZ
             f = ttk.Frame(buy_frame)
             f.pack(fill="x", pady=1)
-            ttk.Label(f, text=f"{res}", width=15).pack(side="left")
+            ttk.Label(f, text=res, width=15).pack(side="left")
+
             var = tk.IntVar()
-            spin = tk.Spinbox(f, from_=0, to=100, textvariable=var, width=8)
+            spin = tk.Spinbox(f, from_=0, to=999,
+                              textvariable=var, width=8)
             spin.pack(side="right")
-            ttk.Label(f, text=f"← {buy_price} szt.").pack(side="right", padx=5)
+
+            ttk.Label(f, text=f"← {buy_price}").pack(side="right", padx=5)
+
             buy_vars[res] = var
             var.trace_add("write", update_sums)
 
         update_sums()
 
+        # --- WYKONANIE TRANSAKCJI (zmodyfikowana wersja europejskiej) ---
         def execute_trade():
-            sell = {r: v.get() for r, v in sell_vars.items() if v.get() > 0}
-            buy = {r: v.get() for r, v in buy_vars.items() if v.get() > 0}
+            sell = {r: self.safe_int(v) for r, v in sell_vars.items() if self.safe_int(v) > 0}
+            buy = {r: self.safe_int(v) for r, v in buy_vars.items() if self.safe_int(v) > 0}
 
             if not sell and not buy:
                 self.log("Brak transakcji!", "red")
                 return
 
-            total_cost = sum(buy.get(r, 0) * NATIVE_PRICES[r] * buy_mod for r in buy)
             total_gain = sum(sell.get(r, 0) * NATIVE_PRICES[r] * sell_mod for r in sell)
+            total_cost = sum(buy.get(r, 0) * NATIVE_PRICES[r] * buy_mod for r in buy)
 
-            if total_cost > total_gain:
-                self.log("Za mało towarów!", "red")
+            # Zasoby wystarczą?
+            for r, a in sell.items():
+                if self.resources[r] < a:
+                    self.log(f"Za mało {r}!", "red")
+                    return
+
+            net = total_gain - total_cost
+            if net < 0:
+                # u Indian nie ma dukatów → bilans musi być >= 0
+                self.log("Bilans ujemny! Nie masz wystarczającej wartości towarów.", "red")
                 return
 
+            # wykonanie handlu
             for r, a in sell.items():
                 self.resources[r] -= a
             for r, a in buy.items():
                 self.resources[r] += a
 
-            net = total_gain - total_cost
-
             self.log(
                 f"Handel z {tribe}: "
-                f"{'zysk' if net > 0 else 'strata' if net < 0 else 'na zero'} "
-                f"{abs(int(net))} szt.",
-                "green" if net > 0 else "orange" if net < 0 else "gray"
+                f"{'zysk' if net > 0 else 'na zero'} {int(net)} jednostek wartości.",
+                "green" if net > 0 else "gray"
             )
 
-            # reputacja jak ustalaliśmy
+            # --- REPUTACJA (jak ustalone) ---
             trade_value = int(max(total_cost, total_gain))
+
             previous = self.native_trade_value.get(tribe, 0)
             cumulative = previous + trade_value
 
-            rep_from_volume = cumulative // 1000
-            self.native_trade_value[tribe] = cumulative % 1000
+            rep_from_volume = cumulative // self.trade_reputation_threshold
+            self.native_trade_value[tribe] = cumulative % self.trade_reputation_threshold
 
-            rep_change = 0
-            if rep_from_volume > 0:
-                rep_change += rep_from_volume
+            rep_change = rep_from_volume
 
+            # bonus za 2×value (zysk dla Indian)
             profit_for_natives = max(abs(total_cost - total_gain), 0)
             value_they_give_us = total_cost
 
@@ -240,7 +303,7 @@ class RelationsMixin:
                 rep_change += 1
 
             if rep_change > 0:
-                old_rel = self.native_relations.get(tribe, 0)
+                old_rel = self.native_relations[tribe]
                 new_rel = min(100, old_rel + rep_change)
                 self.native_relations[tribe] = new_rel
                 self.log(
@@ -251,6 +314,7 @@ class RelationsMixin:
             trade_win.destroy()
 
         ttk.Button(trade_win, text="Wykonaj handel", command=execute_trade).pack(pady=10)
+        ttk.Button(trade_win, text="Anuluj", command=trade_win.destroy).pack(pady=5)
 
     # === Dyplomacja z państwami europejskimi ===
     def diplomacy_menu(self):
@@ -343,13 +407,13 @@ class RelationsMixin:
             total_cost = 0
 
             for r, var in sell_vars.items():
-                qty = var.get()
+                qty = self.safe_int(var)
                 if qty > 0:
                     price = EUROPE_PRICES.get(r, 0) * sell_mult
                     total_gain += qty * price
 
             for r, var in buy_vars.items():
-                qty = var.get()
+                qty = self.safe_int(var)
                 if qty > 0:
                     price = EUROPE_PRICES.get(r, 0) * buy_mult
                     total_cost += qty * price
@@ -412,8 +476,8 @@ class RelationsMixin:
         update_sums()
 
         def execute_trade():
-            sell = {r: v.get() for r, v in sell_vars.items() if v.get() > 0}
-            buy = {r: v.get() for r, v in buy_vars.items() if v.get() > 0}
+            sell = {r: self.safe_int(v) for r, v in sell_vars.items() if self.safe_int(v) > 0}
+            buy = {r: self.safe_int(v) for r, v in buy_vars.items() if self.safe_int(v) > 0}
 
             if not sell and not buy:
                 self.log("Brak transakcji!", "red")
@@ -453,8 +517,8 @@ class RelationsMixin:
             prev = self.europe_trade_value.get(state, 0)
             cumulative = prev + trade_value
 
-            rep_from_volume = cumulative // 1000
-            self.europe_trade_value[state] = cumulative % 1000
+            rep_from_volume = cumulative // self.trade_reputation_threshold
+            self.europe_trade_value[state] = cumulative % self.trade_reputation_threshold
 
             rep_change = 0
             if rep_from_volume > 0:

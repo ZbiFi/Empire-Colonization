@@ -13,19 +13,26 @@ class MissionsMixin:
         mission = ROYAL_MISSIONS[mission_idx]
 
         growth = random.uniform(1.05, 1.15)
-        self.mission_multiplier *= growth
+
+        if not self.first_mission_given:
+            self.mission_multiplier = 1
+            self.first_mission_given = True
+
+        else:
+            self.mission_multiplier *= growth
         difficulty = int(self.mission_multiplier * 10) / 10  # <-- jak wcześniej
 
         required = {}
+        missionName = mission["name"]
         for res, base_amt in mission["base"].items():
             required[res] = max(1, int(base_amt * self.mission_multiplier))
 
         end_date = self.current_date + timedelta(days=365)
         monarch = self.get_monarch()
         mission_text = (
-            f"Jego Królewska Mość {monarch} żąda: " +
+            f"Jego Królewska Mość {monarch} żąda na {missionName}: " +
             ", ".join(f"{v} {res}" for res, v in required.items()) +
-            f". Termin: {end_date.strftime('%d %b %Y')}  (1 rok)."
+            f". Termin: {end_date.strftime('%d %b %Y')}  (1 rok). "
         )
 
         # (end_date, required, sent, difficulty, mission_text, mission_idx)
@@ -62,7 +69,7 @@ class MissionsMixin:
 
         # nagroda jak poprzednio
         self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
-        self.current_mission = None
+        self.complete_royal_mission()
 
     def show_mission_window(self):
         if not self.current_mission:
@@ -112,3 +119,35 @@ class MissionsMixin:
             command=lambda: [self.pay_mission_with_gold(), win.destroy()]
         ).pack(pady=10)
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
+
+    def complete_royal_mission(self):
+        """Wywoływane po ukończeniu misji królewskiej."""
+        self.completed_missions += 1
+        self.mission_counter_label.config(
+            text=f"Misje królewskie wykonane: {self.completed_missions} / 100"
+        )
+
+        # self.log("Misja królewska wykonana!", "green")
+        self.current_mission = None
+
+        if self.completed_missions >= 100:
+            self.win_game()
+
+    def win_game(self):
+        win = tk.Toplevel(self.root)
+        win.title("ZWYCIĘSTWO!")
+
+        ttk.Label(
+            win,
+            text="🎉 WYGRAŁEŚ! 🎉",
+            font=("Arial", 22, "bold"),
+            foreground="green"
+        ).pack(pady=20)
+
+        ttk.Label(
+            win,
+            text="Wykonałeś 100 królewskich misji.\nKolonia stała się legendą!",
+            font=("Arial", 12)
+        ).pack(pady=10)
+
+        ttk.Button(win, text="Zakończ grę", command=self.root.quit).pack(pady=15)

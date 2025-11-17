@@ -110,10 +110,11 @@ class ShipsMixin:
 
             if not mission_completed_before and all(sent.get(r, 0) >= req[r] for r in req):
                 self.log("MISJA KRÓLEWSKA WYKONANA! (po dopłynięciu do Europy)", "gold")
-                self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 5 * diff)
+                self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
                 self.current_mission = None
                 self.mission_multiplier *= 0.9
                 self.last_mission_date = self.current_date
+                self.complete_royal_mission()
 
         for r, a in load.items():
             self.resources[r] -= a
@@ -315,10 +316,11 @@ class ShipsMixin:
 
                         if all(sent.get(r, 0) >= req[r] for r in req):
                             self.log("MISJA KRÓLEWSKA WYKONANA!", "gold")
-                            self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 5 * diff)
+                            self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
                             self.current_mission = None
                             self.mission_multiplier *= 0.9
                             self.last_mission_date = self.current_date
+                            self.complete_royal_mission()
 
                     # === SPRZEDAŻ NADMIARU ===
                     gold = sum(a * EUROPE_PRICES.get(r, 0) for r, a in excess.items())
