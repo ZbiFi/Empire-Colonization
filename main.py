@@ -220,7 +220,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
 
             prod = {}
             for res, amt in base.get("base_prod", {}).items():
-                print(res, amt)
                 bonus = 1
                 if self.state == "Szwecja" and res == "drewno": bonus = STATES[self.state]["wood"]
                 if self.state == "Dania" and res == "żywność": bonus = STATES[self.state]["food"]
