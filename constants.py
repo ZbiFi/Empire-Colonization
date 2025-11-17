@@ -231,7 +231,7 @@ STATES = {
         ]
     },
     "Polska": {
-        "bonus": "dużo ludzi", "pop_start": 20,
+        "bonus": "dużo ludzi", "pop_start": 10,
         "rulers": [
             {"name": "Kazimierz IV Jagiellończyk", "start": 1447, "end": 1492},
             {"name": "Jan I Olbracht", "start": 1492, "end": 1501},
