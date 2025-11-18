@@ -356,6 +356,7 @@ class ShipsMixin:
                 self.ships[i] = (None, None, {}, "w porcie", 0)
                 self.auto_sail_timer = self.current_date + timedelta(days=14)
                 self.log(f"Statek {i+1} wrócił do kolonii. Gotowy do kolejnej podróży.", "blue")
+                self.play_sound("ship_arrived")
 
                 # Nowa misja (jeśli minęło 180 dni)
                 if i == self.flagship_index:

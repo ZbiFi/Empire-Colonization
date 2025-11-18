@@ -38,6 +38,7 @@ class MissionsMixin:
         # (end_date, required, sent, difficulty, mission_text, mission_idx)
         self.current_mission = (end_date, required.copy(), {}, difficulty, mission_text, mission_idx)
         self.log(mission_text, "purple")
+        self.play_sound("new_mission")
 
     def pay_mission_with_gold(self):
         if not self.current_mission:

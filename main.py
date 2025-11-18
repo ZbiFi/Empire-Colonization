@@ -1,10 +1,14 @@
 # main.py
+import os
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timedelta
 import random
 import math
 from functools import partial
+
+import pygame
+
 from map_generator import generate_map, MAP_SIZE
 from constants import *
 from missions import MissionsMixin
@@ -70,6 +74,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
 
         self.current_monarch = ""
 
+        pygame.mixer.init()
+        self.init_sounds()
+
     # === Pomocnicze ===
     def log(self, text, color="black"):
         if not self.current_date: return
@@ -77,6 +84,35 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
         self.log_lines.append((entry, color))
         if len(self.log_lines) > 1000: self.log_lines.pop(0)
         self.update_log_display()
+
+    def resource_path(self, filename):
+        """Bezpieczna ścieżka do pliku obok main.py."""
+        base = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(base, filename)
+
+    def init_sounds(self):
+        # MUZYKA TŁA
+        music_path = self.resource_path("music.mp3")
+        try:
+            pygame.mixer.music.load(music_path)
+            pygame.mixer.music.set_volume(0.4)  # głośność 0.0–1.0
+            pygame.mixer.music.play(loops=-1)  # -1 = gra w pętli bez końca
+        except Exception as e:
+            print("Nie udało się załadować muzyki:", e)
+
+        # tu od razu przygotujemy dźwięki efektów
+        self.sounds = {}
+        try:
+            self.sounds["new_mission"] = pygame.mixer.Sound(self.resource_path("new_mission.wav"))
+            self.sounds["ship_arrived"] = pygame.mixer.Sound(self.resource_path("anchor.wav"))
+            self.sounds["building_done"] = pygame.mixer.Sound(self.resource_path("building_done.wav"))
+        except Exception as e:
+            print("Nie udało się załadować któregoś z efektów dźwiękowych:", e)
+
+    def play_sound(self, name):
+        snd = getattr(self, "sounds", {}).get(name)
+        if snd:
+            snd.play()
 
     def get_cell_size(self):
         """
@@ -164,6 +200,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
 
     # === Start gry ===
     def start_screen(self):
+
         for w in self.root.winfo_children(): w.destroy()
         frame = ttk.Frame(self.root, padding=20); frame.pack(expand=True)
         ttk.Label(frame, text="SYMULATOR KOLONII", font=("Arial", 20, "bold")).pack(pady=20)
@@ -928,6 +965,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
             y, x = new_b["pos"]
             self.map_grid[y][x]["building"].append(new_b)
             self.log(f"Ukończono: {new_b['base']}", "green")
+            self.play_sound("building_done")
 
         finished_upgrades = [u for u in self.upgrades_in_progress if u[0] <= self.current_date]
         for u in finished_upgrades:
@@ -941,6 +979,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
                             (BUILDINGS[self.buildings[idx]["base"]]["upgrades"][old_level-1].get("workers", 0) if old_level > 0 else 0)
             self.busy_people -= workers_change
             self.log(f"Ukończono ulepszenie: {self.buildings[idx]['base']} → poziom {u[2]}", "gold")
+            self.play_sound("building_done")
 
         self.process_arriving_ships()
         self.auto_send_empty_ship()
