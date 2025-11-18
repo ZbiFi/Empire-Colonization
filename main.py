@@ -1,5 +1,6 @@
 # main.py
 import os
+import sys
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timedelta
@@ -86,8 +87,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
         self.update_log_display()
 
     def resource_path(self, filename):
-        """Bezpieczna ścieżka do pliku obok main.py."""
-        base = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, 'frozen', False):
+            base = os.path.dirname(sys.executable)
+        else:
+            # normalne uruchomienie z .py
+            base = os.path.dirname(os.path.abspath(__file__))
         return os.path.join(base, filename)
 
     def init_sounds(self):
