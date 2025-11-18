@@ -124,13 +124,13 @@ class MissionsMixin:
         """Wywoływane po ukończeniu misji królewskiej."""
         self.completed_missions += 1
         self.mission_counter_label.config(
-            text=f"Misje królewskie wykonane: {self.completed_missions} / 100"
+            text=f"Misje królewskie wykonane: {self.completed_missions} / {self.missions_to_win}"
         )
 
         # self.log("Misja królewska wykonana!", "green")
         self.current_mission = None
 
-        if self.completed_missions >= 100:
+        if self.completed_missions >= self.missions_to_win:
             self.win_game()
 
     def win_game(self):
@@ -146,7 +146,7 @@ class MissionsMixin:
 
         ttk.Label(
             win,
-            text="Wykonałeś 100 królewskich misji.\nKolonia stała się legendą!",
+            text=f"Wykonałeś {self.missions_to_win} królewskich misji.\nKolonia stała się legendą!",
             font=("Arial", 12)
         ).pack(pady=10)
 

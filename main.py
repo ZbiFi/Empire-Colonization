@@ -66,6 +66,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
 
         self.start_screen()
         self.completed_missions = 0
+        self.missions_to_win = 100
 
         self.current_monarch = ""
 
@@ -170,12 +171,49 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
         self.state_var = tk.StringVar(value="Portugalia")
         combo = ttk.Combobox(frame, textvariable=self.state_var, values=list(STATES.keys()), state="readonly", width=30)
         combo.pack(pady=5)
+        ttk.Label(frame, text="Długość gry (liczba misji królewskich):").pack(pady=(15, 5))
+
+        self.game_length_var = tk.StringVar(value="zwykla")
+
+        lengths = [
+            ("Błyskawiczna (15 misji)", "blyskawiczna"),
+            ("Szybka (30 misji)", "szybka"),
+            ("Zwykła (50 misji)", "zwykla"),
+            ("Długa (70 misji)", "dluga"),
+            ("Maraton (100 misji)", "maraton"),
+            ("Epicka (150 misji)", "epicka"),
+        ]
+
+        length_frame = ttk.Frame(frame)
+        length_frame.pack(anchor="w", padx=50)
+
+        for text, val in lengths:
+            ttk.Radiobutton(
+                length_frame,
+                text=text,
+                variable=self.game_length_var,
+                value=val
+            ).pack(anchor="w")
+
         ttk.Button(frame, text="Rozpocznij", command=self.start_game).pack(pady=20)
-        ttk.Button(frame, text="Losowe", command=lambda: self.state_var.set(random.choice(list(STATES.keys())))).pack(pady=5)
+        ttk.Button(frame, text="Losowe Państwo", command=lambda: self.state_var.set(random.choice(list(STATES.keys())))).pack(pady=5)
 
     def start_game(self):
         self.state = self.state_var.get()
         if not self.state: return
+
+        # ustawienie długości gry na podstawie wyboru na ekranie startowym
+        length_key = getattr(self, "game_length_var", None).get() if hasattr(self, "game_length_var") else "zwykla"
+
+        length_map = {
+            "blyskawiczna": 15,
+            "szybka": 30,
+            "zwykla": 50,
+            "dluga": 70,
+            "maraton": 100,
+            "epicka": 150,
+        }
+        self.missions_to_win = length_map.get(length_key, 50)
 
         # własne państwo startuje z lepszą reputacją, reszta pozostaje 0
         self.europe_relations[self.state] = 50
@@ -686,7 +724,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin):
 
         self.mission_counter_label = ttk.Label(
             top,
-            text=f"Misje królewskie wykonane: {self.completed_missions} / 100",
+            text=f"Misje królewskie wykonane: {self.completed_missions} / {self.missions_to_win}",
             font=("Arial", 11, "bold"),
             foreground="purple"
         )

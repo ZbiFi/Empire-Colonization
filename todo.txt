@@ -1,4 +1,5 @@
 budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
+magazyn -> podobnie ale z surowcami
 eventy losowe - plaga, pozar, wypadki whatever, piractwo
 eventy z lokalnymi
 espedycje - cos ciekawego
