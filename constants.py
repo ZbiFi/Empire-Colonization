@@ -352,7 +352,7 @@ BUILDINGS = {
 
     # === MIESZKANIA ===
     "namiot": {
-        "base_cost": {}, "build_time": 0, "base_workers": 0,
+        "base_cost": {"skóry": 10, "żelazo": 5}, "build_time": 1, "base_workers": 0,
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True,
         "upgrades": [
