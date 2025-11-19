@@ -661,7 +661,7 @@ class RelationsMixin:
                 remaining_days = (mission["end"] - self.current_date).days
                 full_months_left = max(0, remaining_days // 30)
 
-                reward = 10 + full_months_left * 2
+                reward = 5 + full_months_left * 2
 
                 self.native_relations[tribe] = min(
                     100, self.native_relations[tribe] + reward
