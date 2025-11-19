@@ -32,7 +32,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
         self.resources = {r: 0 for r in RESOURCES}
-        self.resources["żywność"] = 10000
+        self.resources["żywność"] = 1000
         self.resources["drewno"] = 50
         self.resources["żelazo"] = 30
         self.resources["skóry"] = 10
@@ -74,6 +74,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         self.start_screen()
         self.completed_missions = 0
         self.missions_to_win = 100
+
+        # Mechanika misji indiańskich
+        self.native_missions_active = {}  # tribe → dict z aktywną misją
+        self.native_missions_cd = {}  # tribe → data kiedy mogą poprosić ponownie
+        self.native_mission_multiplier = {}  # tribe → mnożnik trudności jak w misjach królewskich
 
         # przyszłe misje od Indian – na razie pusta lista
         # struktura np.: {"tribe": "Irokezi", "text": "...", "end": data, "progress": "..."}
@@ -246,6 +251,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         self.map_grid, self.settlement_pos = generate_map(self.map_size)
         self.map_size = len(self.map_grid)
         self.current_date = generate_start_date()
+
+        # Start systemu po 6 miesiącach
+        self.native_missions_enabled_start = self.current_date + timedelta(days=180)
 
         sy, sx = self.settlement_pos
         for _ in range(3):
@@ -733,6 +741,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         # --- czas i misje ---
         self.current_date += timedelta(days=days)
         # self.log(f"Minęło {days} dni.", "blue")
+
+        # sprawdź misje indiańskie każdego dnia
+        self.try_generate_native_missions()
 
         if self.current_mission is not None and self.current_mission[0] < self.current_date:
             end, req, sent, diff, text, idx = self.current_mission

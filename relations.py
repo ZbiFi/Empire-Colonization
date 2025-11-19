@@ -1,8 +1,10 @@
 # relations.py
 import tkinter as tk
+from datetime import timedelta
 from tkinter import ttk
+import random
 
-from constants import NATIVE_PRICES, EUROPE_PRICES, STATES
+from constants import NATIVE_PRICES, EUROPE_PRICES, STATES, NATIVE_MISSIONS_DETAILS
 
 
 class RelationsMixin:
@@ -549,3 +551,130 @@ class RelationsMixin:
         self.spend_resources(cost)
         self.europe_relations[state] = min(100, self.europe_relations[state] + 5)
         self.log(f"Dar do {state}: +5 relacji", "purple")
+
+    def try_generate_native_missions(self):
+        """Co dzień wywoływane: sprawdza, czy jakieś plemię powinno dostać misję."""
+
+        if self.current_date < self.native_missions_enabled_start:
+            return  # system jeszcze nie wystartował
+
+        for tribe in self.native_relations.keys():
+
+            # 1. Jeśli misja już trwa – sprawdź czy wygasła
+            active = self.native_missions_active.get(tribe)
+            if active:
+                end = active["end"]
+                if self.current_date >= end:
+                    # MISJA NIEWYKONANA → kara
+                    self.native_relations[tribe] = max(
+                        0, self.native_relations[tribe] - 15
+                    )
+                    self.log(
+                        f"Misja od {tribe} wygasła! Kara -15 reputacji.",
+                        "red"
+                    )
+                    self.native_missions_active[tribe] = None
+                    # cooldown 2–3 miesiące
+                    cd = random.randint(60, 90)
+                    self.native_missions_cd[tribe] = self.current_date + timedelta(days=cd)
+                continue
+
+            # 2. Jeśli brak misji aktywnej, ale cooldown trwa → nic nie rób
+            cd_until = self.native_missions_cd.get(tribe)
+            if cd_until and self.current_date < cd_until:
+                continue
+
+            # 3. Losowa szansa — np. 1/14 że dziś dane plemię poprosi o misję
+            # żeby nie waliło się wszystko naraz
+            if random.random() > 1 / 14:
+                continue
+
+            # 4. Generuj misję
+            self.generate_native_mission(tribe)
+
+    def generate_native_mission(self, tribe):
+        """Tworzy nową misję dla konkretnego plemienia."""
+
+        # pierwszy raz? ustaw mnożnik
+        if tribe not in self.native_mission_multiplier:
+            self.native_mission_multiplier[tribe] = 1.0
+        else:
+            # rośnie jak w misjach królewskich
+            self.native_mission_multiplier[tribe] *= random.uniform(1.05, 1.12)
+
+        multiplier = self.native_mission_multiplier[tribe]
+
+        # wybór misji
+        idx = random.randint(0, len(NATIVE_MISSIONS_DETAILS) - 1)
+        data = NATIVE_MISSIONS_DETAILS[idx]
+
+        # wymagania
+        required = {
+            res: max(1, int(base * multiplier))
+            for res, base in data["base"].items()
+        }
+
+        # czas trwania 3–6 miesięcy
+        months = random.randint(3, 6)
+        end_date = self.current_date + timedelta(days=30 * months)
+
+        mission = {
+            "tribe": tribe,
+            "name": data["name"],
+            "desc": data.get("desc", ""),
+            "required": required,
+            "sent": {},
+            "end": end_date,
+            "months_limit": months,
+            "idx": idx,
+        }
+
+        self.native_missions_active[tribe] = mission
+        self.log(
+            f"Nowa misja od plemienia {tribe}: {data['name']}. "
+            f"Czas: {months} miesięcy.",
+            "purple"
+        )
+
+        def deliver_to_native_mission(self, tribe, resources):
+            """resources = dict {res: amount} wysłanych towarów."""
+
+            mission = self.native_missions_active.get(tribe)
+            if not mission:
+                self.log(f"{tribe} nie ma aktywnej misji.", "gray")
+                return False
+
+            req = mission["required"]
+            sent = mission["sent"]
+
+            # dodaj zasoby
+            for r, amount in resources.items():
+                if r in req:
+                    need = req[r] - sent.get(r, 0)
+                    add = min(amount, need)
+                    sent[r] = sent.get(r, 0) + add
+
+            # sprawdzenie, czy skończone
+            completed = all(sent.get(r, 0) >= req[r] for r in req)
+
+            if completed:
+                remaining_days = (mission["end"] - self.current_date).days
+                full_months_left = max(0, remaining_days // 30)
+
+                reward = 10 + full_months_left * 2
+
+                self.native_relations[tribe] = min(
+                    100, self.native_relations[tribe] + reward
+                )
+                self.log(
+                    f"Misja od {tribe} wykonana! Nagroda: +{reward} reputacji.",
+                    "green"
+                )
+
+                self.native_missions_active[tribe] = None
+
+                # cooldown 2–3 miesiące
+                cd = random.randint(60, 90)
+                self.native_missions_cd[tribe] = self.current_date + timedelta(days=cd)
+
+            return True
