@@ -47,8 +47,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         self.title_font = ("IM Fell English SC", 28, "bold")
         self.ui_font = ("EB Garamond Italic", 18)
+        self.journal_font = ("EB Garamond Italic", 14)
 
-
+        self.top_title_font = ("Cinzel", 14, "bold")
+        self.top_info_font = ("EB Garamond Italic", 12)
 
         self.style = ttk.Style(self.root)
         self.style.theme_use("clam")
@@ -162,15 +164,15 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
     def resource_path(self, filename):
         if getattr(sys, 'frozen', False):
-            base = os.path.dirname(sys.executable)
+            # tryb PyInstaller --onefile: pliki są w katalogu tymczasowym
+            base = sys._MEIPASS
         else:
-            # normalne uruchomienie z .py
             base = os.path.dirname(os.path.abspath(__file__))
         return os.path.join(base, filename)
 
     def init_sounds(self):
         # MUZYKA TŁA
-        music_path = self.resource_path("music.mp3")
+        music_path = self.resource_path("sounds/music.mp3")
         try:
             pygame.mixer.music.load(music_path)
             pygame.mixer.music.set_volume(0.4)  # głośność 0.0–1.0
@@ -181,9 +183,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         # tu od razu przygotujemy dźwięki efektów
         self.sounds = {}
         try:
-            self.sounds["new_mission"] = pygame.mixer.Sound(self.resource_path("new_mission.wav"))
-            self.sounds["ship_arrived"] = pygame.mixer.Sound(self.resource_path("anchor.wav"))
-            self.sounds["building_done"] = pygame.mixer.Sound(self.resource_path("building_done.wav"))
+            self.sounds["new_mission"] = pygame.mixer.Sound(self.resource_path("sounds/new_mission.wav"))
+            self.sounds["ship_arrived"] = pygame.mixer.Sound(self.resource_path("sounds/anchor.wav"))
+            self.sounds["building_done"] = pygame.mixer.Sound(self.resource_path("sounds/building_done.wav"))
         except Exception as e:
             print("Nie udało się załadować któregoś z efektów dźwiękowych:", e)
 
@@ -256,7 +258,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         # === TŁO Z OBRAZU ===
         try:
-            img_path = self.resource_path("colony.jpg")
+            img_path = self.resource_path("img/colony.jpg")
             bg_image = Image.open(img_path)
 
             # dopasuj do okna (1600x1000 jak w __init__)
@@ -490,7 +492,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         canvas_width = 850
         canvas_height = 850
-        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height)
+        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height, bg=self.style.lookup("TFrame", "background"),
+                   highlightthickness=0)
         canvas.pack(pady=10)
 
         cell_size = self.get_cell_size()
@@ -664,26 +667,74 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
     # === Główny ekran ===
     def main_game(self):
         for w in self.root.winfo_children(): w.destroy()
-        top = ttk.Frame(self.root); top.pack(fill="x", padx=10, pady=5)
-        self.day_lbl = ttk.Label(top, text="", font=("Arial", 12, "bold")); self.day_lbl.pack(side="left")
-        ttk.Label(top, text=f" | {self.location} | {self.state}").pack(side="left", padx=20)
-        self.monarch_lbl = ttk.Label(top, text="", font=("Arial", 12, "bold"))
-        self.monarch_lbl.pack(side="left", padx=10)
-        self.pop_lbl = ttk.Label(top, text=""); self.pop_lbl.pack(side="left")
-        self.cap_lbl = ttk.Label(top, text=""); self.cap_lbl.pack(side="left")
-        self.work_lbl = ttk.Label(top, text=""); self.work_lbl.pack(side="left")
 
-        # === LICZNIK MISJI KRÓLEWSKICH (warunek zwycięstwa) ===
+        top = ttk.Frame(self.root)
+        top.pack(fill="x", padx=10, pady=5)
+
+        # 3 kolumny: lewa (data), środek (lokacja/państwo/monarcha), prawa (misje)
+        for col in range(3):
+            top.columnconfigure(col, weight=1)
+
+        # ========== WIERSZ 1 ==========
+
+        # Data po lewej
+        self.day_lbl = ttk.Label(
+            top,
+            text="",
+            font=self.top_title_font if hasattr(self, "top_title_font") else ("Cinzel", 14, "bold")
+        )
+        self.day_lbl.grid(row=0, column=0, sticky="w")
+
+        # Środkowy frame: lokalizacja | państwo | Monarcha: XYZ
+        center_frame = ttk.Frame(top)
+        center_frame.grid(row=0, column=1)
+
+        self.loc_state_lbl = ttk.Label(
+            center_frame,
+            text=f"{self.location} | {self.state} | ",
+            font=self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12)
+        )
+        self.loc_state_lbl.pack(side="left")
+
+        # Monarcha tuż po państwie, pogrubiony
+        self.monarch_lbl = ttk.Label(
+            center_frame,
+            text="Monarcha: ...",
+            font=( (self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
+                   self.top_info_font[1] if hasattr(self, "top_info_font") else 12,
+                   "bold")
+        )
+        self.monarch_lbl.pack(side="left")
+
+        # Pogrubiony licznik misji po prawej
         if not hasattr(self, "completed_missions"):
             self.completed_missions = 0
 
         self.mission_counter_label = ttk.Label(
             top,
             text=f"Misje królewskie wykonane: {self.completed_missions} / {self.missions_to_win}",
-            font=("Arial", 11, "bold"),
+            font=( (self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
+                   self.top_info_font[1] if hasattr(self, "top_info_font") else 12,
+                   "bold"),
             foreground="purple"
         )
-        self.mission_counter_label.pack(side="right", padx=10)
+        self.mission_counter_label.grid(row=0, column=2, sticky="e", padx=10)
+
+        # ========== WIERSZ 2 – Ludzie / Wolni, wyśrodkowane ==========
+
+        self.pop_frame = ttk.Frame(top)
+        self.pop_frame.grid(row=1, column=0, columnspan=3, pady=(2, 0))
+
+        base_font = self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12)
+
+        self.pop_lbl = ttk.Label(self.pop_frame, text="Ludzie: 0 / 0", font=base_font)
+        self.pop_lbl.pack(side="left", padx=5)
+
+        ttk.Label(self.pop_frame, text="|", font=base_font).pack(side="left", padx=5)
+
+        self.work_lbl = ttk.Label(self.pop_frame, text="Wolni: 0", font=base_font)
+        self.work_lbl.pack(side="left", padx=5)
+
 
         res_frame = ttk.LabelFrame(self.root, text="Surowce"); res_frame.pack(fill="x", padx=10, pady=5)
         self.res_labels = {}
@@ -742,11 +793,24 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         log_frame = ttk.LabelFrame(self.root, text="Dziennik");
         log_frame.pack(fill="both", expand=True, padx=10, pady=5)
-        self.log_text = tk.Text(log_frame, height=10, state=tk.DISABLED, wrap=tk.WORD, font=("Courier", 10))
+        self.log_text = tk.Text(
+            log_frame,
+            height=10,
+            state=tk.DISABLED,
+            wrap=tk.WORD,
+            font=self.journal_font,
+            bg="#e1d2ad",
+            fg="#3b2a1a"
+        )
         self.log_text.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+
         scrollbar = ttk.Scrollbar(log_frame, orient="vertical", command=self.log_text.yview)
         scrollbar.pack(side="right", fill="y")
         self.log_text.config(yscrollcommand=scrollbar.set)
+
+        # Lepsza interlinia dla czytelności
+        self.log_text.tag_configure("spacing", spacing3=4)
+        self.log_text.tag_add("spacing", "1.0", "end")
 
         self.log("Kolonizacja rozpoczęta!", "green")
         self.log(f'{self.get_monarch()}, nasz monarcha wydał rozkaz, byś prowadził kolonię i ją rozbudował dla dobra naszego Imperium.', "green")
@@ -852,8 +916,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         self.day_lbl.config(text=f"Data: {self.current_date.strftime('%d %B %Y')}")
         self.monarch_lbl.config(text=f" | Monarcha: {self.get_monarch()}")
         cap = self.calculate_population_capacity()
-        self.pop_lbl.config(text=f"Ludzie: {self.people}")
-        self.cap_lbl.config(text=f"/{cap}")
+        self.pop_lbl.config(text=f"Ludzie: {self.people} / {cap}")
         self.work_lbl.config(text=f" | Wolni: {self.free_workers()}")
 
         for res, lbl in self.res_labels.items():
@@ -962,7 +1025,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         canvas_width = 850
         canvas_height = 850
-        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height)
+        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height, bg=self.style.lookup("TFrame", "background"),
+                   highlightthickness=0)
         canvas.pack(pady=1)
 
         cell_size = self.get_cell_size()
