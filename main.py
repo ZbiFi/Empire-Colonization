@@ -32,7 +32,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
         self.resources = {r: 0 for r in RESOURCES}
-        self.resources["żywność"] = 1000
+        self.resources["żywność"] = 10000
         self.resources["drewno"] = 50
         self.resources["żelazo"] = 30
         self.resources["skóry"] = 10
@@ -74,6 +74,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         self.start_screen()
         self.completed_missions = 0
         self.missions_to_win = 100
+
+        # przyszłe misje od Indian – na razie pusta lista
+        # struktura np.: {"tribe": "Irokezi", "text": "...", "end": data, "progress": "..."}
+        self.native_missions = []
 
         self.current_monarch = ""
 
@@ -603,7 +607,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
              ("Dyplomacja", self.diplomacy_menu)],
 
             [("Eksploruj", self.explore),
-             ("Mapa", self.show_map)],
+             ("Mapa", self.show_map),
+             ("Misje", self.show_missions_overview)],
 
             [("Czekaj 1 dzień", lambda: self.advance_date(1)),
              ("Czekaj 3 dni", lambda: self.advance_date(3)),

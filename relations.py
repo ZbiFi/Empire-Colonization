@@ -357,9 +357,6 @@ class RelationsMixin:
             text="Dar: koszt 100 złota + 500 żywności + 200 srebra + 100 stali"
         ).pack(pady=10)
 
-        if self.current_mission:
-            ttk.Button(win, text="Misja Królewska", command=self.show_mission_window).pack(pady=10)
-
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
 
     def open_europe_trade(self, state, parent):

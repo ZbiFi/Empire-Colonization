@@ -72,6 +72,93 @@ class MissionsMixin:
         self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
         self.complete_royal_mission()
 
+    def show_missions_overview(self):
+        """Okno zbiorcze: misja królewska + (w przyszłości) misje indiańskie."""
+        win = tk.Toplevel(self.root)
+        win.title("Misje")
+
+        # === Sekcja: misje królewskie ===
+        royal_frame = ttk.LabelFrame(win, text="Misja królewska")
+        royal_frame.pack(fill="x", padx=10, pady=10)
+
+        if self.current_mission:
+            end, req, sent, diff, text, idx = self.current_mission
+
+            ttk.Label(
+                royal_frame,
+                text=text,
+                wraplength=550,
+                justify="left"
+            ).pack(pady=5, anchor="w")
+
+            ttk.Label(
+                royal_frame,
+                text=f"Termin: {end.strftime('%d %b %Y')} (pozostało {(end - self.current_date).days} dni)",
+                foreground="red"
+            ).pack(pady=2, anchor="w")
+
+            prog_frame = ttk.Frame(royal_frame)
+            prog_frame.pack(pady=5, fill="x")
+
+            for r in req:
+                have = sent.get(r, 0)
+                need = req[r]
+                if have >= need:
+                    color = "green"
+                elif have > 0:
+                    color = "orange"
+                else:
+                    color = "red"
+                ttk.Label(
+                    prog_frame,
+                    text=f"{r}: {have}/{need}",
+                    foreground=color
+                ).pack(anchor="w")
+
+            ttk.Button(
+                royal_frame,
+                text="Szczegóły misji królewskiej",
+                command=self.show_mission_window
+            ).pack(pady=5, anchor="w")
+
+        else:
+            ttk.Label(
+                royal_frame,
+                text="Brak aktywnej misji królewskiej.",
+                foreground="gray"
+            ).pack(pady=5, anchor="w")
+
+        # === Sekcja: misje indiańskie (przygotowane pod przyszłe funkcje) ===
+        native_frame = ttk.LabelFrame(win, text="Misje indiańskie")
+        native_frame.pack(fill="x", padx=10, pady=5)
+
+        missions = getattr(self, "native_missions", [])
+
+        if missions:
+            for m in missions:
+                tribe = m.get("tribe", "Nieznane plemię")
+                text = m.get("text", "")
+                end = m.get("end", None)
+                progress = m.get("progress", "")
+
+                line = f"{tribe}: {text}"
+                if end:
+                    line += f" (termin: {end.strftime('%d %b %Y')})"
+                if progress:
+                    line += f" | Postęp: {progress}"
+
+                ttk.Label(native_frame, text=line, wraplength=550, justify="left").pack(
+                    pady=2, anchor="w"
+                )
+        else:
+            ttk.Label(
+                native_frame,
+                text="Brak aktywnych misji od plemion indiańskich.\n(Pojawią się w przyszłych aktualizacjach.)",
+                foreground="gray",
+                justify="left"
+            ).pack(pady=5, anchor="w")
+
+        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
     def show_mission_window(self):
         if not self.current_mission:
             self.log("Brak aktywnej misji.", "gray")
