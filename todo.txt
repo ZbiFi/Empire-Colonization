@@ -4,5 +4,6 @@ eventy losowe - plaga, pozar, wypadki whatever, piractwo
 DONE !!! - eventy z lokalnymi -> misje
 espedycje - cos ciekawego
 armia i walka?
-piractwo?
+piractwo? -> może statki i z misją od króla by korsarzy wysyłać przeciwko komuś?
 save/load
++-1/+-10/+-100 przyciski przy handlu
