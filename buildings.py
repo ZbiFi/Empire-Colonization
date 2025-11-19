@@ -51,13 +51,41 @@ class BuildingsMixin:
                     return True
         return False
 
+    # === Nazwa budynku na podstawie poziomu (namiot -> chata -> dom) ===
+    def get_building_display_name(self, b):
+        base_data = BUILDINGS[b["base"]]
+        level = b.get("level", 0)
+        if level > 0 and level <= len(base_data["upgrades"]):
+            return base_data["upgrades"][level - 1].get("name", b["base"])
+        return b["base"]
+
     # === Pojemność populacji (z budynków mieszkalnych) ===
     def calculate_population_capacity(self):
-        return sum(
-            b.get("capacity", [4, 6, 8, 12][b.get("level", 0)])
-            for b in self.buildings
-            if b["base"] == "namiot"
-        )
+        from constants import BUILDINGS
+
+        total = 0
+        base_data = BUILDINGS["namiot"]
+
+        for b in self.buildings:
+            if b["base"] != "namiot":
+                continue
+
+            level = b.get("level", 0)
+
+            # --- poziom 0 ---
+            if level == 0:
+                total += base_data.get("capacity", 0)
+
+            # --- poziomy 1+ ---
+            else:
+                upgrades = base_data.get("upgrades", [])
+                if 1 <= level <= len(upgrades):
+                    total += upgrades[level - 1].get("capacity", 0)
+                else:
+                    # fallback – nie powinno się zdarzyć
+                    total += base_data.get("capacity", 0)
+
+        return total
 
     # === Produkcja ===
     def calculate_production(self):
@@ -184,11 +212,17 @@ class BuildingsMixin:
         self.busy_people += data["base_workers"]
         self.log(f"Budowa: {name} → {end_date.strftime('%d %b %Y')}", "blue")
 
-    # === Ulepszenia ===
+    # === Ulepszenia (w górę) ===
     def start_upgrade(self, building_idx):
         b = self.buildings[building_idx]
         base_data = BUILDINGS[b["base"]]
         current_level = b.get("level", 0)
+
+        # 🔒 jeśli ten budynek już ma ulepszenie w toku – nie zaczynamy kolejnego
+        if any(u[1] == building_idx for u in self.upgrades_in_progress):
+            self.log("To ulepszenie jest już w trakcie realizacji!", "red")
+            return
+
         if current_level >= len(base_data["upgrades"]):
             self.log("Maksymalny poziom!", "red")
             return
@@ -212,49 +246,193 @@ class BuildingsMixin:
         self.spend_resources(cost)
         start_date = self.current_date
         end_date = start_date + timedelta(days=build_time)
+
+        # (end_date, building_idx, new_level, start_date)
         self.upgrades_in_progress.append((end_date, building_idx, current_level + 1, start_date))
         self.busy_people += workers_needed
+
         self.log(
-            f"Ulepszanie: {b['base']} → poziom {current_level + 1} → {end_date.strftime('%d %b %Y')}",
+            f"Ulepszanie: {self.get_building_display_name(b)} → poziom {current_level + 1} "
+            f"→ {end_date.strftime('%d %b %Y')}",
             "purple",
         )
 
+    # === Degradacja / zburzenie (w dół) ===
+    def degrade_or_demolish(self, building_idx):
+        b = self.buildings[building_idx]
+        base_data = BUILDINGS[b["base"]]
+        level = b.get("level", 0)
+        y, x = b["pos"]
+
+        # 🔄 jeśli jest trwające ulepszenie tego budynku – przerwij je
+        to_cancel = [u for u in self.upgrades_in_progress if u[1] == building_idx]
+        for u in to_cancel:
+            _, _, new_level, _ = u
+            prev_level = new_level - 1
+            upgrades = base_data.get("upgrades", [])
+            workers_needed = 1
+            if 0 <= prev_level < len(upgrades):
+                workers_needed = upgrades[prev_level].get("workers", 1)
+            self.busy_people -= workers_needed
+            self.upgrades_in_progress.remove(u)
+        if to_cancel:
+            self.log("Przerwano trwające ulepszenie tego budynku (bez zwrotu surowców).", "orange")
+
+        # DEGRADACJA POZIOMU (zwraca 50% kosztu poprzedniego ulepszenia)
+        if level > 0:
+            prev_upgrade = base_data["upgrades"][level - 1]
+            prev_cost = prev_upgrade.get("cost", {})
+            for r, a in prev_cost.items():
+                self.resources[r] = self.resources.get(r, 0) + a // 2
+
+            new_level = level - 1
+            b["level"] = new_level
+
+            # po degradacji dopasuj capacity, jeśli zdefiniowane
+            if new_level > 0:
+                new_up = base_data["upgrades"][new_level - 1]
+                if "capacity" in new_up:
+                    b["capacity"] = new_up["capacity"]
+            else:
+                if b["base"] == "namiot":
+                    b["capacity"] = BUILDINGS["namiot"].get("capacity", 4)
+
+            current_name = self.get_building_display_name(b)
+            self.log(
+                f"Zdegradowano budynek do poziomu {new_level}: {current_name} "
+                f"(zwrot 50% kosztu ulepszenia).",
+                "orange",
+            )
+            return
+
+        # ZBURZENIE BUDYNKU (poziom 0, zwrot 50% kosztu budowy)
+        base_cost = base_data.get("base_cost", {})
+        for r, a in base_cost.items():
+            self.resources[r] = self.resources.get(r, 0) + a // 2
+
+        self.buildings.pop(building_idx)
+        self.map_grid[y][x]["building"] = [bb for bb in self.map_grid[y][x]["building"] if bb is not b]
+        self.log("Zburzono budynek. Zwrot: 50% kosztu budowy.", "orange")
+
+    def cancel_upgrade(self, building_idx):
+        """Anuluje trwające ulepszenie budynku, zwraca 100% surowców i zwalnia ludzi."""
+        b = self.buildings[building_idx]
+        base_data = BUILDINGS[b["base"]]
+
+        # znajdź ulepszenia w toku dotyczące tego budynku
+        to_cancel = [u for u in self.upgrades_in_progress if u[1] == building_idx]
+
+        if not to_cancel:
+            self.log("Brak ulepszenia do zatrzymania.", "red")
+            return
+
+        for u in to_cancel:
+            end_date, idx, new_level, start_date = u
+
+            prev_level = new_level - 1
+            upgrades = base_data.get("upgrades", [])
+
+            # --- zwrot surowców ---
+            if 0 <= prev_level < len(upgrades):
+                original_cost = upgrades[prev_level].get("cost", {}).copy()
+
+                # uwzględnij bonus Holandii (koszty budowy -20%)
+                if self.state == "Holandia":
+                    mult = STATES[self.state]["build_cost"]  # np. 0.8
+                    original_cost = {k: int(v * mult) for k, v in original_cost.items()}
+
+                # zwracamy 100%
+                for r, a in original_cost.items():
+                    self.resources[r] = self.resources.get(r, 0) + a
+
+            # --- zwrot robotników ---
+            workers_used = upgrades[prev_level].get("workers", 1) if 0 <= prev_level < len(upgrades) else 1
+            self.busy_people -= workers_used
+
+            # usuń zadanie ulepszenia
+            self.upgrades_in_progress.remove(u)
+
+        self.log("Ulepszenie zatrzymane — zwrócono wszystkie surowce i robotników.", "orange")
+
+    # === Menu: Ulepsz/Zdegraduj (jeden przycisk) ===
     def show_upgrade_menu(self):
         win = tk.Toplevel(self.root)
-        win.title("Ulepsz budynek")
-        ttk.Label(win, text="Wybierz budynek do ulepszenia:", font=("Arial", 12, "bold")).pack(pady=10)
+        win.title("Ulepsz / Zdegraduj / Zatrzymaj")
+        ttk.Label(win, text="Wybierz budynek:", font=("Arial", 12, "bold")).pack(pady=10)
 
         has_any = False
         for i, b in enumerate(self.buildings):
             if b.get("is_district"):
                 continue
-            base_data = BUILDINGS[b["base"]]
-            level = b.get("level", 0)
-            if level >= len(base_data["upgrades"]):
-                continue
-            has_any = True
 
-            upgrade = base_data["upgrades"][level]
-            cost_str = ", ".join(f"{k}: {v}" for k, v in upgrade.get("cost", {}).items()) or "brak"
-            time = upgrade.get("build_time", 7)
-            name = upgrade.get("name", f"Poziom {level + 1}")
+            base_data = BUILDINGS[b["base"]]
+            upgrades = base_data.get("upgrades", [])
+            level = b.get("level", 0)
+            current_name = self.get_building_display_name(b)
+
+            in_progress = any(u[1] == i for u in self.upgrades_in_progress)
 
             frame = ttk.Frame(win)
-            frame.pack(fill="x", padx=20, pady=2)
-            ttk.Label(frame, text=f"{b['base']} → {name}", width=25).pack(side="left")
-            ttk.Label(frame, text=f"{cost_str} | {time} dni", foreground="blue").pack(side="left", padx=10)
-            ttk.Button(
+            frame.pack(fill="x", padx=20, pady=3)
+
+            # nazwa + poziom + informacja o statusie ulepszenia
+            label_text = f"{current_name} ({b['pos'][0]},{b['pos'][1]}) [poziom {level}]"
+            if in_progress:
+                label_text += " (ulepszanie w toku)"
+            ttk.Label(frame, text=label_text, width=40).pack(side="left")
+
+            # --- NOWY: przycisk ZATRZYMAJ ULEPSZENIE ---
+            if in_progress:
+                cancel_btn = ttk.Button(
+                    frame,
+                    text="Zatrzymaj ulepszenie",
+                    command=lambda idx=i: [self.cancel_upgrade(idx), win.destroy()],
+                )
+                cancel_btn.pack(side="right", padx=5)
+
+            # --- przycisk ULEPSZ (tylko gdy NIE w trakcie ulepszania) ---
+            if level < len(upgrades) and not in_progress:
+                has_any = True
+                next_up = upgrades[level]
+                up_name = next_up.get("name", f"Poziom {level + 1}")
+                cost_str = ", ".join(f"{k}: {v}" for k, v in next_up.get("cost", {}).items()) or "brak"
+                time = next_up.get("build_time", 7)
+
+                up_btn = ttk.Button(
+                    frame,
+                    text=f"Ulepsz → {up_name}\n({cost_str} | {time} dni)",
+                    command=lambda idx=i: [self.start_upgrade(idx), win.destroy()],
+                )
+                up_btn.pack(side="right", padx=5)
+
+            # --- przycisk ZDEGRADUJ/ZBURZ (zawsze dostępny) ---
+            if level > 0:
+                if level == 1:
+                    prev_name = b["base"]
+                else:
+                    prev_name = upgrades[level - 2].get("name", b["base"])
+                text = f"Zdegraduj → {prev_name}\n(+50% kosztu ulepszenia)"
+            else:
+                text = "Zburz\n(+50% kosztu budowy)"
+
+            de_btn = ttk.Button(
                 frame,
-                text="Ulepsz",
-                command=lambda idx=i: [self.start_upgrade(idx), win.destroy()],
-            ).pack(side="right")
+                text=text,
+                command=lambda idx=i: [self.degrade_or_demolish(idx), win.destroy()],
+            )
+            de_btn.pack(side="right", padx=5)
+
 
         if not has_any:
-            ttk.Label(win, text="Brak budynków do ulepszenia.", foreground="gray").pack(pady=20)
+            ttk.Label(
+                win,
+                text="Brak budynków do ulepszenia (lub wszystkie są gotowe).",
+                foreground="gray",
+            ).pack(pady=20)
 
-        ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=10)
+        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
 
-    # === Menu budowy / burzenia / pracowników ===
+    # === Menu budowy ===
     def build_menu(self):
         win = tk.Toplevel(self.root)
         win.title("Buduj")
@@ -279,38 +457,7 @@ class BuildingsMixin:
         win.destroy()
         self.show_map()
 
-    def demolish_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Zburz / Degraduj")
-        for i, b in enumerate(self.buildings):
-            if b.get("is_district"):
-                continue
-            txt = f"{b['base']} na ({b['pos'][0]},{b['pos'][1]})"
-            if b.get("level", 0) > 0:
-                txt += " (degradacja)"
-            else:
-                txt += " (50% zwrotu)"
-            btn = ttk.Button(win, text=txt, command=lambda idx=i: self.demolish(idx, win))
-            btn.pack(fill="x", padx=10, pady=2)
-
-    def demolish(self, idx, win):
-        b = self.buildings[idx]
-        y, x = b["pos"]
-        level = b.get("level", 0)
-        if level > 0:
-            b["level"] -= 1
-            self.log(f"Degradowano: {b['base']} → poziom {b['level']}", "orange")
-        else:
-            cost = BUILDINGS[b["base"]]["base_cost"]
-            for r, a in cost.items():
-                self.resources[r] += a // 2
-            self.buildings.pop(idx)
-            self.map_grid[y][x]["building"] = [
-                bb for bb in self.map_grid[y][x]["building"] if bb is not b
-            ]
-            self.log("Zburzono budynek. Zwrot: 50%", "orange")
-        win.destroy()
-
+    # === Zarządzanie pracownikami ===
     def manage_workers(self):
         win = tk.Toplevel(self.root)
         win.title("Pracownicy")
@@ -330,7 +477,7 @@ class BuildingsMixin:
 
             ttk.Label(
                 frame,
-                text=f"{b['base']} ({b['pos'][0]},{b['pos'][1]})",
+                text=f"{self.get_building_display_name(b)} ({b['pos'][0]},{b['pos'][1]})",
                 width=30,
             ).pack(side="left")
 

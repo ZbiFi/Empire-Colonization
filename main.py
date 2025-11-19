@@ -245,7 +245,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         sy, sx = self.settlement_pos
         for _ in range(3):
-            tent = {"base": "namiot", "level": 0, "workers": 0, "pos": (sy, sx), "capacity": 4}
+            tent = {"base": "namiot", "level": 0, "workers": 0, "pos": (sy, sx)}
             self.buildings.append(tent)
             self.map_grid[sy][sx]["building"].append(tent)
 
@@ -590,25 +590,46 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         build_frame = ttk.LabelFrame(self.root, text="Budynki"); build_frame.pack(fill="x", padx=10, pady=5)
         self.build_listbox = tk.Listbox(build_frame, height=8); self.build_listbox.pack(fill="x", padx=5, pady=5)
 
-        action_frame = ttk.Frame(self.root); action_frame.pack(fill="both", padx=10, pady=5)
-        actions = [
-            ("Buduj", self.build_menu),
-            ("Ulepsz", self.show_upgrade_menu),
-            ("Zburz/Degraduj", self.demolish_menu),
-            ("Statki", self.ships_menu),
-            ("Handel z Indianami", self.native_menu),
-            ("Zarządzaj ludźmi", self.manage_workers),
-            ("Dyplomacja", self.diplomacy_menu),
-            ("Eksploruj", self.explore),
-            ("Mapa", self.show_map),
-            ("Czekaj 1", lambda: self.advance_date(1)),
-            ("Czekaj 3", lambda: self.advance_date(3)),
-            ("Czekaj 7", lambda: self.advance_date(7)),
+        action_frame = ttk.Frame(self.root)
+        action_frame.pack(fill="x", padx=10, pady=5)
+
+        groups = [
+            [("Buduj", self.build_menu),
+             ("Ulepsz/Zdegraduj", self.show_upgrade_menu),
+             ("Zarządzaj ludźmi", self.manage_workers)],
+
+            [("Statki", self.ships_menu),
+             ("Handel z Indianami", self.native_menu),
+             ("Dyplomacja", self.diplomacy_menu)],
+
+            [("Eksploruj", self.explore),
+             ("Mapa", self.show_map)],
+
+            [("Czekaj 1 dzień", lambda: self.advance_date(1)),
+             ("Czekaj 3 dni", lambda: self.advance_date(3)),
+             ("Czekaj 7 dni", lambda: self.advance_date(7))],
         ]
-        for i, (txt, cmd) in enumerate(actions):
-            btn = ttk.Button(action_frame, text=txt, command=cmd)
-            btn.grid(row=i//3, column=i%3, padx=5, pady=5, sticky="ew")
-        for i in range(3): action_frame.columnconfigure(i, weight=1)
+
+        # 3 kolumny dzielące szerokość *dla całego panelu* (uniform => te same w każdej linii)
+        for col in range(3):
+            action_frame.grid_columnconfigure(col, weight=1, uniform="actions")
+
+        current_row = 0
+        for group_index, group in enumerate(groups):
+            for col, (text, command) in enumerate(group):
+                # dodatkowy odstęp nad kolejnymi grupami
+                top_padding = 0 if group_index == 0 else 10
+
+                btn = ttk.Button(action_frame, text=text, command=command)
+                btn.grid(
+                    row=current_row,
+                    column=col,
+                    padx=5,
+                    pady=(top_padding, 5),
+                    sticky="ew",  # rozciąga się na całą szerokość kolumny
+                )
+
+            current_row += 1
 
         log_frame = ttk.LabelFrame(self.root, text="Dziennik");
         log_frame.pack(fill="both", expand=True, padx=10, pady=5)

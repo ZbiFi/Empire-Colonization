@@ -352,13 +352,13 @@ BUILDINGS = {
 
     # === MIESZKANIA ===
     "namiot": {
-        "base_cost": {"skóry": 10, "żelazo": 5}, "build_time": 1, "base_workers": 0,
+        "base_cost": {"skóry": 10, "żelazo": 5}, "build_time": 1, "base_workers": 0, "capacity": 4,
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True,
         "upgrades": [
-            {"name": "Chata", "cost": {"drewno": 15}, "build_time": 3, "capacity": 6},
-            {"name": "Dom", "cost": {"drewno": 30, "żelazo": 10}, "build_time": 7, "capacity": 8},
-            {"name": "Dworek", "cost": {"drewno": 50, "żelazo": 20}, "build_time": 14, "capacity": 12}
+            {"name": "Chata", "cost": {"drewno": 40, "żelazo": 5}, "build_time": 5, "capacity": 6},
+            {"name": "Dom", "cost": {"drewno": 80, "żelazo": 10, "stal": 5, "skóry": 5}, "build_time": 21, "capacity": 10},
+            {"name": "Dworek", "cost": {"drewno": 120, "żelazo": 15, "stal": 10, "ubrania": 10}, "build_time": 60, "capacity": 15}
         ]
     },
 
