@@ -38,7 +38,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         self.resources["skóry"] = 10
         self.resources["srebro"] = 10
         self.resources["medykamenty"] = 10
-        self.resources["dukaty"] = 0
+        self.resources["dukaty"] = 300
 
         self.buildings = []
         self.constructions = []
