@@ -746,8 +746,19 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         prod_frame = ttk.LabelFrame(self.root, text="Produkcja"); prod_frame.pack(fill="x", padx=10, pady=5)
         self.prod_label = ttk.Label(prod_frame, text=""); self.prod_label.pack()
 
-        build_frame = ttk.LabelFrame(self.root, text="Budynki"); build_frame.pack(fill="x", padx=10, pady=5)
-        self.build_listbox = tk.Listbox(build_frame, height=8); self.build_listbox.pack(fill="x", padx=5, pady=5)
+        build_frame = ttk.LabelFrame(self.root, text="Budynki")
+        build_frame.pack(fill="x", padx=10, pady=5)
+
+        build_inner = ttk.Frame(build_frame)
+        build_inner.pack(fill="both", expand=True)
+
+        self.build_listbox = tk.Listbox(build_inner, height=8)
+        self.build_listbox.pack(side="left", fill="both", expand=True, padx=(5, 0), pady=5)
+
+        build_scroll = ttk.Scrollbar(build_inner, orient="vertical", command=self.build_listbox.yview)
+        build_scroll.pack(side="right", fill="y", padx=(0, 5), pady=5)
+
+        self.build_listbox.config(yscrollcommand=build_scroll.set)
 
         action_frame = ttk.Frame(self.root)
         action_frame.pack(fill="x", padx=10, pady=5)
@@ -924,13 +935,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
         building_data = self.calculate_production()
         net_total = {r: 0 for r in RESOURCES}
+
+        # zapamiętaj aktualną pozycję przewinięcia
+        first, last = self.build_listbox.yview()
+
         self.build_listbox.delete(0, tk.END)
 
         for b in self.buildings:
             if b.get("is_district"): continue
             name = b["base"]
             if b.get("level", 0) > 0:
-                name = BUILDINGS[b["base"]]["upgrades"][b["level"]-1].get("name", name)
+                name = BUILDINGS[b["base"]]["upgrades"][b["level"] - 1].get("name", name)
             if b.get("resource"):
                 name += f" [{b['resource']}]"
 
@@ -942,8 +957,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
                 _, prod, cons, eff = data
                 consumes_something = any(cons.values())
                 missing_resources = consumes_something and eff < 1.0
-                if missing_resources:
-                    color_tag = "red"
+                if missing_resources: color_tag = "red"
                 local_net = {r: prod.get(r, 0) - cons.get(r, 0) for r in RESOURCES}
                 prod_str = " | ".join(f"{r}: +{v:.1f}" for r, v in local_net.items() if v > 0.05)
                 eff_str = f" ({eff:.0%})" if eff < 1 else ""
@@ -954,9 +968,12 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
             pos = b["pos"]
             cell = self.map_grid[pos[0]][pos[1]]
             area = "osada" if cell["terrain"] == "osada" else "dzielnica"
-            line = f"{name} | Prac: {b.get('workers',0)}/{self.get_max_workers(b)} | {status} | ({pos[0]},{pos[1]}) | {area}"
+            line = f"{name} | Prac: {b.get('workers', 0)}/{self.get_max_workers(b)} | {status} | ({pos[0]},{pos[1]}) | {area}"
             self.build_listbox.insert(tk.END, line)
             self.build_listbox.itemconfig(tk.END, fg=color_tag)
+
+        # przywróć poprzednią pozycję przewinięcia
+        self.build_listbox.yview_moveto(first)
 
         final_items = [f"{r}: +{v:.1f}" for r, v in net_total.items() if v > 0.05]
         total_str = " | ".join(final_items) or "Brak"
@@ -1097,22 +1114,23 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
                         cost_wood = 10
 
                         # ==== OKNO POTWIERDZENIA ====
-                        confirm = tk.Toplevel(win)
-                        confirm.title("Potwierdź ekspedycję")
+                        confirm = self.create_window("Potwierdź ekspedycję")
+
+                        BG = self.style.lookup("TFrame", "background")
 
                         ttk.Label(
                             confirm,
                             text=f"Wyślij ekspedycję na pole ({y},{x})?",
-                            font=("Arial", 12, "bold")
+                            font=self.top_title_font if hasattr(self, "top_title_font") else ("Cinzel", 14, "bold"),
+                            background=BG
                         ).pack(pady=10)
 
                         ttk.Label(
                             confirm,
-                            text=(
-                                f"Czas wyprawy: {days} dni\n"
-                                f"Koszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna"
-                            ),
-                            justify="center"
+                            text=f"Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna",
+                            justify="center",
+                            font=self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12),
+                            background=BG
                         ).pack(pady=5)
 
                         def do_explore():
