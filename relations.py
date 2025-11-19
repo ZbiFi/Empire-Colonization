@@ -4,7 +4,7 @@ from datetime import timedelta
 from tkinter import ttk
 import random
 
-from constants import NATIVE_PRICES, EUROPE_PRICES, STATES, NATIVE_MISSIONS_DETAILS
+from constants import NATIVE_PRICES, EUROPE_PRICES, STATES, NATIVE_MISSIONS_DETAILS, BLOCK_NATIVE_BUY, BLOCK_EUROPE_BUY
 
 
 class RelationsMixin:
@@ -17,8 +17,7 @@ class RelationsMixin:
 
     # === Relacje z Indianami ===
     def native_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Handel z Indianami")
+        win = self.create_window(f"Handel z Indianami")
         for tribe in self.native_relations:
             rel = self.native_relations[tribe]
             frame = ttk.Frame(win)
@@ -53,8 +52,8 @@ class RelationsMixin:
             self.log(f"Brak reputacji na integrację z {tribe}.", "red")
             return
 
-        win = tk.Toplevel(self.root)
-        win.title(f"Integracja z {tribe}")
+        win = self.create_window(f"Integracja z {tribe}")
+
         win.geometry("460x320")
         win.resizable(False, False)
 
@@ -147,8 +146,7 @@ class RelationsMixin:
         """Handel z Indianami — UI takie jak handel z państwami,
         ale zamiast dukatów jest bilans ilościowy (value units)."""
 
-        trade_win = tk.Toplevel(parent)
-        trade_win.title(f"Handel z {tribe}")
+        trade_win = self.create_window(f"Handel z {tribe}")
 
         rel = self.native_relations[tribe]
         sell_mod, buy_mod = self.get_native_price_modifier(rel)
@@ -233,20 +231,20 @@ class RelationsMixin:
                 sell_vars[res] = var
                 var.trace_add("write", update_sums)
 
-            # KUPUJESZ
-            f = ttk.Frame(buy_frame)
-            f.pack(fill="x", pady=1)
-            ttk.Label(f, text=res, width=15).pack(side="left")
+            # --- KUPNO U INDIAN ---
+            if res not in BLOCK_NATIVE_BUY:
+                f = ttk.Frame(buy_frame)
+                f.pack(fill="x", pady=1)
+                ttk.Label(f, text=res, width=15).pack(side="left")
 
-            var = tk.IntVar()
-            spin = tk.Spinbox(f, from_=0, to=999,
-                              textvariable=var, width=8)
-            spin.pack(side="right")
+                var = tk.IntVar()
+                spin = tk.Spinbox(f, from_=0, to=999, textvariable=var, width=8)
+                spin.pack(side="right")
 
-            ttk.Label(f, text=f"← {buy_price}").pack(side="right", padx=5)
+                ttk.Label(f, text=f"← {buy_price}").pack(side="right", padx=5)
 
-            buy_vars[res] = var
-            var.trace_add("write", update_sums)
+                buy_vars[res] = var
+                var.trace_add("write", update_sums)
 
         update_sums()
 
@@ -320,8 +318,7 @@ class RelationsMixin:
 
     # === Dyplomacja z państwami europejskimi ===
     def diplomacy_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Dyplomacja")
+        win = self.create_window("Dyplomacja")
 
         for state, rel in self.europe_relations.items():
             frame = ttk.Frame(win)
@@ -356,7 +353,7 @@ class RelationsMixin:
 
         ttk.Label(
             win,
-            text="Dar: koszt 100 złota + 500 żywności + 200 srebra + 100 stali"
+            text="Dar: koszt 10 złota + 250 żywności + 20 srebra + 15 stali"
         ).pack(pady=10)
 
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
@@ -368,8 +365,7 @@ class RelationsMixin:
         - przy reputacji 100: sprzedaż 0.9x, kupno 1.1x
         Reputacja rośnie jak u Indian (progi 1000 + bonus za bardzo korzystny handel dla nich).
         """
-        trade_win = tk.Toplevel(parent)
-        trade_win.title(f"Handel z {state}")
+        trade_win = self.create_window(f"Handel z {state}")
 
         def get_margins():
             rel = self.europe_relations.get(state, 0)
@@ -455,22 +451,21 @@ class RelationsMixin:
                 sell_vars[res] = var
                 var.trace_add("write", update_sums)
 
-            f = ttk.Frame(buy_frame)
-            f.pack(fill="x", pady=1)
-            ttk.Label(f, text=f"{res}", width=15).pack(side="left")
-            var = tk.IntVar()
-            spin = tk.Spinbox(
-                f,
-                from_=0,
-                to=999,
-                textvariable=var,
-                width=8
-            )
-            spin.pack(side="right")
-            price = int(EUROPE_PRICES[res] * buy_mult)
-            ttk.Label(f, text=f"← {price} duk./szt.").pack(side="right", padx=5)
-            buy_vars[res] = var
-            var.trace_add("write", update_sums)
+            # KUPNO W EUROPIE ZABRONIONE DLA NIEKTÓRYCH TOWARÓW
+            if res not in BLOCK_EUROPE_BUY or self.state != state:
+                f = ttk.Frame(buy_frame)
+                f.pack(fill="x", pady=1)
+                ttk.Label(f, text=f"{res}", width=15).pack(side="left")
+
+                var = tk.IntVar()
+                spin = tk.Spinbox(f, from_=0, to=999, textvariable=var, width=8)
+                spin.pack(side="right")
+
+                price = int(EUROPE_PRICES[res] * buy_mult)
+                ttk.Label(f, text=f"← {price} duk./szt.").pack(side="right", padx=5)
+
+                buy_vars[res] = var
+                var.trace_add("write", update_sums)
 
         update_sums()
 
@@ -544,7 +539,8 @@ class RelationsMixin:
         ttk.Button(trade_win, text="Anuluj", command=trade_win.destroy).pack(pady=5)
 
     def send_diplomatic_gift(self, state):
-        cost = {"złoto": 100, "żywność": 500, "srebro": 200, "stal": 100}
+
+        cost = {"złoto": 10, "żywność": 250, "srebro": 20, "stal": 15}
         if not self.can_afford(cost):
             self.log(f"Za mało na dar dla {state}!", "red")
             return
@@ -635,6 +631,7 @@ class RelationsMixin:
             f"Czas: {months} miesięcy.",
             "purple"
         )
+        self.play_sound("new_mission")
 
         def deliver_to_native_mission(self, tribe, resources):
             """resources = dict {res: amount} wysłanych towarów."""

@@ -2,6 +2,7 @@
 import os
 import sys
 import tkinter as tk
+from ctypes import windll
 from tkinter import ttk
 from datetime import datetime, timedelta
 import random
@@ -9,6 +10,7 @@ import math
 from functools import partial
 
 import pygame
+from PIL import Image, ImageTk
 
 from buildings import BuildingsMixin
 from map_generator import generate_map, MAP_SIZE
@@ -18,11 +20,64 @@ from relations import RelationsMixin
 from ships import ShipsMixin
 
 
+def load_font_ttf(path):
+    """
+    Ładuje font TTF do pamięci procesu Windows.
+    Dzięki temu można go używać w Tkinterze,
+    nawet po spakowaniu do EXE.
+    """
+    FR_PRIVATE = 0x10
+    FR_NOT_ENUM = 0x20
+    path = os.path.abspath(path)
+    windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
+
 class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin):
     def __init__(self, root):
         self.root = root
-        self.root.title("Symulator Kolonii")
+        self.root.title("Imperium Kolonii")
         self.root.geometry("1600x1000")
+
+        # Załaduj wszystkie czcionki
+        load_font_ttf(self.resource_path("fonts/Cinzel-Regular.ttf"))
+        load_font_ttf(self.resource_path("fonts/Cinzel-Bold.ttf"))
+        load_font_ttf(self.resource_path("fonts/IMFellEnglishSC-Regular.ttf"))
+        load_font_ttf(self.resource_path("fonts/EBGaramond-Italic.ttf"))
+        load_font_ttf(self.resource_path("fonts/MedievalSharp-Regular.ttf"))
+
+
+        self.title_font = ("IM Fell English SC", 28, "bold")
+        self.ui_font = ("EB Garamond Italic", 18)
+
+
+
+        self.style = ttk.Style(self.root)
+        self.style.theme_use("clam")
+
+        bg = self.style.lookup("TFrame", "background")
+        self.root.configure(bg=bg)
+
+        self.style.configure("Colonial.TButton",
+                        font=self.ui_font, padding=(20, 8),
+                        foreground="#2b1d12", background="#e3cfaa",
+                        borderwidth=3, relief="raised"
+                        )
+
+        self.style.map("Colonial.TButton",
+                  foreground=[("disabled", "#888"), ("pressed", "#1d130c"), ("active", "#2b1d12")],
+                  background=[("disabled", "#d8c7a4"), ("pressed", "#c9ae7b"), ("active", "#f0ddba")],
+                  relief=[("pressed", "sunken"), ("!pressed", "raised")]
+                  )
+
+        self.style.configure("ColonialSecondary.TButton",
+                        font=self.ui_font, padding=(14, 6),
+                        foreground="#3b2a18", background="#d9c39a",
+                        borderwidth=1, relief="raised"
+                        )
+
+        self.style.map("ColonialSecondary.TButton",
+                  background=[("pressed", "#c2aa7f"), ("active", "#e8d6af")],
+                  relief=[("pressed", "sunken"), ("!pressed", "raised")]
+                  )
 
         self.state = None
         self.location = None
@@ -89,6 +144,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         pygame.mixer.init()
         self.init_sounds()
 
+
     # === Pomocnicze ===
     def log(self, text, color="black"):
         if not self.current_date: return
@@ -96,6 +152,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         self.log_lines.append((entry, color))
         if len(self.log_lines) > 1000: self.log_lines.pop(0)
         self.update_log_display()
+
+    def create_window(self, title):
+        win = tk.Toplevel(self.root)
+        win.title(title)
+        BG = self.style.lookup("TFrame", "background")
+        win.configure(bg=BG)
+        return win
 
     def resource_path(self, filename):
         if getattr(sys, 'frozen', False):
@@ -187,14 +250,46 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
     # === Start gry ===
     def start_screen(self):
 
-        for w in self.root.winfo_children(): w.destroy()
-        frame = ttk.Frame(self.root, padding=20); frame.pack(expand=True)
-        ttk.Label(frame, text="SYMULATOR KOLONII", font=("Arial", 20, "bold")).pack(pady=20)
-        ttk.Label(frame, text="Wybierz państwo:").pack(pady=10)
+        # wyczyść stare widgety
+        for w in self.root.winfo_children():
+            w.destroy()
+
+        # === TŁO Z OBRAZU ===
+        try:
+            img_path = self.resource_path("colony.jpg")
+            bg_image = Image.open(img_path)
+
+            # dopasuj do okna (1600x1000 jak w __init__)
+            bg_image = bg_image.resize((1600, 1000), Image.LANCZOS)
+
+            # musimy trzymać referencję w self, inaczej obraz zniknie
+            self.start_bg_image = ImageTk.PhotoImage(bg_image)
+
+            bg_label = tk.Label(self.root, image=self.start_bg_image)
+            bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+        except Exception as e:
+            print("Nie udało się załadować tła colony.jpg:", e)
+            bg_label = tk.Label(self.root)
+            bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+        # === GŁÓWNA RAMKA NA PRZYCISKI / WYBÓR PAŃSTWA ===
+        frame = ttk.Frame(bg_label, padding=20)
+        frame.pack(expand=True)
+
+        ttk.Label(frame, text="IMPERIUM KOLONII", font=self.title_font).pack(pady=20)
+        ttk.Label(frame, text="Wybierz państwo:", font=self.ui_font).pack(pady=10)
+
         self.state_var = tk.StringVar(value="Portugalia")
-        combo = ttk.Combobox(frame, textvariable=self.state_var, values=list(STATES.keys()), state="readonly", width=30)
+        combo = ttk.Combobox(
+            frame,
+            textvariable=self.state_var,
+            values=list(STATES.keys()),
+            state="readonly",
+            width=30
+        )
         combo.pack(pady=5)
-        ttk.Label(frame, text="Długość gry (liczba misji królewskich):").pack(pady=(15, 5))
+
+        ttk.Label(frame, text="Długość gry (liczba misji królewskich):", font=self.ui_font).pack(pady=(15, 5))
 
         self.game_length_var = tk.StringVar(value="zwykla")
 
@@ -208,7 +303,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         ]
 
         length_frame = ttk.Frame(frame)
-        length_frame.pack(anchor="w", padx=50)
+        length_frame.pack(anchor="w", padx=100)
 
         for text, val in lengths:
             ttk.Radiobutton(
@@ -218,8 +313,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
                 value=val
             ).pack(anchor="w")
 
-        ttk.Button(frame, text="Rozpocznij", command=self.start_game).pack(pady=20)
-        ttk.Button(frame, text="Losowe Państwo", command=lambda: self.state_var.set(random.choice(list(STATES.keys())))).pack(pady=5)
+        ttk.Button(frame, text="Losowe Państwo", style="ColonialSecondary.TButton", command=lambda: self.state_var.set(random.choice(list(STATES.keys())))).pack(pady=10)
+        ttk.Button(frame, text="Rozpocznij", style="Colonial.TButton", command=self.start_game).pack(pady=10)
+
 
     def start_game(self):
         self.state = self.state_var.get()
@@ -272,8 +368,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
             self.log("Możesz zamawiać kolonistów tylko od własnego państwa!", "red")
             return
 
-        win = tk.Toplevel(self.root)
-        win.title("Zamów kolonistów z Europy")
+        win = self.create_window(f"Zamów kolonistów z Europy")
+
         win.geometry("460x380")
         win.resizable(False, False)
 
@@ -389,8 +485,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
 
     # === Mapa ===
     def show_map(self):
-        win = tk.Toplevel(self.root)
-        win.title("Buduj - wybierz pole")
+
+        win = self.create_window(f"Buduj - wybierz pole")
 
         canvas_width = 850
         canvas_height = 850
@@ -844,8 +940,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         self.show_explore_map()
 
     def show_explore_map(self):
-        win = tk.Toplevel(self.root)
-        win.title("Eksploracja")
+
+        win = self.create_window(f"Eksploracja")
 
         # === INFORMACJE O KOSZTACH ===
         info_frame = ttk.Frame(win)

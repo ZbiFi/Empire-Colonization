@@ -77,8 +77,7 @@ class MissionsMixin:
            Z tego okna można natychmiast wypełnić misje (bez handlu, bez opóźnień).
         """
 
-        win = tk.Toplevel(self.root)
-        win.title("Misje")
+        win = self.create_window(f"Misje")
         win.geometry("650x700")
 
         # ============================
@@ -244,8 +243,7 @@ class MissionsMixin:
             self.log("Brak aktywnej misji.", "gray")
             return
 
-        win = tk.Toplevel(self.root)
-        win.title("Misja Królewska")
+        win = self.create_window(f"Misja Królewska")
         end, req, sent, diff, text, idx = self.current_mission
 
         ttk.Label(win, text=text, wraplength=500, justify="center", font=("Arial", 11)).pack(pady=10)
@@ -302,8 +300,8 @@ class MissionsMixin:
             self.win_game()
 
     def win_game(self):
-        win = tk.Toplevel(self.root)
-        win.title("ZWYCIĘSTWO!")
+
+        win = self.create_window(f"ZWYCIĘSTWO!")
 
         ttk.Label(
             win,

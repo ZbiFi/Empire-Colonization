@@ -10,8 +10,9 @@ from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES
 
 class ShipsMixin:
     def ships_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Statki")
+
+        win = self.create_window(f"Statki")
+
         ttk.Label(win, text="STATKI HANDLOWE", font=("Arial", 14, "bold")).pack(pady=10)
 
         for i, (arrival_to_eu, arrival_back, load, status, pending) in enumerate(self.ships):
@@ -149,8 +150,9 @@ class ShipsMixin:
         return True
 
     def open_load_menu(self, ship_idx, parent):
-        load_win = tk.Toplevel(parent)
-        load_win.title("Załaduj statek")
+
+        load_win = self.create_window(f"Załaduj statek")
+
         load_win.geometry("560x680")
 
         top_frame = ttk.Frame(load_win)

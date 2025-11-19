@@ -586,15 +586,20 @@ NATIVE_MISSIONS_DETAILS = [
 
 EUROPE_PRICES = {
     "żywność": 1, "drewno": 8, "skóry": 4, "ubrania": 15,
-    "zioła": 1, "medykamenty": 4, "trzcina": 3, "cukier": 12, "tytoń": 5, "cygara": 15,
+    "zioła": 1, "medykamenty": 4, "trzcina": 6, "cukier": 12, "tytoń": 8, "cygara": 15,
     "żelazo": 10, "stal": 20, "złoto": 50, "srebro": 30, "węgiel": 3
 }
 
+BLOCK_EUROPE_BUY = {"srebro", "złoto", "trzcina", "tytoń"}
+
 NATIVE_PRICES = {
-    "żywność": 8, "drewno": 2, "skóry": 3, "ubrania": 8,
+    "żywność": 8, "drewno": 2, "skóry": 3, "ubrania": 8, "trzcina": 3, "cukier": 12, "tytoń": 5, "cygara": 15,
     "zioła": 5, "medykamenty": 15,
     "żelazo": 5, "stal": 8, "złoto": 3, "srebro": 2, "węgiel": 1
 
 }
+
+# towary zabronione do kupna od Indian
+BLOCK_NATIVE_BUY = {"medykamenty", "ubrania", "cygara", "cukier", "stal"}
 
 TRIBES = ["Irokezi", "Czirokezi", "Apacze", "Siuksowie", "Krikowie", "Huronowie"]

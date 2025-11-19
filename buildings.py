@@ -356,8 +356,9 @@ class BuildingsMixin:
 
     # === Menu: Ulepsz/Zdegraduj (jeden przycisk) ===
     def show_upgrade_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Ulepsz / Zdegraduj / Zatrzymaj")
+
+        win = self.create_window(f"Ulepsz / Zdegraduj / Zatrzymaj")
+
         ttk.Label(win, text="Wybierz budynek:", font=("Arial", 12, "bold")).pack(pady=10)
 
         has_any = False
@@ -434,8 +435,9 @@ class BuildingsMixin:
 
     # === Menu budowy ===
     def build_menu(self):
-        win = tk.Toplevel(self.root)
-        win.title("Buduj")
+
+        win = self.create_window(f"Buduj")
+
         for name, data in BUILDINGS.items():
             display_cost = data["base_cost"].copy()
             if self.state == "Holandia":
@@ -459,8 +461,8 @@ class BuildingsMixin:
 
     # === Zarządzanie pracownikami ===
     def manage_workers(self):
-        win = tk.Toplevel(self.root)
-        win.title("Pracownicy")
+
+        win = self.create_window(f"Pracownicy")
 
         self.worker_sliders = []
         for i, b in enumerate(self.buildings):
