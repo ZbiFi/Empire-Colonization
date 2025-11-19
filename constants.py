@@ -531,6 +531,59 @@ ROYAL_MISSIONS = [
     {"name": "Wsparcie kościoła", "base": {"złoto": 20, "srebro":30, "żywność": 20}},
 ]
 
+NATIVE_MISSIONS_DETAILS = [
+    {
+        "name": "Pomóż nam w polowaniu na bizony",
+        "base": {"żywność": 30, "żelazo": 20},
+        "desc": "Wielkie stada bizonów oddalają się od naszych ziem. Daj nam mięsa i skór, żeby nasze kobiety i dzieci nie głodowały tej zimy, zanim biali myśliwi zabiorą nam wszystko."
+    },
+    {
+        "name": "Duchy przodków są głodne – przynieś dary",
+        "base": {"cukier": 20, "cygara": 20, "żywność": 30},
+        "desc": "Duchy naszych ojców wędrują niespokojne. Przynieś słodkie kryształy, wonny dym i mięso, by ucieszyć je przy ognisku. Wtedy będą chronić także ciebie, bladą twarzy."
+    },
+    {
+        "name": "Biali z północy palą nasze wioski – daj broń",
+        "base": {"stal": 15, "żelazo": 30},
+        "desc": "Ludzie w niebieskich mundurach palą nasze tipi i zabijają nasze konie. Daj nam żelazo i stal, byśmy mogli zrobić włócznie i topory godne wojowników. Razem przepędzimy tych psów."
+    },
+    {
+        "name": "Szaman potrzebuje ziół z dalekich gór",
+        "base": {"zioła": 30, "medykamenty": 20},
+        "desc": "Stary Szaman widział we śnie święte zioła rosnące tylko tam, gdzie biali kopią żółte kamienie. Przynieś je szybko, bo duchy chorób krążą nad naszymi dziećmi."
+    },
+    {
+        "name": "Nasze kobiety chcą pięknych tkanin od bladych twarzy",
+        "base": {"ubrania": 60},
+        "desc": "Nasze squaw słyszały o miękkich, kolorowych szmatach, które noszą kobiety z wielkich łodzi. Przynieś je, a nasze kobiety będą śpiewać pieśni o tobie przy ogniu."
+    },
+    {
+        "name": "Wodzowi ukradli konia – potrzebujemy żelaza na nowe podkowy",
+        "base": {"żelazo": 20, "stal": 15},
+        "desc": "Dalecy kuzyni z południa ukradli najlepszego ogiera Wielkiego Wodza. Musimy zrobić nowe podkowy i lance. Daj nam żelazo, a kiedy odzyskamy konie, podzielimy się z tobą łupami z bladych osadników."
+    },
+    {
+        "name": "Wielki Duch pragnie błyszczących kamieni",
+        "base": {"złoto": 10, "srebro": 30},
+        "desc": "We śnie Wielki Duch pokazał nam błyszczące kamienie z twoich skrzyń. Przynieś je nam jako dar, a my pokażemy ci ścieżki, gdzie ziemia rodzi jeszcze więcej – zanim inne blade twarzy zabiorą wszystko."
+    },
+    {
+        "name": "Przynieś rum i cukier na święto tańca słońca",
+        "base": {"cukier": 20, "żywność": 50},
+        "desc": "Za trzy księżyce będzie wielkie święto tańca słońca. Potrzebujemy słodkiego ognia z trzciny i dużo jedzenia. Przynieś – będziemy tańczyć i modlić się także za twoją osadę."
+    },
+    {
+        "name": "Nasze dzieci chorują – daj lekarstwa białego człowieka",
+        "base": {"medykamenty": 15, "zioła": 30, "żywność": 40},
+        "desc": "Czarna ospa przyszła z waszych statków i zabiera nasze dzieci. Słyszymy, że masz gorzkie wody, które leczą. Daj je nam szybko, bo inaczej duchy zemsty przyjdą także do twoich chat."
+    },
+    {
+        "name": "Chcemy handlować futrami – ale najpierw pokaż, że jesteś bratem",
+        "base": {"ubrania": 30, "żelazo": 20, "cygara": 15},
+        "desc": "Mamy najlepsze bobrze i lisie futra na całym wybrzeżu. Ale najpierw udowodnij, że nie jesteś taki jak inne blade twarze, co kradną i kłamią. Przynieś dary – wtedy otworzymy nasze spichlerze."
+    }
+]
+
 EUROPE_PRICES = {
     "żywność": 1, "drewno": 8, "skóry": 4, "ubrania": 15,
     "zioła": 1, "medykamenty": 4, "trzcina": 3, "cukier": 12, "tytoń": 5, "cygara": 15,
