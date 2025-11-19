@@ -1,7 +1,7 @@
 budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
 magazyn -> podobnie ale z surowcami
 eventy losowe - plaga, pozar, wypadki whatever, piractwo
-eventy z lokalnymi -> misje
+DONE !!! - eventy z lokalnymi -> misje
 espedycje - cos ciekawego
 armia i walka?
 piractwo?
