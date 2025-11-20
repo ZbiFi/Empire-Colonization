@@ -1,10 +1,16 @@
-# relations.py
 import tkinter as tk
 from datetime import timedelta
 from tkinter import ttk
 import random
 
-from constants import NATIVE_PRICES, EUROPE_PRICES, STATES, NATIVE_MISSIONS_DETAILS, BLOCK_NATIVE_BUY, BLOCK_EUROPE_BUY
+from constants import (
+    NATIVE_PRICES,
+    EUROPE_PRICES,
+    STATES,
+    NATIVE_MISSIONS_DETAILS,
+    BLOCK_NATIVE_BUY,
+    BLOCK_EUROPE_BUY,
+)
 
 
 class RelationsMixin:
@@ -12,8 +18,71 @@ class RelationsMixin:
     def safe_int(self, var):
         try:
             return int(var.get())
-        except:
+        except Exception:
             return 0
+
+    # === WSPÓLNY HELPER DO WIERSZY HANDLU (spinbox + pionowe przyciski) ===
+    def _create_trade_row(self, parent, res_name, max_q, unit_price,
+                          price_prefix, on_change, with_max):
+        """
+        Tworzy wiersz:
+        [nazwa towaru] [Spinbox] [kolumny +1/-1, +10/-10, +100/-100, (opcjonalnie Max)] [etykieta ceny]
+        Zwraca IntVar powiązany ze spinboxem.
+        """
+        frame = ttk.Frame(parent)
+        frame.pack(fill="x", pady=1)
+
+        ttk.Label(frame, text=res_name, width=15).pack(side="left")
+
+        var = tk.IntVar(value=0)
+        spin = tk.Spinbox(
+            frame,
+            from_=0,
+            to=max_q,
+            textvariable=var,
+            width=5
+        )
+        spin.pack(side="left", padx=(0, 4))
+
+        btn_col = ttk.Frame(frame)
+        btn_col.pack(side="left", padx=2)
+
+        def adjust(delta, v=var, m=max_q):
+            try:
+                cur = int(v.get())
+            except Exception:
+                cur = 0
+            new = max(0, min(m, cur + delta))
+            v.set(new)
+            on_change()
+
+        def add_pair(parent, txt_plus, d_plus, txt_minus, d_minus):
+            col = ttk.Frame(parent)
+            col.pack(side="left", padx=1)
+            ttk.Button(col, text=txt_plus, width=5, padding=(3, -2),
+                       command=lambda d=d_plus: adjust(d)).pack()
+            ttk.Button(col, text=txt_minus, width=5, padding=(3, -2),
+                       command=lambda d=d_minus: adjust(d)).pack()
+
+        # kolumny: (+1/-1), (+10/-10), (+100/-100)
+        add_pair(btn_col, "+1", 1, "-1", -1)
+        add_pair(btn_col, "+10", 10, "-10", -10)
+        add_pair(btn_col, "+100", 100, "-100", -100)
+
+        if with_max:
+            ttk.Button(
+                btn_col,
+                text="Max",
+                width=4,
+                command=lambda v=var, m=max_q: (v.set(m), on_change())
+            ).pack(side="left", padx=(4, 0), pady=(2, 0))
+
+        ttk.Label(frame, text=f"{price_prefix} {unit_price}").pack(side="left", padx=5)
+
+        # reaguj także na ręczną zmianę w spinboxie
+        var.trace_add("write", lambda *args: on_change())
+
+        return var
 
     # === Relacje z Indianami ===
     def native_menu(self):
@@ -38,6 +107,9 @@ class RelationsMixin:
             ).pack(side="right", padx=5)
 
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
+
+        # wyśrodkuj okno handlu z Indianami (lista plemion)
+        self.center_window(win)
 
     def integrate_natives(self, tribe):
         """Integracja Indian z danym plemieniem: 1 osoba za 10 reputacji z tym plemieniem."""
@@ -131,6 +203,9 @@ class RelationsMixin:
         ttk.Button(btn_frame, text="Integruj", command=confirm_integration).pack(side="left", padx=8)
         ttk.Button(btn_frame, text="Anuluj", command=win.destroy).pack(side="left", padx=8)
 
+        # wyśrodkuj okno integracji
+        self.center_window(win)
+
     def get_native_price_modifier(self, rel):
         rel_norm = rel / 100.0
         sell_mod = 0.01 + 0.99 * rel_norm
@@ -147,6 +222,9 @@ class RelationsMixin:
         ale zamiast dukatów jest bilans ilościowy (value units)."""
 
         trade_win = self.create_window(f"Handel z {tribe}")
+        trade_win.geometry("500x1100")  # stały rozmiar
+        trade_win.resizable(False, False)
+
 
         rel = self.native_relations[tribe]
         sell_mod, buy_mod = self.get_native_price_modifier(rel)
@@ -158,7 +236,8 @@ class RelationsMixin:
             trade_win,
             text=(
                 f"Relacje z {tribe}: {rel}/100\n"
-                f"Ceny zależą od reputacji (sprzedaż x{sell_mod:.2f}, kupno x{buy_mod:.2f})."
+                f"Ceny zależą od reputacji (sprzedaż x{sell_mod:.2f}, kupno x{buy_mod:.2f}).\n"
+                f"U Indian nie kupisz: {', '.join(sorted(BLOCK_NATIVE_BUY))}"
             ),
             justify="center"
         ).pack(pady=5)
@@ -217,34 +296,31 @@ class RelationsMixin:
 
             # SPRZEDAJESZ
             if self.resources[res] > 0:
-                f = ttk.Frame(sell_frame)
-                f.pack(fill="x", pady=1)
-                ttk.Label(f, text=res, width=15).pack(side="left")
-
-                var = tk.IntVar()
-                spin = tk.Spinbox(f, from_=0, to=self.resources[res],
-                                  textvariable=var, width=8)
-                spin.pack(side="right")
-
-                ttk.Label(f, text=f"→ {sell_price}").pack(side="right", padx=5)
-
-                sell_vars[res] = var
-                var.trace_add("write", update_sums)
+                max_q = self.resources[res]
+                var_s = self._create_trade_row(
+                    parent=sell_frame,
+                    res_name=res,
+                    max_q=max_q,
+                    unit_price=sell_price,
+                    price_prefix="→",
+                    on_change=update_sums,
+                    with_max=True
+                )
+                sell_vars[res] = var_s
 
             # --- KUPNO U INDIAN ---
             if res not in BLOCK_NATIVE_BUY:
-                f = ttk.Frame(buy_frame)
-                f.pack(fill="x", pady=1)
-                ttk.Label(f, text=res, width=15).pack(side="left")
-
-                var = tk.IntVar()
-                spin = tk.Spinbox(f, from_=0, to=999, textvariable=var, width=8)
-                spin.pack(side="right")
-
-                ttk.Label(f, text=f"← {buy_price}").pack(side="right", padx=5)
-
-                buy_vars[res] = var
-                var.trace_add("write", update_sums)
+                max_q_buy = 999  # miękki limit
+                var_b = self._create_trade_row(
+                    parent=buy_frame,
+                    res_name=res,
+                    max_q=max_q_buy,
+                    unit_price=buy_price,
+                    price_prefix="←",
+                    on_change=update_sums,
+                    with_max=False
+                )
+                buy_vars[res] = var_b
 
         update_sums()
 
@@ -316,6 +392,9 @@ class RelationsMixin:
         ttk.Button(trade_win, text="Wykonaj handel", command=execute_trade).pack(pady=10)
         ttk.Button(trade_win, text="Anuluj", command=trade_win.destroy).pack(pady=5)
 
+        # wyśrodkuj okno integracji
+        self.center_window(trade_win)
+
     # === Dyplomacja z państwami europejskimi ===
     def diplomacy_menu(self):
         win = self.create_window("Dyplomacja")
@@ -358,6 +437,9 @@ class RelationsMixin:
 
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
 
+        # wyśrodkuj okno handlu z Indianami (lista plemion)
+        self.center_window(win)
+
     def open_europe_trade(self, state, parent):
         """Handel z innym państwem za dukaty.
         Marża zależy liniowo od reputacji:
@@ -366,6 +448,8 @@ class RelationsMixin:
         Reputacja rośnie jak u Indian (progi 1000 + bonus za bardzo korzystny handel dla nich).
         """
         trade_win = self.create_window(f"Handel z {state}")
+        trade_win.geometry("500x1100")  # stały rozmiar
+        trade_win.resizable(False, False)
 
         def get_margins():
             rel = self.europe_relations.get(state, 0)
@@ -382,7 +466,8 @@ class RelationsMixin:
             text=(
                 f"Relacje z {state}: {rel}/100\n"
                 f"Ceny zależą od reputacji (sprzedaż: {(sell_mult * 100):.0f}% ceny, "
-                f"kupno: {(buy_mult * 100):.0f}% ceny)."
+                f"kupno: {(buy_mult * 100):.0f}% ceny).\n"
+                f"We europejskich krajach nie kupisz: {', '.join(sorted(BLOCK_EUROPE_BUY))}"
             ),
             justify="center"
         ).pack(pady=5)
@@ -433,39 +518,37 @@ class RelationsMixin:
 
         sell_mult, buy_mult = get_margins()
         for res in EUROPE_PRICES.keys():
-            if self.resources.get(res, 0) > 0:
-                f = ttk.Frame(sell_frame)
-                f.pack(fill="x", pady=1)
-                ttk.Label(f, text=f"{res}", width=15).pack(side="left")
-                var = tk.IntVar()
-                spin = tk.Spinbox(
-                    f,
-                    from_=0,
-                    to=self.resources[res],
-                    textvariable=var,
-                    width=8
-                )
-                spin.pack(side="right")
+            have = self.resources.get(res, 0)
+
+            # SPRZEDAŻ
+            if have > 0:
+                max_q = have
                 price = int(EUROPE_PRICES[res] * sell_mult)
-                ttk.Label(f, text=f"→ {price} duk./szt.").pack(side="right", padx=5)
-                sell_vars[res] = var
-                var.trace_add("write", update_sums)
+                var_s = self._create_trade_row(
+                    parent=sell_frame,
+                    res_name=res,
+                    max_q=max_q,
+                    unit_price=price,
+                    price_prefix="→",
+                    on_change=update_sums,
+                    with_max=True
+                )
+                sell_vars[res] = var_s
 
-            # KUPNO W EUROPIE ZABRONIONE DLA NIEKTÓRYCH TOWARÓW
+            # KUPNO W EUROPIE ZABRONIONE DLA NIEKTÓRYCH TOWARÓW TYLKO WE WŁASNYM KRAJU
             if res not in BLOCK_EUROPE_BUY or self.state != state:
-                f = ttk.Frame(buy_frame)
-                f.pack(fill="x", pady=1)
-                ttk.Label(f, text=f"{res}", width=15).pack(side="left")
-
-                var = tk.IntVar()
-                spin = tk.Spinbox(f, from_=0, to=999, textvariable=var, width=8)
-                spin.pack(side="right")
-
-                price = int(EUROPE_PRICES[res] * buy_mult)
-                ttk.Label(f, text=f"← {price} duk./szt.").pack(side="right", padx=5)
-
-                buy_vars[res] = var
-                var.trace_add("write", update_sums)
+                max_q_buy = 999
+                price_b = int(EUROPE_PRICES[res] * buy_mult)
+                var_b = self._create_trade_row(
+                    parent=buy_frame,
+                    res_name=res,
+                    max_q=max_q_buy,
+                    unit_price=price_b,
+                    price_prefix="←",
+                    on_change=update_sums,
+                    with_max=False
+                )
+                buy_vars[res] = var_b
 
         update_sums()
 
@@ -537,6 +620,9 @@ class RelationsMixin:
 
         ttk.Button(trade_win, text="Wykonaj handel", command=execute_trade).pack(pady=10)
         ttk.Button(trade_win, text="Anuluj", command=trade_win.destroy).pack(pady=5)
+
+        # wyśrodkuj okno integracji
+        self.center_window(trade_win)
 
     def send_diplomatic_gift(self, state):
 
@@ -633,45 +719,45 @@ class RelationsMixin:
         )
         self.play_sound("new_mission")
 
-        def deliver_to_native_mission(self, tribe, resources):
-            """resources = dict {res: amount} wysłanych towarów."""
+    def deliver_to_native_mission(self, tribe, resources):
+        """resources = dict {res: amount} wysłanych towarów."""
 
-            mission = self.native_missions_active.get(tribe)
-            if not mission:
-                self.log(f"{tribe} nie ma aktywnej misji.", "gray")
-                return False
+        mission = self.native_missions_active.get(tribe)
+        if not mission:
+            self.log(f"{tribe} nie ma aktywnej misji.", "gray")
+            return False
 
-            req = mission["required"]
-            sent = mission["sent"]
+        req = mission["required"]
+        sent = mission["sent"]
 
-            # dodaj zasoby
-            for r, amount in resources.items():
-                if r in req:
-                    need = req[r] - sent.get(r, 0)
-                    add = min(amount, need)
-                    sent[r] = sent.get(r, 0) + add
+        # dodaj zasoby
+        for r, amount in resources.items():
+            if r in req:
+                need = req[r] - sent.get(r, 0)
+                add = min(amount, need)
+                sent[r] = sent.get(r, 0) + add
 
-            # sprawdzenie, czy skończone
-            completed = all(sent.get(r, 0) >= req[r] for r in req)
+        # sprawdzenie, czy skończone
+        completed = all(sent.get(r, 0) >= req[r] for r in req)
 
-            if completed:
-                remaining_days = (mission["end"] - self.current_date).days
-                full_months_left = max(0, remaining_days // 30)
+        if completed:
+            remaining_days = (mission["end"] - self.current_date).days
+            full_months_left = max(0, remaining_days // 30)
 
-                reward = 5 + full_months_left * 2
+            reward = 5 + full_months_left * 2
 
-                self.native_relations[tribe] = min(
-                    100, self.native_relations[tribe] + reward
-                )
-                self.log(
-                    f"Misja od {tribe} wykonana! Nagroda: +{reward} reputacji.",
-                    "green"
-                )
+            self.native_relations[tribe] = min(
+                100, self.native_relations[tribe] + reward
+            )
+            self.log(
+                f"Misja od {tribe} wykonana! Nagroda: +{reward} reputacji.",
+                "green"
+            )
 
-                self.native_missions_active[tribe] = None
+            self.native_missions_active[tribe] = None
 
-                # cooldown 2–3 miesiące
-                cd = random.randint(60, 90)
-                self.native_missions_cd[tribe] = self.current_date + timedelta(days=cd)
+            # cooldown 2–3 miesiące
+            cd = random.randint(60, 90)
+            self.native_missions_cd[tribe] = self.current_date + timedelta(days=cd)
 
-            return True
+        return True

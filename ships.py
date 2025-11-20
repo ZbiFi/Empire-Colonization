@@ -72,6 +72,9 @@ class ShipsMixin:
         ttk.Label(win, text=f"Łączne dukaty: {self.resources['dukaty']}").pack(pady=10)
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
 
+        # wyśrodkuj okno statków
+        self.center_window(win)
+
     def calculate_load_time(self, load):
         return 1 + (sum(load.values()) // 500)
 
@@ -194,9 +197,13 @@ class ShipsMixin:
         ttk.Button(btn_frame, text="Wyślij", command=send).pack(side="left", padx=5)
         ttk.Button(btn_frame, text="Anuluj", command=load_win.destroy).pack(side="left", padx=5)
 
-        canvas = tk.Canvas(load_win)
+        BG = self.style.lookup("TFrame", "background")  # kolor tła całego UI
+
+        canvas = tk.Canvas(load_win, bg=BG, highlightthickness=0)
         scrollbar = ttk.Scrollbar(load_win, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
+
+        scrollable_frame = ttk.Frame(canvas, style="TFrame")  # styl TFrame = nasze tło
+        scrollable_frame.configure(style="TFrame")
 
         scrollable_frame.bind(
             "<Configure>",
@@ -295,6 +302,8 @@ class ShipsMixin:
             entry.bind("<KeyRelease>", lambda ev: load_win.after(50, sync_slider_func))
 
         update_total()
+        # wyśrodkuj okno załadunku
+        self.center_window(load_win)
 
     def process_arriving_ships(self):
         for i, (arrival_to_eu, arrival_back, load, status, pending) in enumerate(self.ships):

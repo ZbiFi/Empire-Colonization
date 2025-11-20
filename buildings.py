@@ -433,6 +433,9 @@ class BuildingsMixin:
 
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
 
+        # wyśrodkuj okno statków
+        self.center_window(win)
+
     # === Menu budowy ===
     def build_menu(self):
 
@@ -498,6 +501,9 @@ class BuildingsMixin:
                 font=("Arial", 11, "bold"),
             ).pack(pady=15)
             ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
+
+            # wyśrodkuj okno statków
+            self.center_window(win)
             return
 
         def save():
@@ -511,3 +517,6 @@ class BuildingsMixin:
             win.destroy()
 
         ttk.Button(win, text="Zatwierdź", command=save).pack(pady=10)
+
+        # wyśrodkuj okno statków
+        self.center_window(win)

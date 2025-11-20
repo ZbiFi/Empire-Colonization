@@ -9,3 +9,4 @@ save/load
 +-1/+-10/+-100 przyciski przy handlu
 DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
+ekran z towarami na statku wymaga poprawy

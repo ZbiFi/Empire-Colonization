@@ -238,6 +238,9 @@ class MissionsMixin:
 
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
 
+        # wyśrodkuj okno przeglądu misji
+        self.center_window(win)
+
     def show_mission_window(self):
         if not self.current_mission:
             self.log("Brak aktywnej misji.", "gray")
@@ -285,6 +288,9 @@ class MissionsMixin:
             command=lambda: [self.pay_mission_with_gold(), win.destroy()]
         ).pack(pady=10)
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
+
+        # wyśrodkuj okno przeglądu misji
+        self.center_window(win)
 
     def complete_royal_mission(self):
         """Wywoływane po ukończeniu misji królewskiej."""

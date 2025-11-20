@@ -155,6 +155,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         if len(self.log_lines) > 1000: self.log_lines.pop(0)
         self.update_log_display()
 
+    def center_window(self, win):
+        """Wyśrodkuj podane okno na ekranie."""
+        win.update_idletasks()
+        w = win.winfo_width()
+        h = win.winfo_height()
+        sw = win.winfo_screenwidth()
+        sh = win.winfo_screenheight()
+        x = (sw - w) // 2
+        y = (sh - h) // 2
+        win.geometry(f"{w}x{h}+{x}+{y}")
+
     def create_window(self, title):
         win = tk.Toplevel(self.root)
         win.title(title)
@@ -485,6 +496,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         ttk.Button(btn_frame, text="Zamów", command=confirm_order).pack(side="left", padx=8)
         ttk.Button(btn_frame, text="Anuluj", command=win.destroy).pack(side="left", padx=8)
 
+        # wyśrodkuj okno zamawiania kolonistów
+        self.center_window(win)
+
     # === Mapa ===
     def show_map(self):
 
@@ -627,6 +641,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         canvas.bind("<Button-1>", click)
         draw()
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
+
+        # wyśrodkuj okno mapy
+        self.center_window(win)
 
     def draw_legend(self, canvas, offset_x, offset_y, cell_size):
         legend_y = offset_y + self.map_size * cell_size + 30
@@ -1162,6 +1179,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         canvas.bind("<Button-1>", click)
         draw()
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
+
+        # wyśrodkuj okno eksploracji
+        self.center_window(win)
 
     def finish_expedition(self, exp):
         self.busy_people -= 3
