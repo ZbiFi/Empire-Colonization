@@ -6,7 +6,15 @@ espedycje - cos ciekawego
 armia i walka?
 piractwo? -> może statki i z misją od króla by korsarzy wysyłać przeciwko komuś?
 save/load
-+-1/+-10/+-100 przyciski przy handlu
+DONE !!! +-1/+-10/+-100 przyciski przy handlu
 DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
-ekran z towarami na statku wymaga poprawy
+DONE !!! - ekran z towarami na statku wymaga poprawy
+
+
+
+
+
+
+TO EXE
+pyinstaller --noconsole --onefile --name ImperiumKolonii --add-data "fonts;fonts" --add-data "img;img" --add-data "sounds;sounds" main.py
