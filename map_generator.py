@@ -59,9 +59,12 @@ def generate_map(size: int = MAP_SIZE):
         "resource": None
     }
 
+    # Losowa docelowa wielkość morza: (size - 2) .. (size + 2)
+    target_water = random.randint(max(1, size - 1), size + 4)
+
     # Rozszerz wodę (co najmniej 6 pól, połączona)
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
-    while len(water_cells) < max(6, size):
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # brak diagonali
+    while len(water_cells) < target_water:
         candidates = []
         for y, x in water_cells:
             for dy, dx in directions:
