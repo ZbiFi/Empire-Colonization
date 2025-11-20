@@ -1,5 +1,6 @@
 # map_views.py
 import math
+import os
 import random
 import tkinter as tk
 from tkinter import ttk
@@ -76,6 +77,11 @@ class MapUIMixin:
         if "morze" in r or "morze" in r or "sea" in r: return "sea"
         return None
 
+    def init_ocean_tiles(self):
+        """Ładuje info o plikach oceanu i cache na obrazki."""
+        self.ocean_base_path = self.resource_path("img/tiles/ocean")
+        self.ocean_tile_cache = {}  # (name, cell_size) -> ImageTk.PhotoImage
+
     def get_terrain_icon(self, terrain: str, cell_size: int):
         """Zwraca miniaturkę terenu do legendy albo None."""
         base = self.terrain_icon_bases.get(terrain)
@@ -125,6 +131,68 @@ class MapUIMixin:
             img = self.tile_sea_base.resize((cell_size, cell_size), Image.LANCZOS)
             self.tile_sea_cache[cell_size] = ImageTk.PhotoImage(img)
         return self.tile_sea_cache[cell_size]
+
+    def _is_land(self, y, x):
+        """True, jeśli to NIE jest morze (czyli ląd/brzeg)."""
+        if 0 <= y < self.map_size and 0 <= x < self.map_size:
+            return self.map_grid[y][x]["terrain"] != "morze"
+        return False
+
+    def pick_ocean_tile_name(self, neigh):
+        """
+        neigh: dict z get_ocean_neighbors
+        Zwraca bazową nazwę pliku (bez _1) np. 'ocean_north', 'ocean_northeast_outer' itd.
+        """
+        N, NE, E, SE, S, SW, W, NW = (neigh[k] for k in ["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+
+        # 1) czyste morze – brak lądu wokół
+        if not any(neigh.values()):
+            return "ocean_inner"
+
+        # 2) proste brzegi
+        if N and not (S or E or W): return "ocean_north"
+        if S and not (N or E or W): return "ocean_south"
+        if W and not (N or S or E): return "ocean_west"
+        if E and not (N or S or W): return "ocean_east"
+
+        # 3) korytarze NS / EW
+        if N and S and not (E or W): return "ocean_north_south"
+        if W and E and not (N or S): return "ocean_west_east"
+
+        # 4) narożniki zewnętrzne (wystające)
+        #   ląd w dwóch sąsiednich kierunkach, brak po przekątnej
+        if N and E and not NE: return "ocean_northeast_outer"
+        if E and S and not SE: return "ocean_southeast_outer"
+        if S and W and not SW: return "ocean_southwest_outer"
+        if W and N and not NW: return "ocean_northwest_outer"
+
+        # 5) narożniki wewnętrzne (zatoki) – ląd po przekątnej,
+        #   ale brak bezpośrednio w N/E/S/W
+        if NE and not (N or E): return "ocean_northeast_inner"
+        if SE and not (S or E): return "ocean_southeast_inner"
+        if SW and not (S or W): return "ocean_southwest_inner"
+        if NW and not (N or W): return "ocean_northwest_inner"
+
+        # 6) bardziej skomplikowane przypadki – proste przybliżenia
+        if N: return "ocean_north"
+        if S: return "ocean_south"
+        if E: return "ocean_east"
+        if W: return "ocean_west"
+
+        # absolutny fallback
+        return "ocean_inner"
+
+    def get_ocean_neighbors(self, y, x):
+        """Zwraca słownik booli: czy w danym kierunku jest ląd."""
+        n = self._is_land(y - 1, x)
+        ne = self._is_land(y - 1, x + 1)
+        e = self._is_land(y, x + 1)
+        se = self._is_land(y + 1, x + 1)
+        s = self._is_land(y + 1, x)
+        sw = self._is_land(y + 1, x - 1)
+        w = self._is_land(y, x - 1)
+        nw = self._is_land(y - 1, x - 1)
+        return {"N": n, "NE": ne, "E": e, "SE": se, "S": s, "SW": sw, "W": w, "NW": nw}
 
     def get_cell_size(self):
         """
@@ -184,20 +252,43 @@ class MapUIMixin:
                 canvas.create_rectangle(x - 10, mine_y - 10, x + 10, mine_y + 10, fill=color, outline="black")
             canvas.create_text(x, mine_y + 22, text=MINE_NAMES[res], anchor="center", font=("Arial", 10))
 
+    def get_ocean_tile_image(self, y, x, cell_size):
+        """
+        Zwraca ImageTk.PhotoImage z odpowiednim kaflem oceanu dla pola (y,x).
+        """
+        neigh = self.get_ocean_neighbors(y, x)
+        base_name = self.pick_ocean_tile_name(neigh)  # np. 'ocean_north'
+
+        # 'ocean_inner' ma plik bez sufiksu; reszta jako *_1.png
+        if base_name == "ocean_inner":
+            filename = base_name + ".png"
+        else:
+            filename = base_name + "_1.png"
+
+        key = (filename, cell_size)
+        if key in self.ocean_tile_cache:
+            return self.ocean_tile_cache[key]
+
+        path = os.path.join(self.ocean_base_path, filename)
+        try:
+            img = Image.open(path).resize((cell_size, cell_size), Image.LANCZOS)
+            tk_img = ImageTk.PhotoImage(img)
+            self.ocean_tile_cache[key] = tk_img
+            return tk_img
+        except Exception:
+            # fallback: po prostu kolor morza
+            from constants import BASE_COLORS
+            # tworzymy prostokąt jako solid color – ale tu na szybko: None
+            return None
+
     # ===== MAPA BUDOWANIA =====
     def show_map(self):
 
-        win = self.create_window(f"Buduj - wybierz pole")
+        win = self.create_window("Buduj - wybierz pole")
 
         canvas_width = 850
         canvas_height = 850
-        canvas = tk.Canvas(
-            win,
-            width=canvas_width,
-            height=canvas_height,
-            bg=self.style.lookup("TFrame", "background"),
-            highlightthickness=0,
-        )
+        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height, bg=self.style.lookup("TFrame", "background"), highlightthickness=0)
         canvas.pack(pady=10)
 
         cell_size = self.get_cell_size()
@@ -213,142 +304,142 @@ class MapUIMixin:
                 for x in range(self.map_size):
                     cell = self.map_grid[y][x]
 
+                    # nieodkryte pola
                     if not cell["discovered"]:
-                        canvas.create_rectangle(
-                            offset_x + x * cell_size,
-                            offset_y + y * cell_size,
-                            offset_x + (x + 1) * cell_size,
-                            offset_y + (y + 1) * cell_size,
-                            fill="#888888",
-                            outline="gray",
-                        )
+                        canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill="#888888", outline="gray")
                         continue
 
-                    color = BASE_COLORS[cell["terrain"]]
+                    terrain = cell["terrain"]
+
+                    # specjalna obsługa morza – najpierw tło lądu, potem kafel oceanu
+                    if terrain == "morze":
+                        # 1) tło pod przezroczystościami (np. plains)
+                        try:
+                            bg_img = self.get_plains_tile(cell_size)
+                            canvas.create_image(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                anchor="nw",
+                                image=bg_img
+                            )
+                        except Exception:
+                            # fallback: jednolity "grunt"
+                            ground = BASE_COLORS.get("pole", "#7a6b4a")
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                offset_x + (x + 1) * cell_size,
+                                offset_y + (y + 1) * cell_size,
+                                fill=ground,
+                                outline="gray",
+                                width=1
+                            )
+
+                        # 2) kafelek oceanu z autotilingu – na wierzch
+                        img = self.get_ocean_tile_image(y, x, cell_size)
+                        if img:
+                            canvas.create_image(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                anchor="nw",
+                                image=img
+                            )
+                        else:
+                            # absolutny fallback – pełny prostokąt wody
+                            color = BASE_COLORS["morze"]
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                offset_x + (x + 1) * cell_size,
+                                offset_y + (y + 1) * cell_size,
+                                fill=color,
+                                outline="gray",
+                                width=1
+                            )
+                        continue
+
+                    color = BASE_COLORS[terrain]
                     outline = "gray"
                     width = 1
-                    if cell["terrain"] in ["osada", "dzielnica"]:
+                    if terrain in ["osada", "dzielnica"]:
                         outline = "yellow"
                         width = 3
 
                     # tło (np. ramka osady / dzielnicy)
-                    canvas.create_rectangle(
-                        offset_x + x * cell_size,
-                        offset_y + y * cell_size,
-                        offset_x + (x + 1) * cell_size,
-                        offset_y + (y + 1) * cell_size,
-                        fill=color,
-                        outline=outline,
-                        width=width,
-                    )
+                    canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill=color, outline=outline, width=width)
 
-                    # jeśli to las / pole / wzniesienia – nad prostokątem kładziemy teksturę
-                    if cell["terrain"] == "las":
+                    # tekstury lasu / pola / wzniesień
+                    if terrain == "las":
                         img = self.get_forest_tile(cell_size)
                         canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif cell["terrain"] == "pole":
+                    elif terrain == "pole":
                         img = self.get_plains_tile(cell_size)
                         canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif cell["terrain"] == "wzniesienia":
+                    elif terrain == "wzniesienia":
                         img = self.get_mountains_tile(cell_size)
                         canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif cell["terrain"] == "morze":
-                        img = self.get_sea_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
 
-                    # budynek w budowie
+                    # budynek w budowie – procent postępu
                     building_in_progress = next((c for c in self.constructions if c[1]["pos"] == (y, x)), None)
                     if building_in_progress:
                         end, _, _, start = building_in_progress
                         total_days = (end - start).days
                         elapsed = (self.current_date - start).days
                         pct = min(100, max(0, int(elapsed / total_days * 100))) if total_days > 0 else 0
-                        canvas.create_text(
-                            offset_x + x * cell_size + cell_size // 2,
-                            offset_y + y * cell_size + cell_size // 2 + 20,
-                            text=f"{pct}%",
-                            fill="white",
-                            font=("Arial", 9, "bold"),
-                        )
+                        canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2 + 20, text=f"{pct}%", fill="white", font=("Arial", 9, "bold"))
 
                     # opis osady / dzielnicy
-                    if cell["terrain"] in ["osada", "dzielnica"]:
+                    if terrain in ["osada", "dzielnica"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
                         used = len(buildings_here)
-                        canvas.create_text(
-                            offset_x + x * cell_size + cell_size // 2,
-                            offset_y + y * cell_size + cell_size // 2 - 20,
-                            text=f"{cell['terrain'].capitalize()}",
-                            fill="white",
-                            font=("Arial", 9, "bold"),
-                        )
-                        canvas.create_text(
-                            offset_x + x * cell_size + cell_size // 2,
-                            offset_y + y * cell_size + cell_size // 2,
-                            text=f"{used}/5",
-                            fill="yellow",
-                            font=("Arial", 10, "bold"),
-                        )
+                        canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2 - 20, text=f"{terrain.capitalize()}", fill="white", font=("Arial", 9, "bold"))
+                        canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2, text=f"{used}/5", fill="yellow", font=("Arial", 10, "bold"))
 
-                    # złoża na wzniesieniach – mała ikonka węgla/żelaza/srebra/złota
-                    if cell["terrain"] == "wzniesienia" and cell["resource"]:
+                    # złoża na wzniesieniach – ikonki surowców
+                    if terrain == "wzniesienia" and cell["resource"]:
                         icon = self.get_mine_icon(cell["resource"], cell_size)
                         if icon:
-                            img, icon_size = icon
+                            img_icon, icon_size = icon
                             cx = offset_x + x * cell_size + cell_size - 5 - icon_size // 2
                             cy = offset_y + y * cell_size + cell_size - 5 - icon_size // 2
-                            canvas.create_image(cx, cy, image=img)
+                            canvas.create_image(cx, cy, image=img_icon)
                         else:
                             rc = MINE_COLORS[cell["resource"]]
-                            canvas.create_rectangle(
-                                offset_x + x * cell_size + cell_size - 20,
-                                offset_y + y * cell_size + cell_size - 20,
-                                offset_x + x * cell_size + cell_size - 5,
-                                offset_y + y * cell_size + cell_size - 5,
-                                fill=rc,
-                                outline="black",
-                            )
+                            canvas.create_rectangle(offset_x + x * cell_size + cell_size - 20, offset_y + y * cell_size + cell_size - 20, offset_x + x * cell_size + cell_size - 5, offset_y + y * cell_size + cell_size - 5, fill=rc, outline="black")
 
                     # zielone podświetlenia, gdzie można budować
                     if self.selected_building:
                         data = BUILDINGS[self.selected_building]
-                        if cell["terrain"] not in data.get("allowed_terrain", []):
+
+                        if terrain not in data.get("allowed_terrain", []):
                             continue
+
                         if not data.get("requires_settlement"):
                             if cell["building"] or any(c[1]["pos"] == (y, x) for c in self.constructions):
                                 continue
+
                         if data.get("requires_settlement"):
-                            if cell["terrain"] not in ["osada", "dzielnica"]:
+                            if terrain not in ["osada", "dzielnica"]:
                                 continue
                             used = len([b for b in cell["building"] if not b.get("is_district", False)])
                             in_progress = len([c for c in self.constructions if c[1]["pos"] == (y, x)])
                             if used + in_progress >= 5:
                                 continue
+
                         if data.get("requires_adjacent_settlement"):
                             if not self.is_adjacent_to_settlement((y, x)):
                                 continue
-                            if cell["terrain"] == "morze" and self.selected_building != "przystań":
+                            if terrain == "morze" and self.selected_building != "przystań":
                                 continue
 
-                        canvas.create_rectangle(
-                            offset_x + x * cell_size,
-                            offset_y + y * cell_size,
-                            offset_x + (x + 1) * cell_size,
-                            offset_y + (y + 1) * cell_size,
-                            outline="lime",
-                            width=3,
-                        )
+                        canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, outline="lime", width=3)
 
             self.draw_legend(canvas, offset_x, offset_y, cell_size)
 
         def click(event):
             x = (event.x - offset_x) // cell_size
             y = (event.y - offset_y) // cell_size
-            if (
-                0 <= x < self.map_size
-                and 0 <= y < self.map_size
-                and self.map_grid[y][x]["discovered"]
-            ):
+            if 0 <= x < self.map_size and 0 <= y < self.map_size and self.map_grid[y][x]["discovered"]:
                 if self.selected_building:
                     self.start_construction_at(self.selected_building, (y, x))
                     self.selected_building = None
@@ -358,40 +449,23 @@ class MapUIMixin:
         draw()
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
 
-        # wyśrodkuj okno mapy
         self.center_window(win)
 
     # ===== MAPA EKSPLORACJI =====
     def show_explore_map(self):
 
-        win = self.create_window(f"Eksploracja")
+        win = self.create_window("Eksploracja")
 
-        # === INFORMACJE O KOSZTACH ===
+        # informacje o kosztach
         info_frame = ttk.Frame(win)
         info_frame.pack(pady=5)
 
-        ttk.Label(
-            info_frame,
-            text="Koszt eksploracji:",
-            font=("Arial", 12, "bold"),
-        ).pack()
-
-        ttk.Label(
-            info_frame,
-            text="• 3 ludzie • 15 żywności • 10 drewna",
-            justify="center",
-            font=("Arial", 10),
-        ).pack()
+        ttk.Label(info_frame, text="Koszt eksploracji:", font=("Arial", 12, "bold")).pack()
+        ttk.Label(info_frame, text="• 3 ludzie • 15 żywności • 10 drewna", justify="center", font=("Arial", 10)).pack()
 
         canvas_width = 850
         canvas_height = 850
-        canvas = tk.Canvas(
-            win,
-            width=canvas_width,
-            height=canvas_height,
-            bg=self.style.lookup("TFrame", "background"),
-            highlightthickness=0,
-        )
+        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height, bg=self.style.lookup("TFrame", "background"), highlightthickness=0)
         canvas.pack(pady=1)
 
         cell_size = self.get_cell_size()
@@ -404,132 +478,134 @@ class MapUIMixin:
             for y in range(self.map_size):
                 for x in range(self.map_size):
                     cell = self.map_grid[y][x]
+
+                    # nieodkryte pola, ale sąsiadujące z odkrytymi – potencjalne cele eksploracji
                     if not cell["discovered"]:
-                        neighbors = [
-                            (y + dy, x + dx)
-                            for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                            if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
-                        ]
+                        neighbors = [(y + dy, x + dx) for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)] if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size]
                         if any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
+                            canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill="#888888", outline="yellow", width=2)
+                            canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2, text="?", fill="white", font=("Arial", 20, "bold"))
+                        continue
+
+                    terrain = cell["terrain"]
+
+                    if terrain == "morze":
+                        # tło lądu pod przezroczystymi fragmentami
+                        try:
+                            bg_img = self.get_plains_tile(cell_size)
+                            canvas.create_image(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                anchor="nw",
+                                image=bg_img
+                            )
+                        except Exception:
+                            ground = BASE_COLORS.get("pole", "#7a6b4a")
                             canvas.create_rectangle(
                                 offset_x + x * cell_size,
                                 offset_y + y * cell_size,
                                 offset_x + (x + 1) * cell_size,
                                 offset_y + (y + 1) * cell_size,
-                                fill="#888888",
-                                outline="yellow",
-                                width=2,
+                                fill=ground,
+                                outline="gray"
                             )
-                            canvas.create_text(
-                                offset_x + x * cell_size + cell_size // 2,
-                                offset_y + y * cell_size + cell_size // 2,
-                                text="?",
-                                fill="white",
-                                font=("Arial", 20, "bold"),
+
+                        img = self.get_ocean_tile_image(y, x, cell_size)
+                        if img:
+                            canvas.create_image(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                anchor="nw",
+                                image=img
+                            )
+                        else:
+                            color = BASE_COLORS["morze"]
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                offset_x + (x + 1) * cell_size,
+                                offset_y + (y + 1) * cell_size,
+                                fill=color,
+                                outline="gray"
                             )
                         continue
 
-                    color = BASE_COLORS[cell["terrain"]]
-                    canvas.create_rectangle(
-                        offset_x + x * cell_size,
-                        offset_y + y * cell_size,
-                        offset_x + (x + 1) * cell_size,
-                        offset_y + (y + 1) * cell_size,
-                        fill=color,
-                        outline="gray",
-                    )
+                    color = BASE_COLORS[terrain]
+                    canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill=color, outline="gray")
 
-                    if cell["terrain"] == "las":
+                    # tekstury terenów
+                    if terrain == "las":
                         img = self.get_forest_tile(cell_size)
                         canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif cell["terrain"] == "pole":
+                    elif terrain == "pole":
                         img = self.get_plains_tile(cell_size)
                         canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif cell["terrain"] == "wzniesienia":
+                    elif terrain == "wzniesienia":
                         img = self.get_mountains_tile(cell_size)
                         canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif cell["terrain"] == "morze":
-                        img = self.get_sea_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
+
+                    # opcjonalnie – ikona złoża również na mapie eksploracji
+                    if terrain == "wzniesienia" and cell["resource"]:
+                        icon = self.get_mine_icon(cell["resource"], cell_size)
+                        if icon:
+                            img_icon, icon_size = icon
+                            cx = offset_x + x * cell_size + cell_size - 5 - icon_size // 2
+                            cy = offset_y + y * cell_size + cell_size - 5 - icon_size // 2
+                            canvas.create_image(cx, cy, image=img_icon)
 
             self.draw_legend(canvas, offset_x, offset_y, cell_size)
 
         def click(event):
             x = (event.x - offset_x) // cell_size
             y = (event.y - offset_y) // cell_size
-            if 0 <= x < self.map_size and 0 <= y < self.map_size:
-                cell = self.map_grid[y][x]
-                if not cell["discovered"]:
-                    neighbors = [
-                        (y + dy, x + dx)
-                        for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                        if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
-                    ]
-                    if any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
+            if not (0 <= x < self.map_size and 0 <= y < self.map_size):
+                return
 
-                        # ==== OBLICZ KOSZT I CZAS ====
-                        days = random.randint(1, 3) + int(
-                            math.hypot(y - self.settlement_pos[0], x - self.settlement_pos[1])
-                        )
-                        cost_food = 15
-                        cost_wood = 10
+            cell = self.map_grid[y][x]
+            if cell["discovered"]:
+                return
 
-                        # ==== OKNO POTWIERDZENIA ====
-                        confirm = self.create_window("Potwierdź ekspedycję")
+            neighbors = [(y + dy, x + dx) for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)] if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size]
+            if not any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
+                return
 
-                        bg = self.style.lookup("TFrame", "background")
+            # koszt i czas wyprawy
+            days = random.randint(1, 3) + int(math.hypot(y - self.settlement_pos[0], x - self.settlement_pos[1]))
+            cost_food = 15
+            cost_wood = 10
 
-                        ttk.Label(
-                            confirm,
-                            text=f"Wyślij ekspedycję na pole ({y},{x})?",
-                            font=getattr(self, "top_title_font", ("Cinzel", 14, "bold")),
-                            background=bg,
-                        ).pack(pady=10)
+            confirm = self.create_window("Potwierdź ekspedycję")
+            bg = self.style.lookup("TFrame", "background")
 
-                        ttk.Label(
-                            confirm,
-                            text=(
-                                f"Czas wyprawy: {days} dni\n"
-                                f"Koszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna"
-                            ),
-                            justify="center",
-                            font=getattr(self, "top_info_font", ("EB Garamond Italic", 12)),
-                            background=bg,
-                        ).pack(pady=5)
+            ttk.Label(confirm, text=f"Wyślij ekspedycję na pole ({y},{x})?", font=getattr(self, "top_title_font", ("Cinzel", 14, "bold")), background=bg).pack(pady=10)
+            ttk.Label(confirm, text=f"Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna", justify="center", font=getattr(self, "top_info_font", ("EB Garamond Italic", 12)), background=bg).pack(pady=5)
 
-                        def do_explore():
-                            if self.free_workers() < 3:
-                                self.log("Za mało ludzi!", "red")
-                                confirm.destroy()
-                                return
-                            if self.resources["żywność"] < cost_food or self.resources["drewno"] < cost_wood:
-                                self.log("Za mało surowców!", "red")
-                                confirm.destroy()
-                                return
+            def do_explore():
+                if self.free_workers() < 3:
+                    self.log("Za mało ludzi!", "red")
+                    confirm.destroy()
+                    return
+                if self.resources["żywność"] < cost_food or self.resources["drewno"] < cost_wood:
+                    self.log("Za mało surowców!", "red")
+                    confirm.destroy()
+                    return
 
-                            self.busy_people += 3
-                            self.resources["żywność"] -= cost_food
-                            self.resources["drewno"] -= cost_wood
+                self.busy_people += 3
+                self.resources["żywność"] -= cost_food
+                self.resources["drewno"] -= cost_wood
 
-                            end_date = self.current_date + timedelta(days=days)
-                            self.expeditions.append((end_date, (y, x), "explore"))
-                            self.log(
-                                f"Eksploracja ({y},{x}): powrót {end_date.strftime('%d %b %Y')}",
-                                "blue",
-                            )
-                            confirm.destroy()
-                            win.destroy()
+                end_date = self.current_date + timedelta(days=days)
+                self.expeditions.append((end_date, (y, x), "explore"))
+                self.log(f"Eksploracja ({y},{x}): powrót {end_date.strftime('%d %b %Y')}", "blue")
+                confirm.destroy()
+                win.destroy()
 
-                        ttk.Button(confirm, text="Wyślij", command=do_explore).pack(
-                            side="left", padx=10, pady=10
-                        )
-                        ttk.Button(confirm, text="Anuluj", command=confirm.destroy).pack(
-                            side="right", padx=10, pady=10
-                        )
+            ttk.Button(confirm, text="Wyślij", command=do_explore).pack(side="left", padx=10, pady=10)
+            ttk.Button(confirm, text="Anuluj", command=confirm.destroy).pack(side="right", padx=10, pady=10)
 
         canvas.bind("<Button-1>", click)
         draw()
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
 
-        # wyśrodkuj okno eksploracji
         self.center_window(win)
+
