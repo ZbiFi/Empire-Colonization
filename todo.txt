@@ -10,7 +10,9 @@ DONE !!! +-1/+-10/+-100 przyciski przy handlu
 DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
 DONE !!! - ekran z towarami na statku wymaga poprawy
-
+tile dla osady i dzielnicy
+budynki na mapie, że coś stoi
+lepsze tile
 
 
 
