@@ -44,6 +44,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         load_font_ttf(self.resource_path("fonts/EBGaramond-Italic.ttf"))
         load_font_ttf(self.resource_path("fonts/MedievalSharp-Regular.ttf"))
 
+        self.tile_water_center = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/water_center_40.png")))
+        self.tile_shore_n = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/shore_n_40.png")))
+        self.tile_shore_s = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/shore_s_40.png")))
+        self.tile_shore_w = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/shore_w_40.png")))
+        self.tile_shore_e = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/shore_e_40.png")))
+
+        self.tile_corner_nw = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/corner_nw_40.png")))
+        self.tile_corner_ne = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/corner_ne_40.png")))
+        self.tile_corner_sw = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/corner_sw_40.png")))
+        self.tile_corner_se = ImageTk.PhotoImage(Image.open(self.resource_path("img/tiles/corner_se_40.png")))
+
 
         self.title_font = ("IM Fell English SC", 28, "bold")
         self.ui_font = ("EB Garamond Italic", 18)
@@ -850,7 +861,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
             return
 
         # Liczymy dzień po dniu, ale śmierć z głodu losujemy zbiorczo
-        food = self.resources["żywność"]
+        initial_food = self.resources["żywność"]
+        food = initial_food
         starvation_days = 0
         max_excess = 0  # do logowania przeludnienia
 
@@ -860,12 +872,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
             if self.people > cap:
                 excess = self.people - cap
                 max_excess = max(max_excess, excess)
-                base_food = cap
-                extra_food = int(excess * 1.5)
-                food_needed = base_food + extra_food
+
+                base_food = cap * FOOD_CONSUMPTION_PER_PERSON
+                extra_food = excess * FOOD_CONSUMPTION_PER_PERSON * FOOD_OVERCROWDING_MULTIPLIER
+                food_needed = int(base_food + extra_food)
             else:
                 excess = 0
-                food_needed = self.people
+                food_needed = int(self.people * FOOD_CONSUMPTION_PER_PERSON)
 
             if food >= food_needed:
                 food -= food_needed
@@ -874,8 +887,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
                 food = 0
                 starvation_days += 1
 
-        # zapisujemy nowy stan żywności
-        self.resources["żywność"] = food
+        # ile żywności rzeczywiście zużyli ludzie w tej turze
+        people_food_consumption = max(0, initial_food - food)
 
         # przeludnienie — tylko log (brak wypędzania)
         if max_excess > 0:
@@ -904,6 +917,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         # --- PRODUKCJA (jak wcześniej, zbiorczo za 'days') ---
         building_data = self.calculate_production()
         total_net = {r: 0 for r in RESOURCES}
+
+        # zużycie żywności przez populację (policzone wyżej, w pętli dziennej)
+        total_net["żywność"] -= people_food_consumption
 
         for b, prod, cons, eff in building_data:
             if eff == 0 and any(cons.values()):
@@ -992,7 +1008,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin)
         # przywróć poprzednią pozycję przewinięcia
         self.build_listbox.yview_moveto(first)
 
-        final_items = [f"{r}: +{v:.1f}" for r, v in net_total.items() if v > 0.05]
+        final_items = [f"{r}: +{v:.1f}" for r, v in net_total.items() if v > 0]
+        final_items.extend(f"{r}: {v:.1f}" for r, v in net_total.items() if v < 0)
+
         total_str = " | ".join(final_items) or "Brak"
         self.prod_label.config(text=total_str, foreground="black")
 
