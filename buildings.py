@@ -437,25 +437,64 @@ class BuildingsMixin:
         self.center_window(win)
 
     # === Menu budowy ===
+    # === Menu budowy ===
     def build_menu(self):
 
         win = self.create_window(f"Buduj")
 
         for name, data in BUILDINGS.items():
+            # skopiuj koszt i uwzględnij bonus Holandii
             display_cost = data["base_cost"].copy()
             if self.state == "Holandia":
                 mult = STATES[self.state]["build_cost"]  # np. 0.8
                 display_cost = {k: int(v * mult) for k, v in display_cost.items()}
 
-            cost = ", ".join(f"{k}: {v}" for k, v in display_cost.items()) or "brak"
+            cost_str = ", ".join(f"{k}: {v}" for k, v in display_cost.items()) or "brak"
+            build_time = data.get("build_time", 0)
+            base_workers = data.get("base_workers", 0)
+            desc = data.get("desc") or data.get("description", "")
 
+            # === Wiersz dla jednego budynku ===
+            row = ttk.Frame(win)
+            row.pack(fill="x", padx=20, pady=3)
+
+            # 1) Przycisk z nazwą budynku (po lewej)
             btn = ttk.Button(
-                win,
-                text=f"{name} | {data['build_time']} dni | {cost}",
+                row,
+                text=name,
                 command=lambda n=name: self.select_for_building(n, win),
+                width=18,
             )
-            btn.pack(fill="x", padx=20, pady=2)
+            btn.pack(side="left")
+
+            # 2) Ramka z informacjami o budynku (po prawej)
+            info_frame = ttk.Frame(row)
+            info_frame.pack(side="left", fill="x", expand=True, padx=(10, 0))
+
+            # Złóż tekst informacji: czas, koszt, pracownicy, opis
+            info_parts = []
+            if build_time:
+                info_parts.append(f"Czas budowy: {build_time} dni")
+            if base_workers:
+                info_parts.append(f"Pracownicy: {base_workers}")
+            info_parts.append(f"Koszt: {cost_str}")
+            if desc:
+                info_parts.append(desc)
+
+            info_text = " | ".join(info_parts)
+
+            ttk.Label(
+                info_frame,
+                text=info_text,
+                justify="left",
+                anchor="w",
+                wraplength=600,
+            ).pack(fill="x")
+
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=10)
+
+        # wyśrodkuj okno
+        self.center_window(win)
 
     def select_for_building(self, name, win):
         self.selected_building = name

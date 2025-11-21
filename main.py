@@ -16,6 +16,7 @@ from missions import MissionsMixin
 from relations import RelationsMixin
 from ships import ShipsMixin
 from map_views import MapUIMixin
+from tooltip import Tooltip
 
 def load_font_ttf(path):
     """
@@ -29,6 +30,7 @@ def load_font_ttf(path):
     windll.gdi32.AddFontResourceExW(path, FR_PRIVATE, 0)
 
 class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin, MapUIMixin):
+
     def __init__(self, root):
         self.root = root
         self.root.title("Imperium Kolonii")
@@ -374,8 +376,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             ).pack(anchor="w")
 
         ttk.Button(frame, text="Losowe Państwo", style="ColonialSecondary.TButton", command=lambda: self.state_var.set(random.choice(list(STATES.keys())))).pack(pady=10)
-        ttk.Button(frame, text="Rozpocznij", style="Colonial.TButton", command=self.start_game).pack(pady=10)
-
+        start_btn = ttk.Button(frame, text="Rozpocznij", style="Colonial.TButton", command=self.start_game)
+        start_btn.pack(pady=10)
 
     def start_game(self):
         self.state = self.state_var.get()
@@ -987,7 +989,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                     "Eksploracja wróciła z łupami: " + ", ".join(gains),
                     "green"
                 )
-
 
 # ============== URUCHOMIENIE ==============
 if __name__ == "__main__":
