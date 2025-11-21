@@ -24,6 +24,13 @@ class MapUIMixin:
         """
         Wywołaj w __init__ klasy głównej po ustawieniu resource_path / stylu.
         """
+
+        # Seed do deterministycznego wyboru wariantów _1/_2/_3
+        # Jeśli ustawisz self.tile_random_seed wcześniej (np. z save),
+        # to ta linia go nie nadpisze.
+        if not hasattr(self, "tile_random_seed"):
+            self.tile_random_seed = random.randint(0, 2**31 - 1)
+
         forest_path = self.resource_path("img/tiles/conifer_forest_inner.png")
         self.tile_forest_base = Image.open(forest_path)
         self.tile_forest_cache = {}  # cell_size -> ImageTk.PhotoImage
@@ -248,6 +255,57 @@ class MapUIMixin:
 
         return card_req, inner_req, outer_req
 
+    def _variant_group_key(self, filename: str) -> str:
+        """
+        Zwraca klucz grupy wariantów dla pliku:
+        'ocean_north_1.png' -> 'ocean_north'
+        'ocean_inner.png'   -> 'ocean_inner'
+        """
+        name = filename
+        if name.lower().endswith(".png"):
+            name = name[:-4]
+        parts = name.rsplit("_", 1)
+        if len(parts) == 2 and parts[1].isdigit():
+            return parts[0]
+        return name
+
+    def _choose_tile_variant(self, base_filename: str, defs, terrain_tag: str, y: int, x: int) -> str:
+        """
+        Dla danego bazowego pliku (np. 'ocean_north_1.png') wybiera DETERMINISTYCZNIE
+        jeden z wariantów tej samej grupy (_1/_2/_3) na podstawie:
+        - self.tile_random_seed
+        - terrain_tag (np. 'ocean')
+        - grupy (np. 'ocean_north')
+        - współrzędnych (y, x)
+        """
+        group_key = self._variant_group_key(base_filename)
+
+        # znajdź wszystkie pliki z tej samej grupy
+        variants = []
+        for d in defs:
+            fname = d["filename"]
+            if self._variant_group_key(fname) == group_key:
+                variants.append(fname)
+
+        # jeśli nic nie znaleźliśmy, albo jest tylko jeden wariant – zwróć to co było
+        if not variants:
+            return base_filename
+        if len(variants) == 1:
+            return variants[0]
+
+        variants = sorted(variants)  # stała kolejność
+
+        # prosty deterministyczny "hash"
+        seed = int(getattr(self, "tile_random_seed", 0)) & 0xFFFFFFFF
+        key_str = f"{terrain_tag}:{group_key}:{y}:{x}"
+
+        h = seed
+        for ch in key_str:
+            h = (h * 131 + ord(ch)) & 0xFFFFFFFF
+
+        idx = h % len(variants)
+        return variants[idx]
+
     def _pick_tile_from_defs(self, neigh, defs, empty_filename: str):
         """
         Ogólna logika dobierania kafelka (dla oceanu / lasu / wzgórz).
@@ -467,9 +525,18 @@ class MapUIMixin:
     def get_ocean_tile_image(self, y, x, cell_size):
         """
         Zwraca ImageTk.PhotoImage z odpowiednim kaflem oceanu dla pola (y,x).
+        Warianty _1/_2/_3 są wybierane DETERMINISTYCZNIE na podstawie:
+        - self.tile_random_seed
+        - położenia pola (y, x)
+        - grupy kafla (np. ocean_north)
         """
         neigh = self.get_ocean_neighbors(y, x)
-        filename = self.pick_ocean_tile_name(neigh)  # np. 'ocean_northwest_southwest_outer_1.png'
+        # najpierw wybieramy "logiczny" kafel (kształt brzegów)
+        filename = self.pick_ocean_tile_name(neigh)  # np. 'ocean_north_1.png'
+
+        # a teraz deterministycznie wybieramy wariant _1/_2/_3
+        if hasattr(self, "ocean_defs"):
+            filename = self._choose_tile_variant(filename, self.ocean_defs, "ocean", y, x)
 
         key = (filename, cell_size)
         if key in self.ocean_tile_cache:
