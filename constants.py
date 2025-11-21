@@ -361,7 +361,7 @@ BUILDINGS = {
 
     # === MIESZKANIA ===
     "namiot": {
-        "base_cost": {"skóry": 10, "żelazo": 5}, "build_time": 1, "base_workers": 0, "capacity": 4,
+        "name": "Namiot", "base_cost": {"skóry": 10, "żelazo": 5}, "build_time": 1, "base_workers": 0, "capacity": 4,
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True,
         "upgrades": [
@@ -373,7 +373,7 @@ BUILDINGS = {
 
     # === DREWNO ===
     "drwalnia": {
-        "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
+        "name": "Drwalnia", "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
         "allowed_terrain": ["las"], "base_prod": {"drewno": 2},
         "upgrades": [
             {"name": "Tartak ręczny", "cost": {"drewno": 40, "żelazo": 10}, "build_time": 10, "prod": {"drewno": 3}, "workers": 3},
@@ -384,7 +384,7 @@ BUILDINGS = {
 
     # === ŻYWNOŚĆ ===
     "pole_uprawne": {
-        "base_cost": {"drewno": 15}, "build_time": 4, "base_workers": 2,
+        "name": "Pole uprawne", "base_cost": {"drewno": 15}, "build_time": 4, "base_workers": 2,
         "allowed_terrain": ["pole"], "base_prod": {"żywność": 3},
         "upgrades": [
             {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 8, "prod": {"żywność": 4}, "workers": 3},
@@ -395,16 +395,16 @@ BUILDINGS = {
 
     # === SKÓRY → UBRANIA ===
     "obóz_myśliwski": {
-        "base_cost": {"drewno": 25}, "build_time": 6, "base_workers": 2,
-        "allowed_terrain": ["las", "pole"], "base_prod": {"skóry": 1},
+        "name": "Obóz myśliwski", "base_cost": {"drewno": 25}, "build_time": 6, "base_workers": 2,
+        "allowed_terrain": ["las", "pole"], "base_prod": {"skóry": 1, "żywność": 1},
         "upgrades": [
-            {"name": "Stanica łowiecka", "cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "prod": {"skóry": 1}, "workers": 3},
-            {"name": "Rezerwat skórny", "cost": {"stal": 30}, "build_time": 16, "prod": {"skóry": 1.5}, "workers": 4},
-            {"name": "Kompania futrzarska", "cost": {"stal": 50, "cygara": 5}, "build_time": 25, "prod": {"skóry": 2}, "workers": 5}
+            {"name": "Stanica łowiecka", "cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "prod": {"skóry": 1, "żywność": 1}, "workers": 3},
+            {"name": "Rezerwat skórny", "cost": {"stal": 30}, "build_time": 16, "prod": {"skóry": 1.5, "żywność": 1.5}, "workers": 4},
+            {"name": "Kompania futrzarska", "cost": {"stal": 50, "cygara": 5}, "build_time": 25, "prod": {"skóry": 2, "żywność": 1.5}, "workers": 5}
         ]
     },
     "garbarnia_polowa": {
-        "base_cost": {"drewno": 30, "żelazo": 10}, "build_time": 8, "base_workers": 2,
+        "name": "Garbarnia polowa", "base_cost": {"drewno": 30, "żelazo": 10}, "build_time": 8, "base_workers": 2,
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True, "consumes": {"skóry": 1}, "base_prod": {"ubrania": 0.5},
         "upgrades": [
@@ -416,7 +416,7 @@ BUILDINGS = {
 
     # === ZIOŁA → MEDYKAMENTY ===
     "ziołorośla": {
-        "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
+        "name": "Ziołorośla", "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
         "allowed_terrain": ["pole", "las"], "base_prod": {"zioła": 1},
         "upgrades": [
             {"name": "Ogród botaniczny", "cost": {"drewno": 35, "żelazo": 10}, "build_time": 9, "prod": {"zioła": 1.2}, "workers": 3},
@@ -425,7 +425,7 @@ BUILDINGS = {
         ]
     },
     "ziołolecznica": {
-        "base_cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "base_workers": 2,
+        "name": "Ziołolecznica", "base_cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "base_workers": 2,
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True, "consumes": {"zioła": 1}, "base_prod": {"medykamenty": 0.5},
         "upgrades": [
@@ -437,7 +437,7 @@ BUILDINGS = {
 
     # === UNIWERSALNA KOPALNIA (węgiel, żelazo, srebro, złoto) ===
     "kopalnia": {
-        "base_cost": {"drewno": 35, "żelazo": 15}, "build_time": 12, "base_workers": 3, "base_prod": {"trzcina": 1},
+        "name": "Kopalnia", "base_cost": {"drewno": 35, "żelazo": 15}, "build_time": 12, "base_workers": 3, "base_prod": {"trzcina": 1},
         "allowed_terrain": ["wzniesienia"],
         "upgrades": [
             {"name": "Szyb kopalniany", "cost": {"stal": 30}, "build_time": 16, "base_prod": {"trzcina": 1.2}, "workers": 4},
@@ -448,7 +448,7 @@ BUILDINGS = {
 
     # === STAL (przetwarzanie węgla + żelaza) ===
     "kuźnia_polowa": {
-        "base_cost": {"drewno": 50, "żelazo": 20}, "build_time": 14, "base_workers": 3,
+        "name": "Kuźnia polowa", "base_cost": {"drewno": 50, "żelazo": 20}, "build_time": 14, "base_workers": 3,
         "requires_settlement": True,
         "allowed_terrain": ["osada", "dzielnica"],
         "consumes": {"węgiel": 1, "żelazo": 1}, "base_prod": {"stal": 0.5},
@@ -461,7 +461,7 @@ BUILDINGS = {
 
     # === TRZCINA → CUKIER ===
     "plantacja_trzciny": {
-        "base_cost": {"drewno": 30}, "build_time": 7, "base_workers": 3,
+        "name": "Plantacja trzciny", "base_cost": {"drewno": 30}, "build_time": 7, "base_workers": 3,
         "allowed_terrain": ["pole"], "base_prod": {"trzcina": 1},
         "upgrades": [
             {"name": "Hacienda trzcinowa", "cost": {"żelazo": 25}, "build_time": 12, "prod": {"trzcina": 1.2}, "workers": 4},
@@ -470,7 +470,7 @@ BUILDINGS = {
         ]
     },
     "cukrownia_ręczna": {
-        "base_cost": {"drewno": 45, "żelazo": 20}, "build_time": 12, "base_workers": 3,
+        "name": "Cukrownia ręczna", "base_cost": {"drewno": 45, "żelazo": 20}, "build_time": 12, "base_workers": 3,
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True, "consumes": {"trzcina": 2}, "base_prod": {"cukier": 0.5},
         "upgrades": [
@@ -482,7 +482,7 @@ BUILDINGS = {
 
     # === TYTOŃ → CYGARA ===
     "plantacja_tytoniu": {
-        "base_cost": {"drewno": 35}, "build_time": 8, "base_workers": 3,
+        "name": "Plantacja tytoniu", "base_cost": {"drewno": 35}, "build_time": 8, "base_workers": 3,
         "allowed_terrain": ["pole"], "base_prod": {"tytoń": 1},
         "upgrades": [
             {"name": "Estancia tytoniowa", "cost": {"żelazo": 30}, "build_time": 13, "prod": {"tytoń": 1.2}, "workers": 4},
@@ -491,7 +491,7 @@ BUILDINGS = {
         ]
     },
     "suszenie_tytoniu": {
-        "base_cost": {"drewno": 50, "żelazo": 25}, "build_time": 14, "base_workers": 3,
+        "name": "Suszarnia tytoniu", "base_cost": {"drewno": 50, "żelazo": 25}, "build_time": 14, "base_workers": 3,
         "requires_settlement": True, "consumes": {"tytoń": 1}, "base_prod": {"cygara": 0.5},
         "allowed_terrain": ["osada", "dzielnica"],
         "upgrades": [
@@ -503,7 +503,7 @@ BUILDINGS = {
 
     # === PRZYSTAŃ ===
     "przystań": {
-        "base_cost": {"drewno": 60, "żelazo": 30}, "build_time": 16, "base_workers": 2, "base_prod": {"żywność": 3},
+        "name": "Przystań", "base_cost": {"drewno": 60, "żelazo": 30}, "build_time": 16, "base_workers": 2, "base_prod": {"żywność": 3},
         "requires_adjacent_settlement": True,
         "allowed_terrain": ["morze"],
         "upgrades": []
@@ -511,7 +511,7 @@ BUILDINGS = {
 
     # === DZIELNICA ===
     "dzielnica": {
-        "base_cost": {"drewno": 120, "żelazo": 60, "stal": 20}, "build_time": 25, "base_workers": 5,
+        "name": "Dzielnica", "base_cost": {"drewno": 120, "żelazo": 60, "stal": 20}, "build_time": 25, "base_workers": 5,
         "requires_adjacent_settlement": True,
         "allowed_terrain": ["las", "pole", "wzniesienia"],
         "upgrades": []

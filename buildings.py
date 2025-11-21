@@ -58,7 +58,8 @@ class BuildingsMixin:
         level = b.get("level", 0)
         if level > 0 and level <= len(base_data["upgrades"]):
             return base_data["upgrades"][level - 1].get("name", b["base"])
-        return b["base"]
+        # dla poziomu 0 używamy przyjaznej nazwy z constants.py
+        return base_data.get("name", b["base"])
 
     # === Pojemność populacji (z budynków mieszkalnych) ===
     def calculate_population_capacity(self):
@@ -469,6 +470,12 @@ class BuildingsMixin:
 
         win = self.create_window(f"Buduj")
 
+        # styl dla budynków, na które gracza nie stać
+        if not hasattr(self, "_cant_afford_building_style"):
+            style = ttk.Style()
+            style.configure("CantAffordBuilding.TButton", foreground="red")
+            self._cant_afford_building_style = True
+
         for name, data in BUILDINGS.items():
             # koszt z uwzględnieniem bonusu Holandii
             display_cost = data["base_cost"].copy()
@@ -485,13 +492,20 @@ class BuildingsMixin:
             row = ttk.Frame(win)
             row.pack(fill="x", padx=20, pady=3)
 
+            display_name = data.get("name", name)
+
             # 1) Przycisk z nazwą budynku (po lewej)
             btn = ttk.Button(
                 row,
-                text=name,
+                text=display_name,
                 command=lambda n=name: self.select_for_building(n, win),
                 width=18,
             )
+
+            # jeśli gracza nie stać na budynek → czerwony tekst
+            if not self.can_afford(data["base_cost"]):
+                btn.configure(style="CantAffordBuilding.TButton")
+
             btn.pack(side="left")
 
             # Tooltip z informacją CO robi budynek

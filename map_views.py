@@ -784,16 +784,35 @@ class MapUIMixin:
                 for x in range(self.map_size):
                     cell = self.map_grid[y][x]
 
-                    # nieodkryte pola
                     if not cell["discovered"]:
-                        canvas.create_rectangle(
-                            offset_x + x * cell_size,
-                            offset_y + y * cell_size,
-                            offset_x + (x + 1) * cell_size,
-                            offset_y + (y + 1) * cell_size,
-                            fill="#888888",
-                            outline="gray"
-                        )
+                        # spróbuj wczytać terra_incognita.png
+                        try:
+                            if not hasattr(self, "terra_incognita_img") or cell_size not in self.terra_incognita_img:
+                                path = self.resource_path("img/tiles/terra_incognita.png")
+                                base = Image.open(path)
+                                img = base.resize((cell_size, cell_size), Image.LANCZOS)
+
+                                if not hasattr(self, "terra_incognita_img"):
+                                    self.terra_incognita_img = {}
+                                self.terra_incognita_img[cell_size] = ImageTk.PhotoImage(img)
+
+                            canvas.create_image(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                anchor="nw",
+                                image=self.terra_incognita_img[cell_size]
+                            )
+
+                        except Exception:
+                            # fallback – szary kwadrat
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                offset_x + (x + 1) * cell_size,
+                                offset_y + (y + 1) * cell_size,
+                                fill="#888888",
+                                outline="gray",
+                            )
                         continue
 
                     terrain = cell["terrain"]

@@ -24,6 +24,7 @@ drogi? -> bonus do produkcji.
 DONE !!! - lepsze tile
 tile dla osady i dzielnicy
 tile dla przystani
+DONE !!! tile dla terraincognita
 DONE !!! - budynki na mapie, że coś stoi
 
 
