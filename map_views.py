@@ -562,7 +562,12 @@ class MapUIMixin:
     def get_forest_tile_image(self, y, x, cell_size):
         """Auto-tiling lasu – przezroczysty kafel na tle plains."""
         neigh = self.get_forest_neighbors(y, x)
-        filename = self.pick_forest_tile_name(neigh)
+        # najpierw wybieramy "logiczny" kafel (kształt brzegu lasu)
+        filename = self.pick_forest_tile_name(neigh)  # np. 'forest_north_1.png'
+
+        # teraz deterministycznie wybieramy wariant _1/_2/_3
+        if hasattr(self, "forest_defs"):
+            filename = self._choose_tile_variant(filename, self.forest_defs, "forest", y, x)
 
         key = (filename, cell_size)
         if key in self.forest_tile_cache:
@@ -580,7 +585,12 @@ class MapUIMixin:
     def get_mountains_tile_image(self, y, x, cell_size):
         """Auto-tiling wzgórz – przezroczysty kafel na tle plains."""
         neigh = self.get_mountains_neighbors(y, x)
-        filename = self.pick_mountains_tile_name(neigh)
+        # najpierw wybieramy "logiczny" kafel (kształt brzegu wzgórz)
+        filename = self.pick_mountains_tile_name(neigh)  # np. 'mountains_north_1.png'
+
+        # teraz deterministycznie wybieramy wariant _1/_2/_3
+        if hasattr(self, "mountains_defs"):
+            filename = self._choose_tile_variant(filename, self.mountains_defs, "mountains", y, x)
 
         key = (filename, cell_size)
         if key in self.mountains_tile_cache:
