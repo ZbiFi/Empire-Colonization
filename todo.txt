@@ -11,7 +11,7 @@ DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
 DONE !!! - ekran z towarami na statku wymaga poprawy
 TOOLTIPS
-
+drogi? -> bonus do produkcji.
 
 <MAPA>
 DONE !!! - lepsze tile
