@@ -508,7 +508,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 gold_cost_lbl.config(font=("Arial", 10), foreground="gray")
             else:
                 rep_cost_lbl.config(font=("Arial", 10), foreground="gray")
-                gold_cost_lbl.config(font=("Arial", 10, "bold"), foreground="gold")
+                gold_cost_lbl.config(font=("Arial", 10, "bold"), foreground="DarkOrange")
 
         payment_method.trace_add("write", lambda *_: update_costs())
         update_costs()
@@ -852,12 +852,27 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.build_listbox.delete(0, tk.END)
 
         for b in self.buildings:
-            if b.get("is_district"): continue
-            name = b["base"]
-            if b.get("level", 0) > 0:
-                name = BUILDINGS[b["base"]]["upgrades"][b["level"] - 1].get("name", name)
+            if b.get("is_district"):
+                continue
+
+            base_info = BUILDINGS[b["base"]]
+            base_name = base_info.get("name", b["base"])  # nazwa z BUILDINGS
+            level = b.get("level", 0)
+
+            # nazwa ulepszenia (jeśli jest)
+            upgrade_name = None
+            if level > 0:
+                up = base_info.get("upgrades", [])[level - 1]
+                upgrade_name = up.get("name")
+
+            # finalna nazwa do wyświetlenia
+            if upgrade_name and upgrade_name != base_name:
+                display_name = f"{upgrade_name} ({base_name})"
+            else:
+                display_name = base_name
+
             if b.get("resource"):
-                name += f" [{b['resource']}]"
+                display_name += f" [{b['resource']}]"
 
             data = next((d for d in building_data if d[0] is b), None)
             status = "—"
@@ -867,7 +882,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 _, prod, cons, eff = data
                 consumes_something = any(cons.values())
                 missing_resources = consumes_something and eff < 1.0
-                if missing_resources: color_tag = "red"
+                if missing_resources:
+                    color_tag = "red"
                 local_net = {r: prod.get(r, 0) - cons.get(r, 0) for r in RESOURCES}
                 prod_str = " | ".join(f"{r}: +{v:.1f}" for r, v in local_net.items() if v > 0.05)
                 eff_str = f" ({eff:.0%})" if eff < 1 else ""
@@ -878,7 +894,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             pos = b["pos"]
             cell = self.map_grid[pos[0]][pos[1]]
             area = "osada" if cell["terrain"] == "osada" else "dzielnica"
-            line = f"{name} | Prac: {b.get('workers', 0)}/{self.get_max_workers(b)} | {status} | ({pos[0]},{pos[1]}) | {area}"
+
+            line = (
+                f"{display_name} | Prac: {b.get('workers', 0)}/{self.get_max_workers(b)} "
+                f"| {status} | ({pos[0]},{pos[1]}) | {area}"
+            )
             self.build_listbox.insert(tk.END, line)
             self.build_listbox.itemconfig(tk.END, fg=color_tag)
 
@@ -899,7 +919,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.busy_people -= c[2]
             y, x = new_b["pos"]
             self.map_grid[y][x]["building"].append(new_b)
-            self.log(f"Ukończono: {new_b['base']}", "green")
+
+            nice_name = self.get_building_display_name(new_b)
+            self.log(f"Ukończono: {nice_name}", "green")
             self.play_sound("building_done")
 
         finished_upgrades = [u for u in self.upgrades_in_progress if u[0] <= self.current_date]
@@ -912,7 +934,22 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 self.buildings[idx]["capacity"] = BUILDINGS[self.buildings[idx]["base"]]["upgrades"][u[2]-1]["capacity"]
             workers_used = BUILDINGS[self.buildings[idx]["base"]]["upgrades"][old_level].get("workers", 1)
             self.busy_people -= workers_used
-            self.log(f"Ukończono ulepszenie: {self.buildings[idx]['base']} → poziom {u[2]}", "gold")
+            base_data = BUILDINGS[self.buildings[idx]["base"]]
+            # nazwa PRZED ulepszeniem
+            if old_level == 0:
+                old_name = base_data.get("name", self.buildings[idx]["base"])
+            else:
+                old_name = base_data["upgrades"][old_level - 1].get(
+                    "name",
+                    base_data.get("name", self.buildings[idx]["base"])
+                )
+            # nazwa PO ulepszeniu
+            new_name = base_data["upgrades"][u[2] - 1].get(
+                "name",
+                base_data.get("name", self.buildings[idx]["base"])
+            )
+
+            self.log(f"Ukończono ulepszenie: {old_name} → {new_name}", "DarkOrange")
             self.play_sound("building_done")
 
         self.process_arriving_ships()
@@ -938,7 +975,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         if exp[2] == "explore":
             cell["discovered"] = True
             res = cell["resource"] or "brak"
-            self.log(f"Odkryto ({y},{x}): {cell['terrain']} | {res}", "gold")
+            self.log(f"Odkryto ({y},{x}): {cell['terrain']} | {res}", "DarkOrange")
 
             # ===== BONUS ZA EKSPLORACJĘ ZALEŻNY OD POLA =====
             terrain = cell["terrain"]

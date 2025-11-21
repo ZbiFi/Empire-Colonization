@@ -113,7 +113,7 @@ class ShipsMixin:
                         sent[res] = sent.get(res, 0) + contrib
 
             if not mission_completed_before and all(sent.get(r, 0) >= req[r] for r in req):
-                self.log("MISJA KRÓLEWSKA WYKONANA! (po dopłynięciu do Europy)", "gold")
+                self.log("MISJA KRÓLEWSKA WYKONANA! (po dopłynięciu do Europy)", "DarkOrange")
                 self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
                 self.current_mission = None
                 self.mission_multiplier *= 0.9
@@ -326,7 +326,7 @@ class ShipsMixin:
                                         del excess[res]
 
                         if all(sent.get(r, 0) >= req[r] for r in req):
-                            self.log("MISJA KRÓLEWSKA WYKONANA!", "gold")
+                            self.log("MISJA KRÓLEWSKA WYKONANA!", "DarkOrange")
                             self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
                             self.current_mission = None
                             self.mission_multiplier *= 0.9

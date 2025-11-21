@@ -66,7 +66,7 @@ class MissionsMixin:
             return
 
         self.resources["dukaty"] -= cost
-        self.log(f"Misja opłacona dukatami: {cost}. +reputacja", "gold")
+        self.log(f"Misja opłacona dukatami: {cost}. +reputacja", "DarkOrange")
 
         # nagroda jak poprzednio
         self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
@@ -121,7 +121,7 @@ class MissionsMixin:
                 # wypełnij wszystko
                 for r in req:
                     sent[r] = req[r]
-                self.log("Misja królewska natychmiast wypełniona!", "gold")
+                self.log("Misja królewska natychmiast wypełniona!", "DarkOrange")
                 self.complete_royal_mission()
                 win.destroy()
 

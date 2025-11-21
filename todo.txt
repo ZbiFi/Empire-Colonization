@@ -1,11 +1,7 @@
-budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
-magazyn -> podobnie ale z surowcami
-eventy losowe - plaga, pozar, wypadki whatever, piractwo
 DONE !!! - eventy z lokalnymi -> misje
 espedycje - cos ciekawego
 armia i walka?
 piractwo? -> może statki i z misją od króla by korsarzy wysyłać przeciwko komuś?
-save/load
 DONE !!! +-1/+-10/+-100 przyciski przy handlu
 DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
@@ -22,7 +18,15 @@ DONE !!! - bonusy do krajów na ekranie startowym
 wiecej muzyki i ambiance
 drogi? -> bonus do produkcji.
 
+<UI>
 poprawić nazwy z logach obóz_myśliwski -> Obóz myśliwski
+DONE !!! poprawić nazwy z posiadanych budynkach
+przenieść produkcję +/- obok danych zasobów
+
+<SAVE/LOAD>
+save/load
+settings
+localization
 
 <MAPA>
 DONE !!! - lepsze tile
@@ -31,8 +35,10 @@ tile dla przystani
 DONE !!! tile dla terraincognita
 DONE !!! - budynki na mapie, że coś stoi
 
-
-
+<GAMEPLAY>
+eventy losowe - plaga, pozar, wypadki whatever, piractwo
+?budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
+?magazyn -> podobnie ale z surowcami
 
 TO EXE
 pyinstaller --noconsole --onefile --name ImperiumKolonii --add-data "fonts;fonts" --add-data "img;img" --add-data "sounds;sounds" main.py
