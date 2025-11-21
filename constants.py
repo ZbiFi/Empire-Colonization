@@ -376,9 +376,9 @@ BUILDINGS = {
         "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
         "allowed_terrain": ["las"], "base_prod": {"drewno": 2},
         "upgrades": [
-            {"name": "Tartak ręczny", "cost": {"drewno": 40, "żelazo": 10}, "build_time": 10, "prod": {"drewno": 1}, "workers": 3},
-            {"name": "Tartak parowy", "cost": {"stal": 30, "żelazo": 20}, "build_time": 18, "prod": {"drewno": 2}, "workers": 4},
-            {"name": "Przemysłowy kompleks drzewny", "cost": {"stal": 60, "cukier": 10}, "build_time": 30, "prod": {"drewno": 3}, "workers": 6}
+            {"name": "Tartak ręczny", "cost": {"drewno": 40, "żelazo": 10}, "build_time": 10, "prod": {"drewno": 3}, "workers": 3},
+            {"name": "Tartak parowy", "cost": {"stal": 30, "żelazo": 20}, "build_time": 18, "prod": {"drewno": 4}, "workers": 4},
+            {"name": "Przemysłowy kompleks drzewny", "cost": {"stal": 60, "cukier": 10}, "build_time": 30, "prod": {"drewno": 5}, "workers": 5}
         ]
     },
 
@@ -387,63 +387,62 @@ BUILDINGS = {
         "base_cost": {"drewno": 15}, "build_time": 4, "base_workers": 2,
         "allowed_terrain": ["pole"], "base_prod": {"żywność": 3},
         "upgrades": [
-            {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 8, "prod": {"żywność": 1}, "workers": 3},
-            {"name": "Plantacja zbożowa", "cost": {"żelazo": 20, "stal": 10}, "build_time": 15, "prod": {"żywność": 2}, "workers": 4},
-            {"name": "Folwark z młynem", "cost": {"stal": 40, "cukier": 5}, "build_time": 25, "prod": {"żywność": 3}, "workers": 6}
+            {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 8, "prod": {"żywność": 4}, "workers": 3},
+            {"name": "Plantacja zbożowa", "cost": {"żelazo": 20, "stal": 10}, "build_time": 15, "prod": {"żywność": 5}, "workers": 4},
+            {"name": "Folwark z młynem", "cost": {"stal": 40, "cukier": 5}, "build_time": 25, "prod": {"żywność": 6}, "workers": 5}
         ]
     },
 
     # === SKÓRY → UBRANIA ===
     "obóz_myśliwski": {
         "base_cost": {"drewno": 25}, "build_time": 6, "base_workers": 2,
-        "allowed_terrain": ["las", "pole"], "base_prod": {"skóry": 1.5},
+        "allowed_terrain": ["las", "pole"], "base_prod": {"skóry": 1},
         "upgrades": [
             {"name": "Stanica łowiecka", "cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "prod": {"skóry": 1}, "workers": 3},
             {"name": "Rezerwat skórny", "cost": {"stal": 30}, "build_time": 16, "prod": {"skóry": 1.5}, "workers": 4},
-            {"name": "Kompania futrzarska", "cost": {"stal": 50, "cygara": 5}, "build_time": 25, "prod": {"skóry": 2}, "workers": 6}
+            {"name": "Kompania futrzarska", "cost": {"stal": 50, "cygara": 5}, "build_time": 25, "prod": {"skóry": 2}, "workers": 5}
         ]
     },
     "garbarnia_polowa": {
         "base_cost": {"drewno": 30, "żelazo": 10}, "build_time": 8, "base_workers": 2,
         "allowed_terrain": ["osada", "dzielnica"],
-        "requires_settlement": True, "consumes": {"skóry": 1}, "base_prod": {"ubrania": 0.8},
+        "requires_settlement": True, "consumes": {"skóry": 1}, "base_prod": {"ubrania": 0.5},
         "upgrades": [
-            {"name": "Warsztat krawiecki", "cost": {"drewno": 50, "stal": 15}, "build_time": 12, "prod": {"ubrania": 0.5}, "workers": 3},
-            {"name": "Manufaktura odzieżowa", "cost": {"stal": 40, "cukier": 10}, "build_time": 20, "prod": {"ubrania": 1}, "workers": 4},
-            {"name": "Fabryka tekstyliów kolonialnych", "cost": {"stal": 80, "cygara": 10}, "build_time": 30, "prod": {"ubrania": 1.5}, "workers": 6}
+            {"name": "Warsztat krawiecki", "cost": {"drewno": 50, "stal": 15}, "build_time": 12, "prod": {"ubrania": 0.6}, "workers": 3},
+            {"name": "Manufaktura odzieżowa", "cost": {"stal": 40, "cukier": 10}, "build_time": 20, "prod": {"ubrania": 0.8}, "workers": 4},
+            {"name": "Fabryka tekstyliów kolonialnych", "cost": {"stal": 80, "cygara": 10}, "build_time": 30, "prod": {"ubrania": 1}, "workers": 5}
         ]
     },
 
     # === ZIOŁA → MEDYKAMENTY ===
     "ziołorośla": {
-        "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 1,
+        "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
         "allowed_terrain": ["pole", "las"], "base_prod": {"zioła": 1},
         "upgrades": [
-            {"name": "Ogród botaniczny", "cost": {"drewno": 35, "żelazo": 10}, "build_time": 9, "prod": {"zioła": 0.8}, "workers": 2},
-            {"name": "Plantacja ziół leczniczych", "cost": {"stal": 25}, "build_time": 14, "prod": {"zioła": 1.2}, "workers": 3},
-            {"name": "Instytut Etnobotaniki", "cost": {"stal": 50, "medykamenty": 5}, "build_time": 22, "prod": {"zioła": 1.8}, "workers": 5}
+            {"name": "Ogród botaniczny", "cost": {"drewno": 35, "żelazo": 10}, "build_time": 9, "prod": {"zioła": 1.2}, "workers": 3},
+            {"name": "Plantacja ziół leczniczych", "cost": {"stal": 25}, "build_time": 14, "prod": {"zioła": 1.4}, "workers": 4},
+            {"name": "Instytut Etnobotaniki", "cost": {"stal": 50, "medykamenty": 5}, "build_time": 22, "prod": {"zioła": 1.6}, "workers": 5}
         ]
     },
     "ziołolecznica": {
         "base_cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "base_workers": 2,
         "allowed_terrain": ["osada", "dzielnica"],
-        "requires_settlement": True, "consumes": {"zioła": 1}, "base_prod": {"medykamenty": 0.6},
+        "requires_settlement": True, "consumes": {"zioła": 1}, "base_prod": {"medykamenty": 0.5},
         "upgrades": [
-            {"name": "Apteka kolonialna", "cost": {"stal": 30}, "build_time": 14, "prod": {"medykamenty": 0.4}, "workers": 3},
+            {"name": "Apteka kolonialna", "cost": {"stal": 30}, "build_time": 14, "prod": {"medykamenty": 0.6}, "workers": 3},
             {"name": "Laboratorium farmaceutyczne", "cost": {"stal": 50, "cukier": 10}, "build_time": 20, "prod": {"medykamenty": 0.8}, "workers": 4},
-            {"name": "Instytut Medycyny Tropikalnej", "cost": {"stal": 100, "cygara": 15}, "build_time": 32, "prod": {"medykamenty": 1.2}, "workers": 6}
+            {"name": "Instytut Medycyny Tropikalnej", "cost": {"stal": 100, "cygara": 15}, "build_time": 32, "prod": {"medykamenty": 1}, "workers": 5}
         ]
     },
 
     # === UNIWERSALNA KOPALNIA (węgiel, żelazo, srebro, złoto) ===
     "kopalnia": {
-        "base_cost": {"drewno": 35, "żelazo": 15}, "build_time": 12, "base_workers": 3,
+        "base_cost": {"drewno": 35, "żelazo": 15}, "build_time": 12, "base_workers": 3, "base_prod": {"trzcina": 1},
         "allowed_terrain": ["wzniesienia"],
-        "base_prod": {},  # produkcja zależy od zasobu w komórce
         "upgrades": [
-            {"name": "Szyb kopalniany", "cost": {"stal": 30}, "build_time": 16, "workers": 4},
-            {"name": "Kopalnia głębinowa", "cost": {"stal": 60, "cukier": 5}, "build_time": 24, "workers": 5},
-            {"name": "Kombinat górniczy", "cost": {"stal": 100, "cygara": 10}, "build_time": 35, "workers": 7}
+            {"name": "Szyb kopalniany", "cost": {"stal": 30}, "build_time": 16, "base_prod": {"trzcina": 1.2}, "workers": 4},
+            {"name": "Kopalnia głębinowa", "cost": {"stal": 60, "cukier": 5}, "build_time": 24, "base_prod": {"trzcina": 1.4}, "workers": 5},
+            {"name": "Kombinat górniczy", "cost": {"stal": 100, "cygara": 10}, "build_time": 35, "base_prod": {"trzcina": 1.6}, "workers": 7}
         ]
     },
 
@@ -454,57 +453,57 @@ BUILDINGS = {
         "allowed_terrain": ["osada", "dzielnica"],
         "consumes": {"węgiel": 1, "żelazo": 1}, "base_prod": {"stal": 0.5},
         "upgrades": [
-            {"name": "Huta surówki", "cost": {"stal": 40}, "build_time": 18, "prod": {"stal": 0.4}, "workers": 4},
+            {"name": "Huta surówki", "cost": {"stal": 40}, "build_time": 18, "prod": {"stal": 0.6}, "workers": 4},
             {"name": "Wielki piec martenowski", "cost": {"stal": 80, "cukier": 10}, "build_time": 25, "prod": {"stal": 0.8}, "workers": 5},
-            {"name": "Huta stali Siemens-Martin", "cost": {"stal": 120, "cygara": 15}, "build_time": 38, "prod": {"stal": 1.2}, "workers": 7}
+            {"name": "Huta stali Siemens-Martin", "cost": {"stal": 120, "cygara": 15}, "build_time": 38, "prod": {"stal": 1}, "workers": 6}
         ]
     },
 
     # === TRZCINA → CUKIER ===
     "plantacja_trzciny": {
         "base_cost": {"drewno": 30}, "build_time": 7, "base_workers": 3,
-        "allowed_terrain": ["pole"], "base_prod": {"trzcina": 2},
+        "allowed_terrain": ["pole"], "base_prod": {"trzcina": 1},
         "upgrades": [
-            {"name": "Hacienda trzcinowa", "cost": {"żelazo": 25}, "build_time": 12, "prod": {"trzcina": 1}, "workers": 4},
-            {"name": "Latifundium cukrowe", "cost": {"stal": 40}, "build_time": 20, "prod": {"trzcina": 1.5}, "workers": 5},
-            {"name": "Korporacja trzcinowa", "cost": {"stal": 80, "cygara": 10}, "build_time": 30, "prod": {"trzcina": 2}, "workers": 7}
+            {"name": "Hacienda trzcinowa", "cost": {"żelazo": 25}, "build_time": 12, "prod": {"trzcina": 1.2}, "workers": 4},
+            {"name": "Latifundium cukrowe", "cost": {"stal": 40}, "build_time": 20, "prod": {"trzcina": 1.4}, "workers": 5},
+            {"name": "Korporacja trzcinowa", "cost": {"stal": 80, "cygara": 10}, "build_time": 30, "prod": {"trzcina": 1.6}, "workers": 6}
         ]
     },
     "cukrownia_ręczna": {
         "base_cost": {"drewno": 45, "żelazo": 20}, "build_time": 12, "base_workers": 3,
         "allowed_terrain": ["osada", "dzielnica"],
-        "requires_settlement": True, "consumes": {"trzcina": 2}, "base_prod": {"cukier": 1},
+        "requires_settlement": True, "consumes": {"trzcina": 2}, "base_prod": {"cukier": 0.5},
         "upgrades": [
             {"name": "Rafineria cukru", "cost": {"stal": 40}, "build_time": 16, "prod": {"cukier": 0.6}, "workers": 4},
-            {"name": "Destylarnia cukru parowa", "cost": {"stal": 70, "cukier": 10}, "build_time": 24, "prod": {"cukier": 1}, "workers": 5},
-            {"name": "Przemysłowa destylarnia cukru", "cost": {"stal": 110, "cygara": 15}, "build_time": 36, "prod": {"cukier": 1.5}, "workers": 7}
+            {"name": "Destylarnia cukru parowa", "cost": {"stal": 70, "cukier": 10}, "build_time": 24, "prod": {"cukier": 0.7}, "workers": 5},
+            {"name": "Przemysłowa destylarnia cukru", "cost": {"stal": 110, "cygara": 15}, "build_time": 36, "prod": {"cukier": 0.8}, "workers": 6}
         ]
     },
 
     # === TYTOŃ → CYGARA ===
     "plantacja_tytoniu": {
         "base_cost": {"drewno": 35}, "build_time": 8, "base_workers": 3,
-        "allowed_terrain": ["pole"], "base_prod": {"tytoń": 1.5},
+        "allowed_terrain": ["pole"], "base_prod": {"tytoń": 1},
         "upgrades": [
-            {"name": "Estancia tytoniowa", "cost": {"żelazo": 30}, "build_time": 13, "prod": {"tytoń": 0.8}, "workers": 4},
-            {"name": "Latifundium tytoniowe", "cost": {"stal": 50}, "build_time": 20, "prod": {"tytoń": 1.2}, "workers": 5},
-            {"name": "Konsorcjum tytoniowe", "cost": {"stal": 90, "cygara": 10}, "build_time": 32, "prod": {"tytoń": 1.8}, "workers": 7}
+            {"name": "Estancia tytoniowa", "cost": {"żelazo": 30}, "build_time": 13, "prod": {"tytoń": 1.2}, "workers": 4},
+            {"name": "Latifundium tytoniowe", "cost": {"stal": 50}, "build_time": 20, "prod": {"tytoń": 1.4}, "workers": 5},
+            {"name": "Konsorcjum tytoniowe", "cost": {"stal": 90, "cygara": 10}, "build_time": 32, "prod": {"tytoń": 1.6}, "workers": 6}
         ]
     },
     "suszenie_tytoniu": {
         "base_cost": {"drewno": 50, "żelazo": 25}, "build_time": 14, "base_workers": 3,
-        "requires_settlement": True, "consumes": {"tytoń": 1}, "base_prod": {"cygara": 0.7},
+        "requires_settlement": True, "consumes": {"tytoń": 1}, "base_prod": {"cygara": 0.5},
         "allowed_terrain": ["osada", "dzielnica"],
         "upgrades": [
-            {"name": "Manufaktura cygar", "cost": {"stal": 45}, "build_time": 18, "prod": {"cygara": 0.5}, "workers": 4},
-            {"name": "Fabryka cygar ręcznych", "cost": {"stal": 80, "cukier": 15}, "build_time": 26, "prod": {"cygara": 0.9}, "workers": 5},
-            {"name": "Fabryka cygar premium", "cost": {"stal": 130, "cygara": 20}, "build_time": 40, "prod": {"cygara": 1.3}, "workers": 7}
+            {"name": "Manufaktura cygar", "cost": {"stal": 45}, "build_time": 18, "prod": {"cygara": 0.6}, "workers": 4},
+            {"name": "Fabryka cygar ręcznych", "cost": {"stal": 80, "cukier": 15}, "build_time": 26, "prod": {"cygara": 0.7}, "workers": 5},
+            {"name": "Fabryka cygar premium", "cost": {"stal": 130, "cygara": 20}, "build_time": 40, "prod": {"cygara": 0.8}, "workers": 6}
         ]
     },
 
     # === PRZYSTAŃ ===
     "przystań": {
-        "base_cost": {"drewno": 60, "żelazo": 30}, "build_time": 16, "base_workers": 0,
+        "base_cost": {"drewno": 60, "żelazo": 30}, "build_time": 16, "base_workers": 2, "base_prod": {"żywność": 3},
         "requires_adjacent_settlement": True,
         "allowed_terrain": ["morze"],
         "upgrades": []

@@ -4,6 +4,7 @@ from tkinter import ttk
 from datetime import timedelta
 
 from constants import BUILDINGS, RESOURCES, STATES
+from tooltip import Tooltip
 
 
 class BuildingsMixin:
@@ -94,48 +95,73 @@ class BuildingsMixin:
         for b in self.buildings:
             if b.get("is_district"):
                 continue
+
             base = BUILDINGS[b["base"]]
             level = b.get("level", 0)
             workers = b.get("workers", 0)
+
             if not workers:
                 building_output.append((b, {r: 0 for r in RESOURCES}, {}, 0.0))
                 continue
 
             prod = {}
-            for res, amt in base.get("base_prod", {}).items():
-                bonus = 1
-                # premie państw
-                if self.state == "Szwecja" and res == "drewno":
-                    bonus = STATES[self.state]["wood"]
-                if self.state == "Dania" and res == "żywność":
-                    bonus = STATES[self.state]["food"]
-                if self.state == "Brandenburgia" and res == "stal":
-                    bonus = STATES[self.state]["steel"]
-                prod[res] = amt * workers * bonus
 
-            # ulepszenia
+            # --- produkcja bazowa ---
+            for res, amt in base.get("base_prod", {}).items():
+                # dla kopalni: zamiast sztucznego zasobu z constants
+                # używamy faktycznego surowca z pola (węgiel/żelazo/srebro/złoto)
+                target_res = res
+                if b["base"] == "kopalnia" and b.get("resource"):
+                    target_res = b["resource"]
+
+                bonus = 1.0
+                # premie państw zależne od surowca (po mapowaniu)
+                if self.state == "Szwecja" and target_res == "drewno":
+                    bonus = STATES[self.state]["wood"]
+                if self.state == "Dania" and target_res == "żywność":
+                    bonus = STATES[self.state]["food"]
+                if self.state == "Brandenburgia" and target_res == "stal":
+                    bonus = STATES[self.state]["steel"]
+
+                # bonus Genui dla wszystkich kopalń
+                if self.state == "Genua" and b["base"] == "kopalnia":
+                    bonus *= STATES[self.state].get("mine", 1.0)
+
+                prod[target_res] = prod.get(target_res, 0) + amt * workers * bonus
+
+            # --- ulepszenia (poziomy 1+) ---
             if level > 0:
                 up = base["upgrades"][level - 1]
-                for res, amt in up.get("prod", {}).items():
-                    prod[res] = prod.get(res, 0) + amt * workers
 
-            # kopalnie z przypisanym surowcem
-            if b["base"] == "kopalnia" and b.get("resource"):
-                resource = b["resource"]
-                base_amount = (1 + level * 0.5) * workers
+                # standardowo: klucz "prod" jak w innych budynkach;
+                # ale gdybyś w kopalni trzymał to w "base_prod", też to złapiemy
+                upgrade_prod = up.get("prod", up.get("base_prod", {}))
 
-                if self.state == "Genua":
-                    bonus = STATES[self.state]["mine"]
-                    base_amount *= bonus
+                for res, amt in upgrade_prod.items():
+                    target_res = res
+                    if b["base"] == "kopalnia" and b.get("resource"):
+                        target_res = b["resource"]
 
-                prod[resource] = base_amount
+                    bonus = 1.0
+                    if self.state == "Szwecja" and target_res == "drewno":
+                        bonus = STATES[self.state]["wood"]
+                    if self.state == "Dania" and target_res == "żywność":
+                        bonus = STATES[self.state]["food"]
+                    if self.state == "Brandenburgia" and target_res == "stal":
+                        bonus = STATES[self.state]["steel"]
 
+                    if self.state == "Genua" and b["base"] == "kopalnia":
+                        bonus *= STATES[self.state].get("mine", 1.0)
+
+                    prod[target_res] = prod.get(target_res, 0) + amt * workers * bonus
+
+            # --- konsumpcja surowców ---
             cons = {}
             if "consumes" in base:
                 for res, amt in base["consumes"].items():
                     cons[res] = amt * workers
 
-            # sprawdzamy, czy starcza surowców na konsumpcję
+            # --- sprawdzenie, czy starcza surowców (wydajność) ---
             efficiency = 1.0
             for res, needed in cons.items():
                 available = self.resources.get(res, 0)
@@ -438,12 +464,13 @@ class BuildingsMixin:
 
     # === Menu budowy ===
     # === Menu budowy ===
+    # === Menu budowy ===
     def build_menu(self):
 
         win = self.create_window(f"Buduj")
 
         for name, data in BUILDINGS.items():
-            # skopiuj koszt i uwzględnij bonus Holandii
+            # koszt z uwzględnieniem bonusu Holandii
             display_cost = data["base_cost"].copy()
             if self.state == "Holandia":
                 mult = STATES[self.state]["build_cost"]  # np. 0.8
@@ -467,16 +494,21 @@ class BuildingsMixin:
             )
             btn.pack(side="left")
 
+            # Tooltip z informacją CO robi budynek
+            Tooltip(
+                btn,
+                lambda n=name, d=data: self.get_building_tooltip_text(n, d)
+            )
+
             # 2) Ramka z informacjami o budynku (po prawej)
             info_frame = ttk.Frame(row)
             info_frame.pack(side="left", fill="x", expand=True, padx=(10, 0))
 
-            # Złóż tekst informacji: czas, koszt, pracownicy, opis
             info_parts = []
             if build_time:
                 info_parts.append(f"Czas budowy: {build_time} dni")
             if base_workers:
-                info_parts.append(f"Pracownicy: {base_workers}")
+                info_parts.append(f"Miejsca pracy: {base_workers}")
             info_parts.append(f"Koszt: {cost_str}")
             if desc:
                 info_parts.append(desc)
@@ -496,6 +528,89 @@ class BuildingsMixin:
         # wyśrodkuj okno
         self.center_window(win)
 
+    def get_building_tooltip_text(self, name, data):
+        """
+        Tooltip po najechaniu na nazwę budynku:
+        - namiot: +X mieszkań
+        - dzielnica: +5 miejsc na budowle
+        - kopalnia: produkcja zależna od surowca i poziomu
+        - reszta: +prod / pracownik, -koszt / pracownik
+        wszystko z uwzględnieniem bonusów państwa.
+        """
+
+        # === NAMIOT ===
+        if name == "namiot":
+            cap = data.get("capacity", 0)
+            return f"+{cap} mieszkań"
+
+        # === DZIELNICA ===
+        if name == "dzielnica":
+            return "+5 nowych miejsc na budowle"
+
+        # === BUDYNKI PRODUKCYJNE I KOPALNIA ===
+
+        # 1) produkcja bazowa
+        base_prod = data.get("base_prod", {}) or {}
+
+        # 2) produkcja z ulepszeń (pokazać poziomy)
+        upgrades = data.get("upgrades", []) or []
+
+        # Tooltip dla kopalni oraz innych budynków produkcyjnych
+        lines = []
+
+        # === bazowa produkcja ===
+        if base_prod:
+            for res, amount in base_prod.items():
+                display_res = res
+
+                # kopalnia: „trzcina” → prawdziwy surowiec ('węgiel', 'żelazo', 'srebro', 'złoto')
+                if name == "kopalnia":
+                    display_res = "surowiec ze złoża"
+
+                # premie państw
+                bonus = 1.0
+                if self.state == "Szwecja" and display_res == "drewno":
+                    bonus = STATES[self.state]["wood"]
+                if self.state == "Dania" and display_res == "żywność":
+                    bonus = STATES[self.state]["food"]
+                if self.state == "Brandenburgia" and display_res == "stal":
+                    bonus = STATES[self.state]["steel"]
+                if self.state == "Genua" and name == "kopalnia":
+                    bonus *= STATES[self.state].get("mine", 1.0)
+
+                real_amount = amount * bonus
+                lines.append(f"Poziom 0: +{real_amount:g} {display_res} / pracownik")
+
+        # === produkcja z ulepszeń ===
+        for idx, up in enumerate(upgrades, start=1):
+            up_prod = up.get("prod", up.get("base_prod", {})) or {}
+            for res, amount in up_prod.items():
+                display_res = res
+                if name == "kopalnia":
+                    display_res = "surowiec ze złoża"
+
+                bonus = 1.0
+                if self.state == "Szwecja" and display_res == "drewno":
+                    bonus = STATES[self.state]["wood"]
+                if self.state == "Dania" and display_res == "żywność":
+                    bonus = STATES[self.state]["food"]
+                if self.state == "Brandenburgia" and display_res == "stal":
+                    bonus = STATES[self.state]["steel"]
+                if self.state == "Genua" and name == "kopalnia":
+                    bonus *= STATES[self.state].get("mine", 1.0)
+
+                real_amount = amount * bonus
+                lines.append(f"Poziom {idx}: +{real_amount:g} {display_res} / pracownik")
+
+        if not lines:
+            return "Brak bezpośredniej produkcji ani kosztów."
+
+        # Jeśli to kopalnia — dodaj precyzję opisu
+        if name == "kopalnia":
+            return ("Kopalnia: wydobywa surowiec ze złoża na wzniesieniach.\n"
+                    + "\n".join(lines))
+
+        return "\n".join(lines)
     def select_for_building(self, name, win):
         self.selected_building = name
         win.destroy()

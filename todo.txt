@@ -10,7 +10,12 @@ DONE !!! +-1/+-10/+-100 przyciski przy handlu
 DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
 DONE !!! - ekran z towarami na statku wymaga poprawy
-TOOLTIPS
+
+<TOOLTIPS>
+DONE !!!!Do budynków
+Do misji
+Do reszty
+
 DONE !!! - bonusy do krajów na ekranie startowym
 wiecej muzyki i ambiance
 drogi? -> bonus do produkcji.
