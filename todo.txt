@@ -11,6 +11,8 @@ DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
 DONE !!! - ekran z towarami na statku wymaga poprawy
 TOOLTIPS
+DONE !!! - bonusy do krajów na ekranie startowym
+wiecej muzyki i ambiance
 drogi? -> bonus do produkcji.
 
 <MAPA>

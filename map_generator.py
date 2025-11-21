@@ -1,8 +1,8 @@
 # map_generator.py
 import random
 
-# Konfiguracja mapy
-MAP_SIZE = 8
+from constants import MAP_SIZE
+
 MINE_RESOURCES = ["węgiel", "żelazo", "srebro", "złoto"]
 BASE_COLORS = {"morze": "#0066CC", "pole": "#CCCC99", "las": "#228B22", "wzniesienia": "#8B4513", "osada": "#000000"}
 FERTILITY = {"nieurodzaj": 0.7, "średni": 1.0, "płodny": 1.3}

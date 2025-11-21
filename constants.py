@@ -5,6 +5,9 @@ import random
 START_YEAR_MIN = 1492
 START_YEAR_MAX = 1776
 
+# Konfiguracja mapy
+MAP_SIZE = 8
+
 def generate_start_date():
     from datetime import datetime
     year = random.randint(START_YEAR_MIN, START_YEAR_MAX)
@@ -24,7 +27,7 @@ MAX_SHIP_CARGO = 1500
 # ============== PAŃSTWA ==============
 STATES = {
     "Portugalia": {
-        "bonus": "szybsze statki", "speed": 1.3,
+        "bonus": "szybsze statki (+30% szybkości podróży)", "speed": 1.3,
         "rulers": [
             {"name": "Jan II Doskonały", "start": 1481, "end": 1495},
             {"name": "Manuel I Szczęśliwy", "start": 1495, "end": 1521},
@@ -43,7 +46,7 @@ STATES = {
         ]
     },
     "Hiszpania": {
-        "bonus": "lepsza eksploracja", "explore": 1.4,
+        "bonus": "lepsza eksploracja (+40% nagrody)", "explore": 1.4,
         "rulers": [
             {"name": "Izabela I Kastylijska", "start": 1474, "end": 1504},
             {"name": "Ferdynand II Aragoński", "start": 1479, "end": 1516},
@@ -60,7 +63,7 @@ STATES = {
         ]
     },
     "Anglia": {
-        "bonus": "lepszy handel i szybsze statki", "trade": 0.1, "speed": 1.1,
+        "bonus": "lepszy handel (-10%/+10% ceny)\nSzybsze statki (+10% szybkości podróży)", "trade": 0.1, "speed": 1.1,
         "rulers": [
             {"name": "Henryk VII Tudor", "start": 1485, "end": 1509},
             {"name": "Henryk VIII", "start": 1509, "end": 1547},
@@ -81,7 +84,7 @@ STATES = {
         ]
     },
     "Francja": {
-        "bonus": "lepsza dyplomacja", "reputation_threshold": 750,
+        "bonus": "lepsza dyplomacja\n(nagroda reputacji przy 750 wartości (z 1000))", "reputation_threshold": 750,
         "rulers": [
             {"name": "Karol VIII", "start": 1483, "end": 1498},
             {"name": "Ludwik XII", "start": 1498, "end": 1515},
@@ -98,7 +101,7 @@ STATES = {
         ]
     },
     "Holandia": {
-        "bonus": "taniej budować", "build_cost": 0.8,
+        "bonus": "tańsze budowle (-20% kosztu budowy)", "build_cost": 0.8,
         "rulers": [
             {"name": "Filip II", "start": 1555, "end": 1581},
             {"name": "Rada Stanu", "start": 1581, "end": 1588},
@@ -113,7 +116,7 @@ STATES = {
         ]
     },
     "Szwecja": {
-        "bonus": "lepsza produkcja drewna", "wood": 1.5,
+        "bonus": "lepsza produkcja drewna (+50% produkcji)", "wood": 1.5,
         "rulers": [
             {"name": "Sten Starszy", "start": 1470, "end": 1497},
             {"name": "Jan Oldenburński", "start": 1497, "end": 1501},
@@ -137,7 +140,7 @@ STATES = {
         ]
     },
     "Dania": {
-        "bonus": "lepsza żywność", "food": 1.4,
+        "bonus": "lepsza żywność (+40% produkcji)", "food": 1.4,
         "rulers": [
             {"name": "Jan Oldenburński", "start": 1481, "end": 1513},
             {"name": "Krystian II", "start": 1513, "end": 1523},
@@ -154,7 +157,7 @@ STATES = {
         ]
     },
     "Wenecja": {
-        "bonus": "lepszy handel", "trade": 0.2,
+        "bonus": "lepszy handel (-20%/+20% ceny)", "trade": 0.2,
         "rulers": [
             {"name": "Agostino Barbarigo", "start": 1486, "end": 1501},
             {"name": "Leonardo Loredan", "start": 1501, "end": 1521},
@@ -206,7 +209,7 @@ STATES = {
         ]
     },
     "Genua": {
-        "bonus": "bogate kopalnie", "mine": 1.2,
+        "bonus": "bogate kopalnie (+20% produkcji)", "mine": 1.2,
         "rulers": [
             {"name": "Battista Fregoso", "start": 1478, "end": 1483},
             {"name": "Paolo Fregoso", "start": 1483, "end": 1488},
@@ -237,7 +240,7 @@ STATES = {
         ]
     },
     "Polska": {
-        "bonus": "dużo ludzi", "pop_start": 10,
+        "bonus": "wzmożona emigracja (+10 ludzi na start)", "pop_start": 10,
         "rulers": [
             {"name": "Kazimierz IV Jagiellończyk", "start": 1447, "end": 1492},
             {"name": "Jan I Olbracht", "start": 1492, "end": 1501},
@@ -331,7 +334,7 @@ STATES = {
     #     ]
     # },
     "Brandenburgia": {
-        "bonus": "lepsza stal", "steel": 1.5,
+        "bonus": "lepsza stal (+50% przy produkcji)", "steel": 1.5,
         "rulers": [
             {"name": "Fryderyk I", "start": 1415, "end": 1440},
             {"name": "Fryderyk II Żelazny Ząb", "start": 1440, "end": 1470},

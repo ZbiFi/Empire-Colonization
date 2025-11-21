@@ -251,8 +251,19 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 return monarch["name"]
         return "Nieznany"
 
+
     # === Start gry ===
     def start_screen(self):
+
+        def update_state_bonus(*_):
+            state = self.state_var.get()
+            data = STATES.get(state, {})
+            bonus_text = data.get("bonus")
+
+            if bonus_text:
+                self.state_bonus_var.set(f"Bonus: {bonus_text}")
+            else:
+                self.state_bonus_var.set("Bonus: brak unikalnego efektu.")
 
         # wyczyść stare widgety
         for w in self.root.winfo_children():
@@ -292,6 +303,51 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             width=30
         )
         combo.pack(pady=5)
+
+        # === Bonus wybranego państwa ===
+        self.state_bonus_var = tk.StringVar(value="")
+
+        # Ramka o stałej wysokości – nic nie przeskakuje
+        bonus_frame = ttk.Frame(frame, height=60)  # możesz skorygować 60 na 50/70 wg uznania
+        bonus_frame.pack(pady=(5, 10), fill="x")
+        bonus_frame.pack_propagate(False)  # NIE zmieniaj rozmiaru ramki pod zawartość
+
+        self.state_bonus_label = ttk.Label(
+            bonus_frame,
+            textvariable=self.state_bonus_var,
+            font=("EB Garamond Italic", 12),   # mniejsza czcionka
+            foreground="darkgreen",
+            anchor="center",
+            justify="center",
+            wraplength=500,  # szerokość w pikselach, przy której tekst sam się zawija
+        )
+        self.state_bonus_label.pack(expand=True)
+
+        # aktualizuj bonus przy każdej zmianie wyboru
+        self.state_var.trace_add("write", update_state_bonus)
+        # ustaw tekst dla domyślnego państwa (Portugalia)
+        update_state_bonus()
+
+        # === Wybór wielkości mapy ===
+        ttk.Label(frame, text="Wielkość mapy:", font=self.ui_font).pack(pady=(10, 5))
+
+        self.map_size_var = tk.StringVar(value="średnia (normalna)")
+        map_size_options = [
+            "najmniejsza (bardzo trudna)",
+            "mała (trudna)",
+            "średnia (normalna)",
+            "duża (łatwa)",
+            "najwięsza (bardzo łatwa)",
+        ]
+
+        map_size_combo = ttk.Combobox(
+            frame,
+            textvariable=self.map_size_var,
+            values=map_size_options,
+            state="readonly",
+            width=30
+        )
+        map_size_combo.pack(pady=5)
 
         ttk.Label(frame, text="Długość gry (liczba misji królewskich):", font=self.ui_font).pack(pady=(15, 5))
 
@@ -347,6 +403,18 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         ])
         if "pop_start" in STATES[self.state]:
             self.people += STATES[self.state]["pop_start"]
+
+        # wybór wielkości mapy z ekranu startowego
+        size_label = getattr(self, "map_size_var", None).get() if hasattr(self, "map_size_var") else "średnia (normalna)"
+        size_map = {
+            "najmniejsza (bardzo trudna)": 6,
+            "mała (trudna)": 7,
+            "średnia (normalna)": 8,
+            "duża (łatwa)": 9,
+            "najwięsza (bardzo łatwa)": 10,
+        }
+
+        self.map_size = size_map.get(size_label, 8)
 
         self.map_grid, self.settlement_pos = generate_map(self.map_size)
         self.map_size = len(self.map_grid)
