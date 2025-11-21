@@ -369,10 +369,10 @@ class ShipsMixin:
                 self.log(f"Statek {i+1} wrócił do kolonii. Gotowy do kolejnej podróży.", "blue")
                 self.play_sound("ship_arrived")
 
-                # Nowa misja (jeśli minęło 180 dni)
+                # Nowa misja (jeśli minęło 30 dni)
                 if i == self.flagship_index:
                     if (self.last_mission_date is None or
-                            (self.current_date - self.last_mission_date).days >= 180):
+                            (self.current_date - self.last_mission_date).days >= 30):
                         if not self.current_mission:
                             self.deliver_new_mission()
 

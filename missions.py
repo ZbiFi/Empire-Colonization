@@ -20,7 +20,7 @@ class MissionsMixin:
 
         else:
             self.mission_multiplier *= growth
-        difficulty = int(self.mission_multiplier * 10) / 10  # <-- jak wcześniej
+        difficulty = int(self.mission_multiplier * 1.5)  # <-- jak wcześniej
 
         required = {}
         missionName = mission["name"]
@@ -215,8 +215,8 @@ class MissionsMixin:
                     # zakończ misję
                     self.native_missions_active[tribe] = None
 
-                    # cooldown 2–3 miesiące
-                    cd = random.randint(60, 90)
+                    # cooldown 1–2 miesiące
+                    cd = random.randint(30, 60)
                     self.native_missions_cd[tribe] = self.current_date + timedelta(days=cd)
 
                     win.destroy()
