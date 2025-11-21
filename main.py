@@ -44,6 +44,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # grafika mapy (kafelki lasu itp.)
         self.init_map_graphics()
         self.init_ocean_tiles()
+        self.init_mountains_tiles()
+        self.init_forest_tiles()
 
         self.title_font = ("IM Fell English SC", 28, "bold")
         self.ui_font = ("EB Garamond Italic", 18)

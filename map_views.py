@@ -82,6 +82,7 @@ class MapUIMixin:
         self.ocean_base_path = self.resource_path("img/tiles/ocean")
         self.ocean_tile_cache = {}   # (filename, cell_size) -> ImageTk.PhotoImage
         self.ocean_defs = []         # lista: {filename, card, inner, outer}
+        self.ocean_tile_assignments = {}  # (y, x) -> filename (na przyszłość, jeśli chcesz je utrwalać)
 
         if not os.path.isdir(self.ocean_base_path):
             return
@@ -104,6 +105,74 @@ class MapUIMixin:
         if not self.ocean_defs:
             self.ocean_defs.append({
                 "filename": "ocean_inner.png",
+                "card": set(),
+                "inner": set(),
+                "outer": set(),
+            })
+
+    def init_forest_tiles(self):
+        """Ładuje wszystkie pliki lasu i rozbija ich nazwy na krawędzie/narożniki."""
+        self.forest_base_path = self.resource_path("img/tiles/forest")
+        self.forest_tile_cache = {}  # (filename, cell_size) -> ImageTk.PhotoImage
+        self.forest_defs = []  # lista: {filename, card, inner, outer}
+
+        if not os.path.isdir(self.forest_base_path):
+            return
+
+        for fname in os.listdir(self.forest_base_path):
+            if not fname.endswith(".png"):
+                continue
+            base = fname.split(".")[0]  # np. forest_north_south_1
+            parts = base.rsplit("_", 1)
+            base_no_idx = parts[0] if parts[-1].isdigit() else base
+
+            # podmieniamy prefix forest_ -> ocean_, żeby użyć tego samego parsera
+            norm = base_no_idx.replace("forest_", "ocean_")
+            card, inner, outer = self._parse_ocean_name(norm)
+            self.forest_defs.append({
+                "filename": fname,
+                "card": card,
+                "inner": inner,
+                "outer": outer,
+            })
+
+        if not self.forest_defs:
+            # awaryjnie, żeby coś było
+            self.forest_defs.append({
+                "filename": "forest_inner.png",
+                "card": set(),
+                "inner": set(),
+                "outer": set(),
+            })
+
+    def init_mountains_tiles(self):
+        """Ładuje wszystkie pliki wzgórz i rozbija ich nazwy na krawędzie/narożniki."""
+        self.mountains_base_path = self.resource_path("img/tiles/mountains")
+        self.mountains_tile_cache = {}  # (filename, cell_size) -> ImageTk.PhotoImage
+        self.mountains_defs = []  # lista: {filename, card, inner, outer}
+
+        if not os.path.isdir(self.mountains_base_path):
+            return
+
+        for fname in os.listdir(self.mountains_base_path):
+            if not fname.endswith(".png"):
+                continue
+            base = fname.split(".")[0]  # np. mountains_north_south_1
+            parts = base.rsplit("_", 1)
+            base_no_idx = parts[0] if parts[-1].isdigit() else base
+
+            norm = base_no_idx.replace("mountains_", "ocean_")
+            card, inner, outer = self._parse_ocean_name(norm)
+            self.mountains_defs.append({
+                "filename": fname,
+                "card": card,
+                "inner": inner,
+                "outer": outer,
+            })
+
+        if not self.mountains_defs:
+            self.mountains_defs.append({
+                "filename": "mountains_inner.png",
                 "card": set(),
                 "inner": set(),
                 "outer": set(),
@@ -179,6 +248,95 @@ class MapUIMixin:
 
         return card_req, inner_req, outer_req
 
+    def _pick_tile_from_defs(self, neigh, defs, empty_filename: str):
+        """
+        Ogólna logika dobierania kafelka (dla oceanu / lasu / wzgórz).
+        - neigh: dict N/NE/.. -> bool (czy tam jest 'ląd' względem danego terenu)
+        - defs: lista {filename, card, inner, outer}
+        - empty_filename: nazwa 'pustego' tilesa (inner) na wypadek braku dopasowania
+        """
+        if not defs:
+            return empty_filename
+
+        card_req, inner_req, _ = self._describe_ocean_neighbors(neigh)
+
+        # jeśli wszędzie "morze" / "las" / "góry" (czyli brak krawędzi) – szukamy czystego tilesa
+        if not any(neigh.values()):
+            for d in defs:
+                if not d["card"] and not d["inner"] and not d["outer"]:
+                    return d["filename"]
+            return empty_filename
+
+        # outer traktujemy jak dodatkowe krawędzie (NE => N+E itd.)
+        def effective_edges(d):
+            edges = set(d["card"])
+            for diag in d["outer"]:
+                if diag == "NE":
+                    edges.update(("N", "E"))
+                elif diag == "SE":
+                    edges.update(("S", "E"))
+                elif diag == "SW":
+                    edges.update(("S", "W"))
+                elif diag == "NW":
+                    edges.update(("N", "W"))
+            return edges
+
+        # --- 1. Perfekcyjne dopasowanie ---
+        perfect = []
+        for d in defs:
+            edges = effective_edges(d)
+            if edges == card_req and d["inner"] == inner_req:
+                perfect.append(d)
+
+        if perfect:
+            return random.choice(perfect)["filename"]
+
+        # --- 2. Supersety (kafel ma wszystko co trzeba + może coś ekstra) ---
+        superset = []
+        for d in defs:
+            edges = effective_edges(d)
+            if card_req <= edges and inner_req <= d["inner"]:
+                superset.append((d, edges))
+
+        if superset:
+            def extra_cost(item):
+                d, edges = item
+                return len(edges - card_req) + len(d["inner"] - inner_req)
+
+            best_d, _ = min(superset, key=extra_cost)
+            return best_d["filename"]
+
+        # --- 3. Fallback: prosty scoring ---
+        best_name = empty_filename
+        best_score = -10 ** 9
+
+        for d in defs:
+            edges = effective_edges(d)
+            inner = d["inner"]
+            outer = d["outer"]
+
+            edge_match = len(card_req & edges)
+            edge_missing = len(card_req - edges)
+            edge_extra = len(edges - card_req)
+
+            inner_match = len(inner_req & inner)
+            inner_missing = len(inner_req - inner)
+            inner_extra = len(inner - inner_req)
+
+            score = 0
+            score += 20 * edge_match - 40 * edge_missing - 10 * edge_extra
+            score += 10 * inner_match - 15 * inner_missing - 5 * inner_extra
+
+            # lekka kara za zbyt skomplikowane tilesy
+            complexity = len(edges) + len(inner) + len(outer)
+            score -= 0.1 * complexity
+
+            if score > best_score:
+                best_score = score
+                best_name = d["filename"]
+
+        return best_name
+
     def get_terrain_icon(self, terrain: str, cell_size: int):
         """Zwraca miniaturkę terenu do legendy albo None."""
         base = self.terrain_icon_bases.get(terrain)
@@ -235,115 +393,29 @@ class MapUIMixin:
             return self.map_grid[y][x]["terrain"] != "morze"
         return False
 
-    def pick_ocean_tile_name(self, neigh):
+    def _is_not_terrain(self, y, x, terrain_name: str) -> bool:
         """
-        Wybiera NAJLEPIEJ pasujący kafelek oceanu biorąc pod uwagę
-        wszystkich 8 sąsiadów (N, NE, E, SE, S, SW, W, NW).
+        True, jeśli pole NIE jest danym terenem (np. nie-las, nie-wzgórza).
+        Używane do wykrywania 'krawędzi' lasu/wzgórz względem otoczenia.
+        """
+        if 0 <= y < self.map_size and 0 <= x < self.map_size:
+            return self.map_grid[y][x]["terrain"] != terrain_name
+        return False
 
-        Zasady:
-        - OUTER w nazwie kafla traktujemy jak normalne krawędzie:
-          NE -> N+E, SE -> S+E, SW -> S+W, NW -> N+W
-        - najpierw szukamy kafli z idealnie takim samym zestawem krawędzi
-          i innerów jak wymagane,
-        - potem supersety,
-        - na końcu heurystyczny scoring.
-        """
+    def pick_ocean_tile_name(self, neigh):
         if not hasattr(self, "ocean_defs") or not self.ocean_defs:
             self.init_ocean_tiles()
+        return self._pick_tile_from_defs(neigh, self.ocean_defs, "ocean_inner.png")
 
-        if not self.ocean_defs:
-            return "ocean_inner.png"
+    def pick_forest_tile_name(self, neigh):
+        if not hasattr(self, "forest_defs") or not self.forest_defs:
+            self.init_forest_tiles()
+        return self._pick_tile_from_defs(neigh, self.forest_defs, "forest_inner.png")
 
-        card_req, inner_req, _ = self._describe_ocean_neighbors(neigh)
-
-        # jeśli wszędzie woda – szukamy po prostu ocean_inner
-        if not any(neigh.values()):
-            for d in self.ocean_defs:
-                if not d["card"] and not d["inner"] and not d["outer"]:
-                    return d["filename"]
-            return "ocean_inner.png"
-
-        # pomocnicza funkcja: efektywne krawędzie kafla (card + outer→krawędzie)
-        def effective_edges(d):
-            edges = set(d["card"])
-            for diag in d["outer"]:
-                if diag == "NE":
-                    edges.update(("N", "E"))
-                elif diag == "SE":
-                    edges.update(("S", "E"))
-                elif diag == "SW":
-                    edges.update(("S", "W"))
-                elif diag == "NW":
-                    edges.update(("N", "W"))
-            return edges
-
-        # --- 1. Perfekcyjne dopasowanie ---
-        perfect = []
-        for d in self.ocean_defs:
-            edges = effective_edges(d)
-            if edges == card_req and d["inner"] == inner_req:
-                perfect.append(d)
-
-        if perfect:
-            return random.choice(perfect)["filename"]
-
-        # --- 2. Supersety: kafle zawierające wszystkie wymagane krawędzie/innery ---
-        superset = []
-        for d in self.ocean_defs:
-            edges = effective_edges(d)
-            if card_req <= edges and inner_req <= d["inner"]:
-                superset.append((d, edges))
-
-        if superset:
-            def extra_cost(item):
-                d, edges = item
-                return len(edges - card_req) + len(d["inner"] - inner_req)
-
-            best_d, _ = min(superset, key=extra_cost)
-            return best_d["filename"]
-
-        # --- 3. Fallback: scoring heurystyczny ---
-        best_name = "ocean_inner.png"
-        best_score = -10**9
-
-        for d in self.ocean_defs:
-            edges = effective_edges(d)
-            inner = d["inner"]
-            outer = d["outer"]
-
-            edge_match = len(card_req & edges)
-            edge_missing = len(card_req - edges)
-            edge_extra = len(edges - card_req)
-
-            inner_match = len(inner_req & inner)
-            inner_missing = len(inner_req - inner)
-            inner_extra = len(inner - inner_req)
-
-            score = 0
-            # krawędzie są najważniejsze
-            score += 20 * edge_match - 40 * edge_missing - 10 * edge_extra
-            # zatoki – mniej ważne, ale nadal istotne
-            score += 10 * inner_match - 15 * inner_missing - 5 * inner_extra
-
-            # heurystyka dla przekątnych: jeśli jest ląd na diagonali,
-            # to lekko premiujemy kafle z inner/outer w tym miejscu
-            for diag in ("NE", "SE", "SW", "NW"):
-                if neigh[diag]:
-                    if diag in inner or diag in outer:
-                        score += 3
-                else:
-                    if diag in inner or diag in outer:
-                        score -= 2
-
-            # delikatna kara za zbyt skomplikowane kafle
-            complexity = len(edges) + len(inner) + len(outer)
-            score -= 0.1 * complexity
-
-            if score > best_score:
-                best_score = score
-                best_name = d["filename"]
-
-        return best_name
+    def pick_mountains_tile_name(self, neigh):
+        if not hasattr(self, "mountains_defs") or not self.mountains_defs:
+            self.init_mountains_tiles()
+        return self._pick_tile_from_defs(neigh, self.mountains_defs, "mountains_inner.png")
 
     def get_ocean_neighbors(self, y, x):
         """Zwraca słownik booli: czy w danym kierunku jest ląd."""
@@ -357,6 +429,30 @@ class MapUIMixin:
         nw = self._is_land(y - 1, x - 1)
         return {"N": n, "NE": ne, "E": e, "SE": se, "S": s, "SW": sw, "W": w, "NW": nw}
 
+    def get_forest_neighbors(self, y, x):
+        """Sąsiedzi względem lasu: True tam, gdzie pole NIE jest lasem."""
+        n = self._is_not_terrain(y - 1, x, "las")
+        ne = self._is_not_terrain(y - 1, x + 1, "las")
+        e = self._is_not_terrain(y, x + 1, "las")
+        se = self._is_not_terrain(y + 1, x + 1, "las")
+        s = self._is_not_terrain(y + 1, x, "las")
+        sw = self._is_not_terrain(y + 1, x - 1, "las")
+        w = self._is_not_terrain(y, x - 1, "las")
+        nw = self._is_not_terrain(y - 1, x - 1, "las")
+        return {"N": n, "NE": ne, "E": e, "SE": se, "S": s, "SW": sw, "W": w, "NW": nw}
+
+    def get_mountains_neighbors(self, y, x):
+        """Sąsiedzi względem wzgórz: True tam, gdzie pole NIE jest wzniesieniami."""
+        n = self._is_not_terrain(y - 1, x, "wzniesienia")
+        ne = self._is_not_terrain(y - 1, x + 1, "wzniesienia")
+        e = self._is_not_terrain(y, x + 1, "wzniesienia")
+        se = self._is_not_terrain(y + 1, x + 1, "wzniesienia")
+        s = self._is_not_terrain(y + 1, x, "wzniesienia")
+        sw = self._is_not_terrain(y + 1, x - 1, "wzniesienia")
+        w = self._is_not_terrain(y, x - 1, "wzniesienia")
+        nw = self._is_not_terrain(y - 1, x - 1, "wzniesienia")
+        return {"N": n, "NE": ne, "E": e, "SE": se, "S": s, "SW": sw, "W": w, "NW": nw}
+
     def get_cell_size(self):
         """
         Dynamiczny rozmiar pola mapy w pikselach.
@@ -367,6 +463,70 @@ class MapUIMixin:
         # trochę ograniczeń, żeby nie było śmiesznie małe / ogromne
         cell = max(40, min(100, cell))
         return cell
+
+    def get_ocean_tile_image(self, y, x, cell_size):
+        """
+        Zwraca ImageTk.PhotoImage z odpowiednim kaflem oceanu dla pola (y,x).
+        """
+        neigh = self.get_ocean_neighbors(y, x)
+        filename = self.pick_ocean_tile_name(neigh)  # np. 'ocean_northwest_southwest_outer_1.png'
+
+        key = (filename, cell_size)
+        if key in self.ocean_tile_cache:
+            return self.ocean_tile_cache[key]
+
+        path = os.path.join(self.ocean_base_path, filename)
+        try:
+            img = Image.open(path).resize((cell_size, cell_size), Image.LANCZOS)
+            tk_img = ImageTk.PhotoImage(img)
+            self.ocean_tile_cache[key] = tk_img
+            return tk_img
+        except Exception:
+            # fallback: spróbuj ocean_inner, a jak nie ma – None
+            try:
+                inner_path = os.path.join(self.ocean_base_path, "ocean_inner.png")
+                img = Image.open(inner_path).resize((cell_size, cell_size), Image.LANCZOS)
+                tk_img = ImageTk.PhotoImage(img)
+                self.ocean_tile_cache[("ocean_inner.png", cell_size)] = tk_img
+                return tk_img
+            except Exception:
+                return None
+
+    def get_forest_tile_image(self, y, x, cell_size):
+        """Auto-tiling lasu – przezroczysty kafel na tle plains."""
+        neigh = self.get_forest_neighbors(y, x)
+        filename = self.pick_forest_tile_name(neigh)
+
+        key = (filename, cell_size)
+        if key in self.forest_tile_cache:
+            return self.forest_tile_cache[key]
+
+        path = os.path.join(self.forest_base_path, filename)
+        try:
+            img = Image.open(path).resize((cell_size, cell_size), Image.LANCZOS)
+            tk_img = ImageTk.PhotoImage(img)
+            self.forest_tile_cache[key] = tk_img
+            return tk_img
+        except Exception:
+            return None
+
+    def get_mountains_tile_image(self, y, x, cell_size):
+        """Auto-tiling wzgórz – przezroczysty kafel na tle plains."""
+        neigh = self.get_mountains_neighbors(y, x)
+        filename = self.pick_mountains_tile_name(neigh)
+
+        key = (filename, cell_size)
+        if key in self.mountains_tile_cache:
+            return self.mountains_tile_cache[key]
+
+        path = os.path.join(self.mountains_base_path, filename)
+        try:
+            img = Image.open(path).resize((cell_size, cell_size), Image.LANCZOS)
+            tk_img = ImageTk.PhotoImage(img)
+            self.mountains_tile_cache[key] = tk_img
+            return tk_img
+        except Exception:
+            return None
 
     # ===== LEGENDA =====
     def draw_legend(self, canvas, offset_x, offset_y, cell_size):
@@ -395,7 +555,6 @@ class MapUIMixin:
                 canvas.create_rectangle(x - 10, terrain_y - 10, x + 10, terrain_y + 10, fill=color, outline="black")
             canvas.create_text(x, terrain_y + 22, text=name.capitalize(), anchor="center", font=("Arial", 10))
 
-
         # --- grupa: surowce kopalniane ---
         mine_spacing = 80
         mine_y = terrain_y + 70
@@ -415,34 +574,87 @@ class MapUIMixin:
                 canvas.create_rectangle(x - 10, mine_y - 10, x + 10, mine_y + 10, fill=color, outline="black")
             canvas.create_text(x, mine_y + 22, text=MINE_NAMES[res], anchor="center", font=("Arial", 10))
 
-    def get_ocean_tile_image(self, y, x, cell_size):
+    # ===== WSPÓLNE RYSOWANIE TERAENU =====
+    def _draw_terrain_cell(self, canvas, x, y, offset_x, offset_y, cell_size):
         """
-        Zwraca ImageTk.PhotoImage z odpowiednim kaflem oceanu dla pola (y,x).
+        Wspólne rysowanie JEDNEGO odkrytego pola mapy:
+        - morze / las / wzniesienia: plains w tle + autotiling
+        - reszta terenów: prostokąt + tekstura (np. plains dla 'pole')
+        Bez nakładek typu budynki, %, '?', zielone ramki itp.
         """
-        neigh = self.get_ocean_neighbors(y, x)
-        filename = self.pick_ocean_tile_name(neigh)  # np. 'ocean_northwest_southwest_outer_1.png'
+        cell = self.map_grid[y][x]
+        terrain = cell["terrain"]
 
-        print(f"({y},{x}) neigh={neigh} -> {filename}")
-        key = (filename, cell_size)
-        if key in self.ocean_tile_cache:
-            return self.ocean_tile_cache[key]
-
-        path = os.path.join(self.ocean_base_path, filename)
-        try:
-            img = Image.open(path).resize((cell_size, cell_size), Image.LANCZOS)
-            tk_img = ImageTk.PhotoImage(img)
-            self.ocean_tile_cache[key] = tk_img
-            return tk_img
-        except Exception:
-            # fallback: spróbuj ocean_inner, a jak nie ma – None
+        if terrain in ("morze", "las", "wzniesienia"):
+            # tło – pole (plains), tak jak dla morza
             try:
-                inner_path = os.path.join(self.ocean_base_path, "ocean_inner.png")
-                img = Image.open(inner_path).resize((cell_size, cell_size), Image.LANCZOS)
-                tk_img = ImageTk.PhotoImage(img)
-                self.ocean_tile_cache[("ocean_inner.png", cell_size)] = tk_img
-                return tk_img
+                bg_img = self.get_plains_tile(cell_size)
+                canvas.create_image(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    anchor="nw",
+                    image=bg_img
+                )
             except Exception:
-                return None
+                ground = BASE_COLORS.get("pole", "#7a6b4a")
+                canvas.create_rectangle(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    offset_x + (x + 1) * cell_size,
+                    offset_y + (y + 1) * cell_size,
+                    fill=ground,
+                    outline="gray"
+                )
+
+            img = None
+            if terrain == "morze":
+                img = self.get_ocean_tile_image(y, x, cell_size)
+                fallback_color = BASE_COLORS["morze"]
+            elif terrain == "las":
+                img = self.get_forest_tile_image(y, x, cell_size)
+                fallback_color = BASE_COLORS["las"]
+            else:  # "wzniesienia"
+                img = self.get_mountains_tile_image(y, x, cell_size)
+                fallback_color = BASE_COLORS["wzniesienia"]
+
+            if img:
+                canvas.create_image(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    anchor="nw",
+                    image=img
+                )
+            else:
+                # awaryjny prostokąt, gdy brak tilesa
+                canvas.create_rectangle(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    offset_x + (x + 1) * cell_size,
+                    offset_y + (y + 1) * cell_size,
+                    fill=fallback_color,
+                    outline="gray"
+                )
+            return
+
+        # --- reszta terenów (np. 'pole', 'osada', 'dzielnica' itd.) ---
+        color = BASE_COLORS[terrain]
+        canvas.create_rectangle(
+            offset_x + x * cell_size,
+            offset_y + y * cell_size,
+            offset_x + (x + 1) * cell_size,
+            offset_y + (y + 1) * cell_size,
+            fill=color,
+            outline="gray"
+        )
+
+        if terrain == "pole":
+            img = self.get_plains_tile(cell_size)
+            canvas.create_image(
+                offset_x + x * cell_size,
+                offset_y + y * cell_size,
+                anchor="nw",
+                image=img
+            )
 
     # ===== MAPA BUDOWANIA =====
     def show_map(self):
@@ -451,7 +663,8 @@ class MapUIMixin:
 
         canvas_width = 850
         canvas_height = 850
-        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height, bg=self.style.lookup("TFrame", "background"), highlightthickness=0)
+        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height,
+                           bg=self.style.lookup("TFrame", "background"), highlightthickness=0)
         canvas.pack(pady=10)
 
         cell_size = self.get_cell_size()
@@ -469,94 +682,56 @@ class MapUIMixin:
 
                     # nieodkryte pola
                     if not cell["discovered"]:
-                        canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill="#888888", outline="gray")
+                        canvas.create_rectangle(
+                            offset_x + x * cell_size,
+                            offset_y + y * cell_size,
+                            offset_x + (x + 1) * cell_size,
+                            offset_y + (y + 1) * cell_size,
+                            fill="#888888",
+                            outline="gray"
+                        )
                         continue
 
                     terrain = cell["terrain"]
 
-                    # specjalna obsługa morza – najpierw tło lądu, potem kafel oceanu
-                    if terrain == "morze":
-                        # 1) tło pod przezroczystościami (np. plains)
-                        try:
-                            bg_img = self.get_plains_tile(cell_size)
-                            canvas.create_image(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                anchor="nw",
-                                image=bg_img
-                            )
-                        except Exception:
-                            # fallback: jednolity "grunt"
-                            ground = BASE_COLORS.get("pole", "#7a6b4a")
-                            canvas.create_rectangle(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                offset_x + (x + 1) * cell_size,
-                                offset_y + (y + 1) * cell_size,
-                                fill=ground,
-                                outline="gray",
-                                width=1
-                            )
-
-                        # 2) kafelek oceanu z autotilingu – na wierzch
-                        img = self.get_ocean_tile_image(y, x, cell_size)
-                        if img:
-                            canvas.create_image(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                anchor="nw",
-                                image=img
-                            )
-                        else:
-                            # absolutny fallback – pełny prostokąt wody
-                            color = BASE_COLORS["morze"]
-                            canvas.create_rectangle(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                offset_x + (x + 1) * cell_size,
-                                offset_y + (y + 1) * cell_size,
-                                fill=color,
-                                outline="gray",
-                                width=1
-                            )
-                        continue
-
-                    color = BASE_COLORS[terrain]
-                    outline = "gray"
-                    width = 1
-                    if terrain in ["osada", "dzielnica"]:
-                        outline = "yellow"
-                        width = 3
-
-                    # tło (np. ramka osady / dzielnicy)
-                    canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill=color, outline=outline, width=width)
-
-                    # tekstury lasu / pola / wzniesień
-                    if terrain == "las":
-                        img = self.get_forest_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif terrain == "pole":
-                        img = self.get_plains_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif terrain == "wzniesienia":
-                        img = self.get_mountains_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
+                    # wspólne rysowanie terenu (morze/las/wzniesienia/pole/...)
+                    self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
 
                     # budynek w budowie – procent postępu
-                    building_in_progress = next((c for c in self.constructions if c[1]["pos"] == (y, x)), None)
+                    building_in_progress = next(
+                        (c for c in self.constructions if c[1]["pos"] == (y, x)), None
+                    )
                     if building_in_progress:
                         end, _, _, start = building_in_progress
                         total_days = (end - start).days
                         elapsed = (self.current_date - start).days
                         pct = min(100, max(0, int(elapsed / total_days * 100))) if total_days > 0 else 0
-                        canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2 + 20, text=f"{pct}%", fill="white", font=("Arial", 9, "bold"))
+                        canvas.create_text(
+                            offset_x + x * cell_size + cell_size // 2,
+                            offset_y + y * cell_size + cell_size // 2 + 20,
+                            text=f"{pct}%",
+                            fill="white",
+                            font=("Arial", 9, "bold")
+                        )
 
                     # opis osady / dzielnicy
                     if terrain in ["osada", "dzielnica"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
                         used = len(buildings_here)
-                        canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2 - 20, text=f"{terrain.capitalize()}", fill="white", font=("Arial", 9, "bold"))
-                        canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2, text=f"{used}/5", fill="yellow", font=("Arial", 10, "bold"))
+                        canvas.create_text(
+                            offset_x + x * cell_size + cell_size // 2,
+                            offset_y + y * cell_size + cell_size // 2 - 20,
+                            text=f"{terrain.capitalize()}",
+                            fill="white",
+                            font=("Arial", 9, "bold")
+                        )
+                        canvas.create_text(
+                            offset_x + x * cell_size + cell_size // 2,
+                            offset_y + y * cell_size + cell_size // 2,
+                            text=f"{used}/5",
+                            fill="yellow",
+                            font=("Arial", 10, "bold")
+                        )
 
                     # złoża na wzniesieniach – ikonki surowców
                     if terrain == "wzniesienia" and cell["resource"]:
@@ -568,7 +743,14 @@ class MapUIMixin:
                             canvas.create_image(cx, cy, image=img_icon)
                         else:
                             rc = MINE_COLORS[cell["resource"]]
-                            canvas.create_rectangle(offset_x + x * cell_size + cell_size - 20, offset_y + y * cell_size + cell_size - 20, offset_x + x * cell_size + cell_size - 5, offset_y + y * cell_size + cell_size - 5, fill=rc, outline="black")
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size + cell_size - 20,
+                                offset_y + y * cell_size + cell_size - 20,
+                                offset_x + x * cell_size + cell_size - 5,
+                                offset_y + y * cell_size + cell_size - 5,
+                                fill=rc,
+                                outline="black"
+                            )
 
                     # zielone podświetlenia, gdzie można budować
                     if self.selected_building:
@@ -595,7 +777,14 @@ class MapUIMixin:
                             if terrain == "morze" and self.selected_building != "przystań":
                                 continue
 
-                        canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, outline="lime", width=3)
+                        canvas.create_rectangle(
+                            offset_x + x * cell_size,
+                            offset_y + y * cell_size,
+                            offset_x + (x + 1) * cell_size,
+                            offset_y + (y + 1) * cell_size,
+                            outline="lime",
+                            width=3
+                        )
 
             self.draw_legend(canvas, offset_x, offset_y, cell_size)
 
@@ -624,11 +813,22 @@ class MapUIMixin:
         info_frame.pack(pady=5)
 
         ttk.Label(info_frame, text="Koszt eksploracji:", font=("Arial", 12, "bold")).pack()
-        ttk.Label(info_frame, text="• 3 ludzie • 15 żywności • 10 drewna", justify="center", font=("Arial", 10)).pack()
+        ttk.Label(
+            info_frame,
+            text="• 3 ludzie • 15 żywności • 10 drewna",
+            justify="center",
+            font=("Arial", 10)
+        ).pack()
 
         canvas_width = 850
         canvas_height = 850
-        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height, bg=self.style.lookup("TFrame", "background"), highlightthickness=0)
+        canvas = tk.Canvas(
+            win,
+            width=canvas_width,
+            height=canvas_height,
+            bg=self.style.lookup("TFrame", "background"),
+            highlightthickness=0
+        )
         canvas.pack(pady=1)
 
         cell_size = self.get_cell_size()
@@ -644,68 +844,34 @@ class MapUIMixin:
 
                     # nieodkryte pola, ale sąsiadujące z odkrytymi – potencjalne cele eksploracji
                     if not cell["discovered"]:
-                        neighbors = [(y + dy, x + dx) for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)] if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size]
+                        neighbors = [
+                            (y + dy, x + dx)
+                            for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                            if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
+                        ]
                         if any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
-                            canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill="#888888", outline="yellow", width=2)
-                            canvas.create_text(offset_x + x * cell_size + cell_size // 2, offset_y + y * cell_size + cell_size // 2, text="?", fill="white", font=("Arial", 20, "bold"))
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                offset_x + (x + 1) * cell_size,
+                                offset_y + (y + 1) * cell_size,
+                                fill="#888888",
+                                outline="yellow",
+                                width=2
+                            )
+                            canvas.create_text(
+                                offset_x + x * cell_size + cell_size // 2,
+                                offset_y + y * cell_size + cell_size // 2,
+                                text="?",
+                                fill="white",
+                                font=("Arial", 20, "bold")
+                            )
                         continue
 
                     terrain = cell["terrain"]
 
-                    if terrain == "morze":
-                        # tło lądu pod przezroczystymi fragmentami
-                        try:
-                            bg_img = self.get_plains_tile(cell_size)
-                            canvas.create_image(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                anchor="nw",
-                                image=bg_img
-                            )
-                        except Exception:
-                            ground = BASE_COLORS.get("pole", "#7a6b4a")
-                            canvas.create_rectangle(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                offset_x + (x + 1) * cell_size,
-                                offset_y + (y + 1) * cell_size,
-                                fill=ground,
-                                outline="gray"
-                            )
-
-                        img = self.get_ocean_tile_image(y, x, cell_size)
-                        if img:
-                            canvas.create_image(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                anchor="nw",
-                                image=img
-                            )
-                        else:
-                            color = BASE_COLORS["morze"]
-                            canvas.create_rectangle(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                offset_x + (x + 1) * cell_size,
-                                offset_y + (y + 1) * cell_size,
-                                fill=color,
-                                outline="gray"
-                            )
-                        continue
-
-                    color = BASE_COLORS[terrain]
-                    canvas.create_rectangle(offset_x + x * cell_size, offset_y + y * cell_size, offset_x + (x + 1) * cell_size, offset_y + (y + 1) * cell_size, fill=color, outline="gray")
-
-                    # tekstury terenów
-                    if terrain == "las":
-                        img = self.get_forest_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif terrain == "pole":
-                        img = self.get_plains_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
-                    elif terrain == "wzniesienia":
-                        img = self.get_mountains_tile(cell_size)
-                        canvas.create_image(offset_x + x * cell_size, offset_y + y * cell_size, anchor="nw", image=img)
+                    # odkryte pole – rysowanie jak na mapie budowy
+                    self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
 
                     # opcjonalnie – ikona złoża również na mapie eksploracji
                     if terrain == "wzniesienia" and cell["resource"]:
@@ -718,6 +884,13 @@ class MapUIMixin:
 
             self.draw_legend(canvas, offset_x, offset_y, cell_size)
 
+        def debug_reveal_all():
+            """DEBUG: odkryj wszystkie pola na mapie eksploracji."""
+            for row in self.map_grid:
+                for cell in row:
+                    cell["discovered"] = True
+            draw()
+
         def click(event):
             x = (event.x - offset_x) // cell_size
             y = (event.y - offset_y) // cell_size
@@ -728,7 +901,11 @@ class MapUIMixin:
             if cell["discovered"]:
                 return
 
-            neighbors = [(y + dy, x + dx) for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)] if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size]
+            neighbors = [
+                (y + dy, x + dx)
+                for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
+            ]
             if not any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
                 return
 
@@ -740,8 +917,19 @@ class MapUIMixin:
             confirm = self.create_window("Potwierdź ekspedycję")
             bg = self.style.lookup("TFrame", "background")
 
-            ttk.Label(confirm, text=f"Wyślij ekspedycję na pole ({y},{x})?", font=getattr(self, "top_title_font", ("Cinzel", 14, "bold")), background=bg).pack(pady=10)
-            ttk.Label(confirm, text=f"Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna", justify="center", font=getattr(self, "top_info_font", ("EB Garamond Italic", 12)), background=bg).pack(pady=5)
+            ttk.Label(
+                confirm,
+                text=f"Wyślij ekspedycję na pole ({y},{x})?",
+                font=getattr(self, "top_title_font", ("Cinzel", 14, "bold")),
+                background=bg
+            ).pack(pady=10)
+            ttk.Label(
+                confirm,
+                text=f"Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna",
+                justify="center",
+                font=getattr(self, "top_info_font", ("EB Garamond Italic", 12)),
+                background=bg
+            ).pack(pady=5)
 
             def do_explore():
                 if self.free_workers() < 3:
@@ -766,9 +954,15 @@ class MapUIMixin:
             ttk.Button(confirm, text="Wyślij", command=do_explore).pack(side="left", padx=10, pady=10)
             ttk.Button(confirm, text="Anuluj", command=confirm.destroy).pack(side="right", padx=10, pady=10)
 
+        # Przycisk debug – odkryj wszystkie pola od razu
+        ttk.Button(
+            info_frame,
+            text="Odkryj wszystkie pola (debug)",
+            command=debug_reveal_all,
+        ).pack(pady=2)
+
         canvas.bind("<Button-1>", click)
         draw()
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
 
         self.center_window(win)
-
