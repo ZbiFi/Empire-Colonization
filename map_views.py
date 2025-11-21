@@ -48,6 +48,16 @@ class MapUIMixin:
         # ikony surowców kopalnianych
         self.mine_icon_bases = {}
         self.mine_icon_cache = {}  # (key, size) -> ImageTk.PhotoImage
+
+        # ikona budynku
+        try:
+            path = self.resource_path(f"img/tiles/building.png")
+            self.building_icon_base = Image.open(path)
+            self.building_icon_cache = {}  # size -> ImageTk.PhotoImage
+        except Exception:
+            self.building_icon_base = None
+            self.building_icon_cache = {}
+
         for key, fname in {"coal": "coal.png", "iron": "iron.png", "silver": "silver.png", "gold": "gold.png"}.items():
             path = self.resource_path(f"img/tiles/{fname}")
             try:
@@ -69,6 +79,23 @@ class MapUIMixin:
                 self.terrain_icon_bases[terrain] = Image.open(path)
             except Exception:
                 pass  # jeśli nie ma pliku, zostanie prostokąt z BASE_COLORS
+
+    def get_building_icon(self, cell_size: int):
+        """
+        Zwraca (PhotoImage, rozmiar) ikony budynku, przeskalowanej do 1/4 kafla,
+        albo None jeśli nie ma grafiki.
+        """
+        if not getattr(self, "building_icon_base", None):
+            return None
+
+        size = max(8, cell_size // 2)
+        key = size
+
+        if key not in self.building_icon_cache:
+            img = self.building_icon_base.resize((size, size), Image.LANCZOS)
+            self.building_icon_cache[key] = ImageTk.PhotoImage(img)
+
+        return self.building_icon_cache[key], size
 
     def _mine_icon_key(self, res: str):
         """Mapuje nazwę surowca na klucz ikony (coal/iron/silver/gold)."""
@@ -771,7 +798,7 @@ class MapUIMixin:
 
                     terrain = cell["terrain"]
 
-                    # wspólne rysowanie terenu (morze/las/wzniesienia/pole/...)
+                    # wspólne rysowanie terenu (morze/las/wzniesienia/pole/.)
                     self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
 
                     # budynek w budowie – procent postępu
@@ -791,7 +818,18 @@ class MapUIMixin:
                             font=("Arial", 9, "bold")
                         )
 
-                    # opis osady / dzielnicy
+                    # IKONA BUDYNKU: tylko na polach INNYCH niż osada/dzielnica
+                    if terrain not in ["osada", "dzielnica"]:
+                        buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
+                        if buildings_here:
+                            icon = self.get_building_icon(cell_size)
+                            if icon:
+                                img_icon, icon_size = icon
+                                cx = offset_x + x * cell_size + cell_size // 2
+                                cy = offset_y + y * cell_size + cell_size // 2
+                                canvas.create_image(cx, cy, image=img_icon)
+
+                    # opis osady / dzielnicy (tylko tekst, BEZ ikony)
                     if terrain in ["osada", "dzielnica"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
                         used = len(buildings_here)
