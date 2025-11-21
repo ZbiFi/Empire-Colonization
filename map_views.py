@@ -1,6 +1,6 @@
 # map_views.py
 import math
-import os
+import os, re
 import random
 import tkinter as tk
 from tkinter import ttk
@@ -78,9 +78,106 @@ class MapUIMixin:
         return None
 
     def init_ocean_tiles(self):
-        """Ładuje info o plikach oceanu i cache na obrazki."""
+        """Ładuje wszystkie pliki oceanu i rozbija ich nazwy na krawędzie/narożniki."""
         self.ocean_base_path = self.resource_path("img/tiles/ocean")
-        self.ocean_tile_cache = {}  # (name, cell_size) -> ImageTk.PhotoImage
+        self.ocean_tile_cache = {}   # (filename, cell_size) -> ImageTk.PhotoImage
+        self.ocean_defs = []         # lista: {filename, card, inner, outer}
+
+        if not os.path.isdir(self.ocean_base_path):
+            return
+
+        for fname in os.listdir(self.ocean_base_path):
+            if not fname.endswith(".png"):
+                continue
+            base = fname.split(".")[0]  # np. ocean_northwest_southwest_outer_1
+            parts = base.rsplit("_", 1)
+            base_no_idx = parts[0] if parts[-1].isdigit() else base
+            card, inner, outer = self._parse_ocean_name(base_no_idx)
+            self.ocean_defs.append({
+                "filename": fname,
+                "card": card,
+                "inner": inner,
+                "outer": outer,
+            })
+
+        # na wszelki wypadek – mieć chociaż ocean_inner
+        if not self.ocean_defs:
+            self.ocean_defs.append({
+                "filename": "ocean_inner.png",
+                "card": set(),
+                "inner": set(),
+                "outer": set(),
+            })
+
+    def _parse_ocean_name(self, base_name: str):
+        """
+        base_name np. 'ocean_northwest_southwest_outer_southeast_inner'
+        Zwraca (card, inner, outer):
+        - card: {'N','E','S','W'}
+        - inner/outer: {'NE','SE','SW','NW'}
+        """
+        s = base_name.replace("ocean_", "")
+        card, inner, outer = set(), set(), set()
+
+        tokens = s.split("_")
+        pending_diags = []
+        diag_map = {"northeast": "NE", "southeast": "SE", "southwest": "SW", "northwest": "NW"}
+
+        for t in tokens:
+            if t == "north_south":
+                card.update(["N", "S"])
+            elif t == "west_east":
+                card.update(["W", "E"])
+            elif t in ("north", "east", "south", "west"):
+                card.add({"north": "N", "east": "E", "south": "S", "west": "W"}[t])
+            elif t in diag_map:
+                # zapamiętujemy diagonale aż do napotkania 'inner'/'outer'
+                pending_diags.append(diag_map[t])
+            elif t in ("inner", "outer"):
+                # wszystkie zebrane diagonale traktujemy jako inner/outer
+                for d in pending_diags:
+                    if t == "inner":
+                        inner.add(d)
+                    else:
+                        outer.add(d)
+                pending_diags = []
+            else:
+                # ignorujemy inne tokeny
+                pass
+
+        return card, inner, outer
+
+    def _describe_ocean_neighbors(self, neigh):
+        """
+        Na podstawie sąsiadów wyznacza:
+        - card_req: krawędzie z lądem (N/E/S/W)
+        - inner_req: wewnętrzne rogi (zatoki)
+        - outer_req: na razie nie używane (zawsze puste),
+                     zostawione dla kompatybilności z API.
+        """
+        N, NE, E, SE, S, SW, W, NW = (neigh[k] for k in ["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+
+        # krawędzie – po prostu gdzie jest ląd
+        card_req = set()
+        if N: card_req.add("N")
+        if E: card_req.add("E")
+        if S: card_req.add("S")
+        if W: card_req.add("W")
+
+        inner_req = set()
+        outer_req = set()  # nie wyciągamy już outer z sąsiadów
+
+        # wewnętrzne rogi – ląd po skosie, woda na bokach
+        if NE and not N and not E:
+            inner_req.add("NE")
+        if SE and not S and not E:
+            inner_req.add("SE")
+        if SW and not S and not W:
+            inner_req.add("SW")
+        if NW and not N and not W:
+            inner_req.add("NW")
+
+        return card_req, inner_req, outer_req
 
     def get_terrain_icon(self, terrain: str, cell_size: int):
         """Zwraca miniaturkę terenu do legendy albo None."""
@@ -140,47 +237,113 @@ class MapUIMixin:
 
     def pick_ocean_tile_name(self, neigh):
         """
-        neigh: dict z get_ocean_neighbors
-        Zwraca bazową nazwę pliku (bez _1) np. 'ocean_north', 'ocean_northeast_outer' itd.
+        Wybiera NAJLEPIEJ pasujący kafelek oceanu biorąc pod uwagę
+        wszystkich 8 sąsiadów (N, NE, E, SE, S, SW, W, NW).
+
+        Zasady:
+        - OUTER w nazwie kafla traktujemy jak normalne krawędzie:
+          NE -> N+E, SE -> S+E, SW -> S+W, NW -> N+W
+        - najpierw szukamy kafli z idealnie takim samym zestawem krawędzi
+          i innerów jak wymagane,
+        - potem supersety,
+        - na końcu heurystyczny scoring.
         """
-        N, NE, E, SE, S, SW, W, NW = (neigh[k] for k in ["N", "NE", "E", "SE", "S", "SW", "W", "NW"])
+        if not hasattr(self, "ocean_defs") or not self.ocean_defs:
+            self.init_ocean_tiles()
 
-        # 1) czyste morze – brak lądu wokół
+        if not self.ocean_defs:
+            return "ocean_inner.png"
+
+        card_req, inner_req, _ = self._describe_ocean_neighbors(neigh)
+
+        # jeśli wszędzie woda – szukamy po prostu ocean_inner
         if not any(neigh.values()):
-            return "ocean_inner"
+            for d in self.ocean_defs:
+                if not d["card"] and not d["inner"] and not d["outer"]:
+                    return d["filename"]
+            return "ocean_inner.png"
 
-        # 2) proste brzegi
-        if N and not (S or E or W): return "ocean_north"
-        if S and not (N or E or W): return "ocean_south"
-        if W and not (N or S or E): return "ocean_west"
-        if E and not (N or S or W): return "ocean_east"
+        # pomocnicza funkcja: efektywne krawędzie kafla (card + outer→krawędzie)
+        def effective_edges(d):
+            edges = set(d["card"])
+            for diag in d["outer"]:
+                if diag == "NE":
+                    edges.update(("N", "E"))
+                elif diag == "SE":
+                    edges.update(("S", "E"))
+                elif diag == "SW":
+                    edges.update(("S", "W"))
+                elif diag == "NW":
+                    edges.update(("N", "W"))
+            return edges
 
-        # 3) korytarze NS / EW
-        if N and S and not (E or W): return "ocean_north_south"
-        if W and E and not (N or S): return "ocean_west_east"
+        # --- 1. Perfekcyjne dopasowanie ---
+        perfect = []
+        for d in self.ocean_defs:
+            edges = effective_edges(d)
+            if edges == card_req and d["inner"] == inner_req:
+                perfect.append(d)
 
-        # 4) narożniki zewnętrzne (wystające)
-        #   ląd w dwóch sąsiednich kierunkach, brak po przekątnej
-        if N and E and not NE: return "ocean_northeast_outer"
-        if E and S and not SE: return "ocean_southeast_outer"
-        if S and W and not SW: return "ocean_southwest_outer"
-        if W and N and not NW: return "ocean_northwest_outer"
+        if perfect:
+            return random.choice(perfect)["filename"]
 
-        # 5) narożniki wewnętrzne (zatoki) – ląd po przekątnej,
-        #   ale brak bezpośrednio w N/E/S/W
-        if NE and not (N or E): return "ocean_northeast_inner"
-        if SE and not (S or E): return "ocean_southeast_inner"
-        if SW and not (S or W): return "ocean_southwest_inner"
-        if NW and not (N or W): return "ocean_northwest_inner"
+        # --- 2. Supersety: kafle zawierające wszystkie wymagane krawędzie/innery ---
+        superset = []
+        for d in self.ocean_defs:
+            edges = effective_edges(d)
+            if card_req <= edges and inner_req <= d["inner"]:
+                superset.append((d, edges))
 
-        # 6) bardziej skomplikowane przypadki – proste przybliżenia
-        if N: return "ocean_north"
-        if S: return "ocean_south"
-        if E: return "ocean_east"
-        if W: return "ocean_west"
+        if superset:
+            def extra_cost(item):
+                d, edges = item
+                return len(edges - card_req) + len(d["inner"] - inner_req)
 
-        # absolutny fallback
-        return "ocean_inner"
+            best_d, _ = min(superset, key=extra_cost)
+            return best_d["filename"]
+
+        # --- 3. Fallback: scoring heurystyczny ---
+        best_name = "ocean_inner.png"
+        best_score = -10**9
+
+        for d in self.ocean_defs:
+            edges = effective_edges(d)
+            inner = d["inner"]
+            outer = d["outer"]
+
+            edge_match = len(card_req & edges)
+            edge_missing = len(card_req - edges)
+            edge_extra = len(edges - card_req)
+
+            inner_match = len(inner_req & inner)
+            inner_missing = len(inner_req - inner)
+            inner_extra = len(inner - inner_req)
+
+            score = 0
+            # krawędzie są najważniejsze
+            score += 20 * edge_match - 40 * edge_missing - 10 * edge_extra
+            # zatoki – mniej ważne, ale nadal istotne
+            score += 10 * inner_match - 15 * inner_missing - 5 * inner_extra
+
+            # heurystyka dla przekątnych: jeśli jest ląd na diagonali,
+            # to lekko premiujemy kafle z inner/outer w tym miejscu
+            for diag in ("NE", "SE", "SW", "NW"):
+                if neigh[diag]:
+                    if diag in inner or diag in outer:
+                        score += 3
+                else:
+                    if diag in inner or diag in outer:
+                        score -= 2
+
+            # delikatna kara za zbyt skomplikowane kafle
+            complexity = len(edges) + len(inner) + len(outer)
+            score -= 0.1 * complexity
+
+            if score > best_score:
+                best_score = score
+                best_name = d["filename"]
+
+        return best_name
 
     def get_ocean_neighbors(self, y, x):
         """Zwraca słownik booli: czy w danym kierunku jest ląd."""
@@ -257,14 +420,9 @@ class MapUIMixin:
         Zwraca ImageTk.PhotoImage z odpowiednim kaflem oceanu dla pola (y,x).
         """
         neigh = self.get_ocean_neighbors(y, x)
-        base_name = self.pick_ocean_tile_name(neigh)  # np. 'ocean_north'
+        filename = self.pick_ocean_tile_name(neigh)  # np. 'ocean_northwest_southwest_outer_1.png'
 
-        # 'ocean_inner' ma plik bez sufiksu; reszta jako *_1.png
-        if base_name == "ocean_inner":
-            filename = base_name + ".png"
-        else:
-            filename = base_name + "_1.png"
-
+        print(f"({y},{x}) neigh={neigh} -> {filename}")
         key = (filename, cell_size)
         if key in self.ocean_tile_cache:
             return self.ocean_tile_cache[key]
@@ -276,10 +434,15 @@ class MapUIMixin:
             self.ocean_tile_cache[key] = tk_img
             return tk_img
         except Exception:
-            # fallback: po prostu kolor morza
-            from constants import BASE_COLORS
-            # tworzymy prostokąt jako solid color – ale tu na szybko: None
-            return None
+            # fallback: spróbuj ocean_inner, a jak nie ma – None
+            try:
+                inner_path = os.path.join(self.ocean_base_path, "ocean_inner.png")
+                img = Image.open(inner_path).resize((cell_size, cell_size), Image.LANCZOS)
+                tk_img = ImageTk.PhotoImage(img)
+                self.ocean_tile_cache[("ocean_inner.png", cell_size)] = tk_img
+                return tk_img
+            except Exception:
+                return None
 
     # ===== MAPA BUDOWANIA =====
     def show_map(self):
