@@ -385,11 +385,11 @@ BUILDINGS = {
     # === ŻYWNOŚĆ ===
     "pole_uprawne": {
         "name": "Pole uprawne", "base_cost": {"drewno": 15}, "build_time": 4, "base_workers": 2,
-        "allowed_terrain": ["pole"], "base_prod": {"żywność": 3},
+        "allowed_terrain": ["pole"], "base_prod": {"żywność": 1.5},
         "upgrades": [
-            {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 8, "prod": {"żywność": 4}, "workers": 3},
-            {"name": "Plantacja zbożowa", "cost": {"żelazo": 20, "stal": 10}, "build_time": 15, "prod": {"żywność": 5}, "workers": 4},
-            {"name": "Folwark z młynem", "cost": {"stal": 40, "cukier": 5}, "build_time": 25, "prod": {"żywność": 6}, "workers": 5}
+            {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 8, "prod": {"żywność": 2}, "workers": 3},
+            {"name": "Plantacja zbożowa", "cost": {"żelazo": 20, "stal": 10}, "build_time": 15, "prod": {"żywność": 2.5}, "workers": 4},
+            {"name": "Folwark z młynem", "cost": {"stal": 40, "cukier": 5}, "build_time": 25, "prod": {"żywność": 3}, "workers": 5}
         ]
     },
 
@@ -503,7 +503,7 @@ BUILDINGS = {
 
     # === PRZYSTAŃ ===
     "przystań": {
-        "name": "Przystań", "base_cost": {"drewno": 60, "żelazo": 30}, "build_time": 16, "base_workers": 2, "base_prod": {"żywność": 3},
+        "name": "Przystań", "base_cost": {"drewno": 60, "żelazo": 30}, "build_time": 16, "base_workers": 2, "base_prod": {"żywność": 2},
         "requires_adjacent_settlement": True,
         "allowed_terrain": ["morze"],
         "upgrades": []

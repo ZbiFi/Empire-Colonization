@@ -675,12 +675,24 @@ class BuildingsMixin:
             return
 
         def save():
-            total = sum(s.get() for _, s in self.worker_sliders)
-            if total > self.free_workers() + self.busy_people:
-                self.log("Za dużo!", "red")
+            # ile ludzi pracuje teraz (przed zmianą suwaków)
+            current_total = sum(self.buildings[idx].get("workers", 0) for idx, _ in self.worker_sliders)
+
+            # ile będzie pracować po zmianie suwaków
+            new_total = sum(s.get() for _, s in self.worker_sliders)
+
+            # o ile rośnie zapotrzebowanie na pracowników
+            delta = new_total - current_total
+
+            # jeśli trzeba więcej ludzi niż mamy WOLNYCH -> błąd
+            if delta > self.free_workers():
+                self.log("Za dużo! Za mało wolnych ludzi.", "red")
                 return
+
+            # zapisujemy nowe wartości
             for idx, scale in self.worker_sliders:
                 self.buildings[idx]["workers"] = scale.get()
+
             self.log("Pracownicy przydzieleni.", "green")
             win.destroy()
 

@@ -219,7 +219,16 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.log_text.see(tk.END)
         self.log_text.config(state=tk.DISABLED)
 
-    def free_workers(self): return max(0, self.people - self.busy_people)
+    def free_workers(self):
+        # ile osób pracuje w budynkach (nie liczymy dzielnic i namiotów)
+        workers_in_buildings = sum(
+            b.get("workers", 0)
+            for b in self.buildings
+            if not b.get("is_district", False) and b["base"] not in ["namiot"]
+        )
+
+        # Wolni = wszyscy ludzie - ci w budowach/expedycjach - ci w budynkach
+        return max(0, self.people - self.busy_people - workers_in_buildings)
 
     def can_afford(self, cost):
         # tworzymy kopię, by nie modyfikować oryginału
@@ -901,9 +910,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.buildings[idx]["level"] = u[2]
             if "capacity" in BUILDINGS[self.buildings[idx]["base"]]["upgrades"][u[2]-1]:
                 self.buildings[idx]["capacity"] = BUILDINGS[self.buildings[idx]["base"]]["upgrades"][u[2]-1]["capacity"]
-            workers_change = BUILDINGS[self.buildings[idx]["base"]]["upgrades"][u[2]-1].get("workers", 0) - \
-                            (BUILDINGS[self.buildings[idx]["base"]]["upgrades"][old_level-1].get("workers", 0) if old_level > 0 else 0)
-            self.busy_people -= workers_change
+            workers_used = BUILDINGS[self.buildings[idx]["base"]]["upgrades"][old_level].get("workers", 1)
+            self.busy_people -= workers_used
             self.log(f"Ukończono ulepszenie: {self.buildings[idx]['base']} → poziom {u[2]}", "gold")
             self.play_sound("building_done")
 
