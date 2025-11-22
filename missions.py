@@ -77,72 +77,191 @@ class MissionsMixin:
            Z tego okna można natychmiast wypełnić misje (bez handlu, bez opóźnień).
         """
 
-        win = self.create_window(f"Misje")
+        win = self.create_window("Misje")
         win.geometry("650x700")
+
+        # === GRID NA OKNIE: content + bottom bar ===
+        win.grid_rowconfigure(0, weight=1)  # content rośnie
+        win.grid_rowconfigure(1, weight=0)  # bottom nie rośnie
+        win.grid_columnconfigure(0, weight=1)
+
+        content_frame = ttk.Frame(win)
+        content_frame.grid(row=0, column=0, sticky="nsew")
+
+        bottom_frame = ttk.Frame(win)
+        bottom_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=8)
+
+        # ====== GŁÓWNY TYTUŁ OKNA ======
+        ttk.Label(
+            content_frame,
+            text="MISJE",
+            font=("Arial", 15, "bold"),
+            anchor="center",
+            justify="center"
+        ).pack(pady=(8, 4))
+
+        ttk.Separator(content_frame, orient="horizontal").pack(fill="x", padx=12, pady=(0, 8))
 
         # ============================
         # 1. MISJA KRÓLEWSKA
         # ============================
-        royal_frame = ttk.LabelFrame(win, text="Misja królewska")
-        royal_frame.pack(fill="x", padx=10, pady=10)
+        royal_frame = ttk.LabelFrame(content_frame, text="")
+        royal_frame.pack(fill="x", padx=12, pady=8)
 
-        if self.current_mission:
+        ttk.Label(
+            royal_frame,
+            text="✦ MISJA KRÓLEWSKA ✦",
+            font=("Arial", 13, "bold"),
+            anchor="center",
+            justify="center"
+        ).pack(fill="x", pady=(6, 8))
+
+        ttk.Separator(royal_frame, orient="horizontal").pack(fill="x", padx=8, pady=(0, 8))
+
+        if not self.current_mission:
+            ttk.Label(
+                royal_frame,
+                text="Brak aktywnej misji królewskiej.",
+                foreground="gray",
+                anchor="center",
+                justify="center"
+            ).pack(pady=8, fill="x")
+        else:
             end, req, sent, diff, text, idx = self.current_mission
 
             ttk.Label(
                 royal_frame,
                 text=text,
                 wraplength=600,
-                justify="left"
-            ).pack(pady=5, anchor="w")
+                justify="center",
+                font=("Arial", 11)
+            ).pack(pady=6, fill="x")
 
             ttk.Label(
                 royal_frame,
-                text=f"Termin: {end.strftime('%d %b %Y')} "
-                     f"(pozostało {(end - self.current_date).days} dni)",
-                foreground="red"
-            ).pack(anchor="w", pady=3)
+                text=f"Pozostało: {(end - self.current_date).days} dni",
+                foreground="red",
+                anchor="center",
+                justify="center"
+            ).pack(fill="x", pady=3)
 
-            # POSTĘP
+            progress_frame = ttk.Frame(royal_frame)
+            progress_frame.pack(pady=6, fill="x")
+
             for r in req:
                 have = sent.get(r, 0)
                 need = req[r]
                 color = "green" if have >= need else ("orange" if have > 0 else "red")
                 ttk.Label(
-                    royal_frame,
+                    progress_frame,
                     text=f"{r}: {have}/{need}",
-                    foreground=color
-                ).pack(anchor="w")
+                    foreground=color,
+                    anchor="center",
+                    justify="center"
+                ).pack(fill="x")
 
-            # ============================
-            # PRZYCISK – NATYCHMIAST WYKONAJ
-            # ============================
-            def complete_royal_now():
-                # wypełnij wszystko
-                for r in req:
-                    sent[r] = req[r]
-                self.log("Misja królewska natychmiast wypełniona!", "DarkOrange")
-                self.complete_royal_mission()
-                win.destroy()
+            remaining = {
+                r: req[r] - sent.get(r, 0)
+                for r in req
+                if sent.get(r, 0) < req[r]
+            }
 
-            ttk.Button(
-                royal_frame,
-                text="Wypełnij misję teraz",
-                command=complete_royal_now
-            ).pack(pady=8, anchor="w")
+            if remaining:
+                total_value = sum(a * EUROPE_PRICES.get(r, 10) for r, a in remaining.items())
+                dukaty_cost = int(total_value * diff)
 
-        else:
-            ttk.Label(
-                royal_frame,
-                text="Brak aktywnej misji królewskiej.",
-                foreground="gray"
-            ).pack(pady=5, anchor="w")
+                ttk.Label(
+                    royal_frame,
+                    text=f"Koszt spłacenia dukatami: {dukaty_cost}",
+                    foreground="orange",
+                    font=("Arial", 10, "bold"),
+                    anchor="center",
+                    justify="center"
+                ).pack(pady=(6, 4), fill="x")
+
+                ttk.Button(
+                    royal_frame,
+                    text="Opłać dukatami",
+                    command=lambda: [self.pay_mission_with_gold(), win.destroy()]
+                ).pack(pady=(4, 8), anchor="center")
+            else:
+                ttk.Label(
+                    royal_frame,
+                    text="Misja już wykonana!",
+                    foreground="green",
+                    font=("Arial", 10, "bold"),
+                    anchor="center",
+                    justify="center"
+                ).pack(pady=8, fill="x")
 
         # ============================
-        # 2. MISJE INDIAŃSKIE
+        # 2. MISJE INDIAŃSKIE (SCROLL tylko gdy potrzebny)
         # ============================
-        native_frame = ttk.LabelFrame(win, text="Misje indiańskie")
-        native_frame.pack(fill="both", padx=10, pady=10)
+        native_frame = ttk.LabelFrame(content_frame, text="")
+        native_frame.pack(fill="both", expand=True, padx=12, pady=8)
+
+        ttk.Label(
+            native_frame,
+            text="✦ MISJE INDIAŃSKIE ✦",
+            font=("Arial", 13, "bold"),
+            anchor="center",
+            justify="center"
+        ).pack(fill="x", pady=(6, 8))
+
+        ttk.Separator(native_frame, orient="horizontal").pack(fill="x", padx=8, pady=(0, 8))
+
+        bg = win.cget("background")
+        native_canvas = tk.Canvas(native_frame, highlightthickness=0, background=bg)
+        native_scrollbar = ttk.Scrollbar(native_frame, orient="vertical", command=native_canvas.yview)
+        native_canvas.configure(yscrollcommand=native_scrollbar.set)
+
+        native_scrollbar.pack(side="right", fill="y")
+        native_canvas.pack(side="left", fill="both", expand=True)
+
+        native_list = ttk.Frame(native_canvas)
+        native_window = native_canvas.create_window((0, 0), window=native_list, anchor="nw")
+
+        scroll_needed = {"value": False}
+
+        def _native_update_scrollregion(event=None):
+            native_canvas.configure(scrollregion=native_canvas.bbox("all"))
+            native_canvas.itemconfigure(native_window, width=native_canvas.winfo_width())
+
+            bbox = native_canvas.bbox("all")
+            if not bbox:
+                scroll_needed["value"] = False
+                if native_scrollbar.winfo_ismapped():
+                    native_scrollbar.pack_forget()
+                return
+
+            content_h = bbox[3] - bbox[1]
+            canvas_h = native_canvas.winfo_height()
+
+            if content_h <= canvas_h + 2:
+                scroll_needed["value"] = False
+                native_canvas.yview_moveto(0)
+                if native_scrollbar.winfo_ismapped():
+                    native_scrollbar.pack_forget()
+            else:
+                scroll_needed["value"] = True
+                if not native_scrollbar.winfo_ismapped():
+                    native_scrollbar.pack(side="right", fill="y")
+
+        native_list.bind("<Configure>", _native_update_scrollregion)
+        native_canvas.bind("<Configure>", _native_update_scrollregion)
+
+        def _on_mousewheel(e):
+            if scroll_needed["value"]:
+                native_canvas.yview_scroll(int(-1 * (e.delta / 120)), "units")
+
+        def _bind_mousewheel(_):
+            native_canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        def _unbind_mousewheel(_):
+            native_canvas.unbind_all("<MouseWheel>")
+
+        native_canvas.bind("<Enter>", _bind_mousewheel)
+        native_canvas.bind("<Leave>", _unbind_mousewheel)
 
         any_native = False
 
@@ -152,53 +271,105 @@ class MissionsMixin:
 
             any_native = True
 
-            mframe = ttk.Frame(native_frame)
-            mframe.pack(fill="x", pady=8)
+            mframe = ttk.Frame(native_list)
+            mframe.pack(fill="x", pady=8, padx=6)
 
             ttk.Label(
                 mframe,
                 text=f"{tribe}: {mission['name']}",
-                font=("Arial", 11, "bold")
-            ).pack(anchor="w")
+                font=("Arial", 11, "bold"),
+                anchor="center",
+                justify="center"
+            ).pack(fill="x")
 
             ttk.Label(
                 mframe,
                 text=mission.get("desc", ""),
                 wraplength=600,
-                justify="left"
-            ).pack(anchor="w", pady=2)
+                justify="center",
+                anchor="center"
+            ).pack(fill="x", pady=2)
 
             ttk.Label(
                 mframe,
                 text=f"Termin: {mission['end'].strftime('%d %b %Y')} "
                      f"(pozostało {(mission['end'] - self.current_date).days} dni)",
-                foreground="red"
-            ).pack(anchor="w")
+                foreground="red",
+                anchor="center",
+                justify="center"
+            ).pack(fill="x", pady=1)
 
-            # POSTĘP
             req = mission["required"]
             sent = mission["sent"]
 
+            # koloruj wg zasobów gracza w magazynie, NIE wg sent
+            resource_sources = [
+                "storage", "warehouse", "inventory", "goods",
+                "colony_resources", "resources"
+            ]
+
             for r in req:
-                have = sent.get(r, 0)
                 need = req[r]
-                color = "green" if have >= need else ("orange" if have > 0 else "red")
+
+                # ile gracz ma tego surowca
+                player_have = 0
+                for src in resource_sources:
+                    d = getattr(self, src, None)
+                    if isinstance(d, dict) and r in d:
+                        player_have = d.get(r, 0)
+                        break
+
+                # kolor zależny od magazynu gracza
+                if player_have >= need:
+                    color = "green"
+                elif player_have > 0:
+                    color = "orange"
+                else:
+                    color = "red"
+
+                # (tekst zostaje jak był: sent/need)
+                have_sent = sent.get(r, 0)
+
                 ttk.Label(
                     mframe,
-                    text=f"{r}: {have}/{need}",
-                    foreground=color
-                ).pack(anchor="w")
+                    text=f"{r}: {have_sent}/{need}",
+                    foreground=color,
+                    anchor="center",
+                    justify="center"
+                ).pack(fill="x")
 
-            # ============================
-            # PRZYCISK – WYPEŁNIJ MISJĘ TERAZ
-            # ============================
             def make_finish_fn(tribe=tribe, mission=mission):
                 def finish_now():
-                    # pełne wypełnienie wymagań
-                    for r in mission["required"]:
-                        mission["sent"][r] = mission["required"][r]
+                    missing = {}
+                    required = mission.get("required", {})
 
-                    # obliczenie nagrody
+                    resource_sources = [
+                        "storage", "warehouse", "inventory", "goods",
+                        "colony_resources", "resources"
+                    ]
+
+                    for r, need in required.items():
+                        have = 0
+                        for src in resource_sources:
+                            d = getattr(self, src, None)
+                            if isinstance(d, dict) and r in d:
+                                have = d.get(r, 0)
+                                break
+                        if have < need:
+                            missing[r] = (have, need)
+
+                    if missing:
+                        msg = (
+                                "Nie masz wystarczających surowców do wykonania misji od "
+                                + str(tribe) + ": "
+                                + ", ".join([f"{r} {have}/{need}" for r, (have, need) in missing.items()])
+                        )
+                        self.log(msg, "red")
+                        return
+
+                    for r in required:
+                        mission["sent"][r] = required[r]
+
                     remaining_days = (mission["end"] - self.current_date).days
                     full_months_left = max(0, remaining_days // 30)
                     reward = 10 + 2 * full_months_left
@@ -212,10 +383,7 @@ class MissionsMixin:
                         "green"
                     )
 
-                    # zakończ misję
                     self.native_missions_active[tribe] = None
-
-                    # cooldown 1–2 miesiące
                     cd = random.randint(30, 60)
                     self.native_missions_cd[tribe] = self.current_date + timedelta(days=cd)
 
@@ -227,69 +395,30 @@ class MissionsMixin:
                 mframe,
                 text="Wypełnij misję teraz",
                 command=make_finish_fn()
-            ).pack(anchor="w", pady=6)
+            ).pack(pady=6, anchor="center")
+
+            ttk.Separator(native_list, orient="horizontal").pack(fill="x", padx=10, pady=6)
 
         if not any_native:
             ttk.Label(
-                native_frame,
+                native_list,
                 text="Brak aktywnych misji indiańskich.",
-                foreground="gray"
-            ).pack(anchor="w", pady=5)
+                foreground="gray",
+                anchor="center",
+                justify="center"
+            ).pack(pady=8, fill="x")
 
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
-
-        # wyśrodkuj okno przeglądu misji
-        self.center_window(win)
-
-    def show_mission_window(self):
-        if not self.current_mission:
-            self.log("Brak aktywnej misji.", "gray")
-            return
-
-        win = self.create_window(f"Misja Królewska")
-        end, req, sent, diff, text, idx = self.current_mission
-
-        ttk.Label(win, text=text, wraplength=500, justify="center", font=("Arial", 11)).pack(pady=10)
-        ttk.Label(win, text=f"Pozostało: {(end - self.current_date).days} dni", foreground="red").pack(pady=5)
-
-        # POSTĘP MISJI
-        frame = ttk.Frame(win)
-        frame.pack(pady=10)
-        for r in req:
-            have = sent.get(r, 0)
-            need = req[r]
-            color = "green" if have >= need else "orange" if have > 0 else "red"
-            ttk.Label(frame, text=f"{r}: {have}/{need}", foreground=color).pack()
-
-        # KOSZT DUKATÓW – liczony tak samo jak w pay_mission_with_gold
-        remaining = {r: req[r] - sent.get(r, 0) for r in req if sent.get(r, 0) < req[r]}
-        if remaining:
-            total_value = sum(a * EUROPE_PRICES.get(r, 10) for r, a in remaining.items())
-            dukaty_cost = int(total_value * diff)   # *** też tylko ta linijka zmieniona względem starej wersji ***
-
-            cost_lbl = ttk.Label(
-                win,
-                text=f"Koszt spłacenia dukatami: {dukaty_cost}",
-                foreground="orange",
-                font=("Arial", 10, "bold")
-            )
-            cost_lbl.pack(pady=5)
-        else:
-            ttk.Label(
-                win,
-                text="Misja już wykonana!",
-                foreground="green",
-                font=("Arial", 10, "bold")
-            ).pack(pady=5)
+        # ============================
+        # BOTTOM BAR — ZAMKNIJ
+        # ============================
+        ttk.Separator(bottom_frame, orient="horizontal").pack(fill="x", pady=(0, 6))
 
         ttk.Button(
-            win,
-            text="Opłać dukatami",
-            command=lambda: [self.pay_mission_with_gold(), win.destroy()]
-        ).pack(pady=10)
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
+            bottom_frame,
+            text="Zamknij",
+            command=win.destroy
+        ).pack(anchor="center")
 
-        # wyśrodkuj okno przeglądu misji
         self.center_window(win)
 
     def complete_royal_mission(self):

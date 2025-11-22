@@ -36,6 +36,7 @@ DONE !!! tile dla terraincognita
 DONE !!! - budynki na mapie, że coś stoi
 
 <GAMEPLAY>
+DONE !!! NIE DZIAŁAJA QUESTY JAK POWINNY!!!!!!
 eventy losowe - plaga, pozar, wypadki whatever, piractwo
 ?budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
 ?magazyn -> podobnie ale z surowcami

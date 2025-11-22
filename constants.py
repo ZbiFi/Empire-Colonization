@@ -527,16 +527,16 @@ BASE_COLORS = {"morze": "#0066CC", "pole": "#CCCC99", "las": "#228B22", "wzniesi
 
 # Misje królewskie
 ROYAL_MISSIONS = [
-    {"name": "Drewno na stocznie", "base": {"drewno": 200}},
-    {"name": "Żywność dla armii", "base": {"żywność": 100, "skóry": 50}},
-    {"name": "Żelazo na działa", "base": {"żelazo": 50}},
-    {"name": "Stal dla floty", "base": {"stal": 60, "drewno": 100}},
-    {"name": "Cukier dla dworu", "base": {"cukier": 100}},
-    {"name": "Prezent dla króla", "base": {"złoto": 15, "cygara": 15, "srebro": 25}},
-    {"name": "Złoto dla skarbu", "base": {"złoto": 20}},
-    {"name": "Wsparcie dla armii", "base": {"stal": 30, "ubrania": 20}},
-    {"name": "Zapomoga na choroby", "base": {"zioła": 15, "medykamenty": 20}},
-    {"name": "Wsparcie kościoła", "base": {"złoto": 20, "srebro":30, "żywność": 20}},
+    {"name": "Drewno na stocznie", "base": {"drewno": 300}},
+    {"name": "Żywność dla armii", "base": {"żywność": 300, "skóry": 50}},
+    {"name": "Żelazo na działa", "base": {"żelazo": 100}},
+    {"name": "Stal dla floty", "base": {"stal": 60, "drewno": 200}},
+    {"name": "Cukier dla dworu", "base": {"cukier": 200}},
+    {"name": "Prezent dla króla", "base": {"złoto": 50, "cygara": 30, "srebro": 100}},
+    {"name": "Złoto dla skarbu", "base": {"złoto": 100}},
+    {"name": "Wsparcie dla armii", "base": {"stal": 50, "ubrania": 100}},
+    {"name": "Zapomoga na choroby", "base": {"zioła": 50, "medykamenty": 70}},
+    {"name": "Wsparcie kościoła", "base": {"złoto": 30, "srebro": 50, "żywność": 100}},
 ]
 
 NATIVE_MISSIONS_DETAILS = [

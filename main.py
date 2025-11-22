@@ -93,7 +93,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
         self.resources = {r: 0 for r in RESOURCES}
-        self.resources["żywność"] = 1000
+        self.resources["żywność"] = 10000
         self.resources["drewno"] = 50
         self.resources["żelazo"] = 30
         self.resources["skóry"] = 10
