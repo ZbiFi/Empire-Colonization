@@ -527,46 +527,136 @@ BASE_COLORS = {"morze": "#0066CC", "pole": "#CCCC99", "las": "#228B22", "wzniesi
 
 # Misje królewskie
 ROYAL_MISSIONS = [
-    {"name": "Drewno na stocznie", "base": {"drewno": 300}},
-    {"name": "Żywność dla armii", "base": {"żywność": 300, "skóry": 50}},
-    {"name": "Żelazo na działa", "base": {"żelazo": 100}},
-    {"name": "Stal dla floty", "base": {"stal": 60, "drewno": 200}},
-    {"name": "Cukier dla dworu", "base": {"cukier": 200}},
-    {"name": "Prezent dla króla", "base": {"złoto": 50, "cygara": 30, "srebro": 100}},
-    {"name": "Złoto dla skarbu", "base": {"złoto": 100}},
-    {"name": "Wsparcie dla armii", "base": {"stal": 50, "ubrania": 100}},
-    {"name": "Zapomoga na choroby", "base": {"zioła": 50, "medykamenty": 70}},
-    {"name": "Wsparcie kościoła", "base": {"złoto": 30, "srebro": 50, "żywność": 100}},
+    {
+        "name": "Drewno na stocznie",
+        "base": {"drewno": 300},
+        "desc": (
+            "Z woli naszej królewskiej rozkazuję, by niezwłocznie zgromadzono znaczny zapas drewna "
+            "na budowę okrętów i umocnień morskich. Stocznie Korony mają pracować dniem i nocą, "
+            "a brak surowca uznam za zaniedbanie przeciw interesowi państwa. "
+            "Dostarcz drewno w pełnej mierze, aby flota mogła wyruszyć na wody bez zwłoki."
+        )
+    },
+    {
+        "name": "Żywność dla armii",
+        "base": {"żywność": 300, "skóry": 50},
+        "desc": (
+            "Rozkazuję zaopatrzyć wojska nasze w żywność, aby żaden żołnierz nie cierpiał głodu na służbie. "
+            "Ponadto skóry dostarczysz na oporządzenie i naprawę rynsztunku, by armia trwała w gotowości. "
+            "Niech zapasy dotrą na czas, gdyż od nich zależy siła marszu i zwycięstwo w polu."
+        )
+    },
+    {
+        "name": "Żelazo na działa",
+        "base": {"żelazo": 100},
+        "desc": (
+            "Zlecam i nakazuję przygotować żelazo na odlew dział oraz naprawę arsenału. "
+            "Twierdze i okręty muszą mieć broń pewną, a kuźnie królewskie nie mogą stać bez pracy. "
+            "Nie zwlekaj z dostawą, bo od niej zależy bezpieczeństwo granic i chwała naszego oręża."
+        )
+    },
+    {
+        "name": "Stal dla floty",
+        "base": {"stal": 60, "drewno": 200},
+        "desc": (
+            "Niechaj zostanie dostarczona stal na okucia, kotwice i uzbrojenie floty, "
+            "a drewno na maszty i poszycie okrętów. Rozkaz ten ma pierwszeństwo przed innymi sprawami, "
+            "gdyż morza wymagają siły i porządku. "
+            "Dopełnij powinności bez wymówek, aby bandery nasze panowały na szlakach handlu."
+        )
+    },
+    {
+        "name": "Cukier dla dworu",
+        "base": {"cukier": 200},
+        "desc": (
+            "Rozkazuję, by cukier w należnej ilości trafił do królewskich spiżarni. "
+            "Dwór mój ma być godnie podejmowany podczas uczt i poselstw, "
+            "bo wspaniałość stołu świadczy o potędze Korony. "
+            "Niech dostawa będzie czysta i pełna, bez zaniżania miary."
+        )
+    },
+    {
+        "name": "Prezent dla króla",
+        "base": {"złoto": 50, "cygara": 30, "srebro": 100},
+        "desc": (
+            "Nakazuję przygotować dary godne majestatu: złoto i srebro na skarbiec oraz cygara "
+            "na użytek dworu i ważnych gości. "
+            "Niechaj przybywają poselstwa widzą, iż Królestwo w dostatku stoi "
+            "i splendoru mu nie brakuje. "
+            "Dostarcz wszystko bez uszczerbku i w stanie nienagannym."
+        )
+    },
+    {
+        "name": "Złoto dla skarbu",
+        "base": {"złoto": 100},
+        "desc": (
+            "Rozkazuję zasilić skarb królewski złotem, aby państwo mogło prowadzić sprawy "
+            "wojny i pokoju wedle naszej woli. "
+            "Moneta musi płynąć do skarbca bez zwłoki, bo na niej wspiera się ład i prawo. "
+            "Kto ociąga się z dostawą, ten szkodzi Koronie."
+        )
+    },
+    {
+        "name": "Wsparcie dla armii",
+        "base": {"stal": 50, "ubrania": 100},
+        "desc": (
+            "Stal przeznaczysz na broń, pancerze i naprawę rynsztunku, "
+            "zaś ubrania na odzienie dla wojsk stojących w polu. "
+            "Rozkazuję uczynić to natychmiast, by armia nie traciła ducha ani sprawności. "
+            "Niech żołnierz nosi barwy Króla z dumą i trwa w gotowości do marszu."
+        )
+    },
+    {
+        "name": "Zapomoga na choroby",
+        "base": {"zioła": 50, "medykamenty": 70},
+        "desc": (
+            "Nakazuję zebrać zioła i medykamenty, aby zaraza i choroby nie pustoszyły naszych ludzi. "
+            "Lekarze królewscy mają otrzymać środki do leczenia natychmiast, "
+            "bo zdrowie poddanych jest siłą państwa. "
+            "Niech dostawa będzie rzetelna, a jakość nieskazitelna."
+        )
+    },
+    {
+        "name": "Wsparcie kościoła",
+        "base": {"złoto": 30, "srebro": 50, "żywność": 100},
+        "desc": (
+            "Rozkazuję przekazać złoto i srebro na potrzeby świątyń oraz żywność "
+            "dla zakonów i przytułków pod opieką Kościoła. "
+            "Wiara i porządek duchowy wspierają tron, "
+            "a kto lekceważy ten nakaz, ten sprzeciwia się ładowi Królestwa. "
+            "Wykonaj polecenie bez ociągania."
+        )
+    },
 ]
 
 NATIVE_MISSIONS_DETAILS = [
     {
-        "name": "Pomóż nam w polowaniu na bizony",
+        "name": "Pomoc w polowaniu na bizony",
         "base": {"żywność": 30, "żelazo": 20},
         "desc": "Wielkie stada bizonów oddalają się od naszych ziem. Daj nam mięsa i skór, żeby nasze kobiety i dzieci nie głodowały tej zimy, zanim biali myśliwi zabiorą nam wszystko."
     },
     {
-        "name": "Duchy przodków są głodne – przynieś dary",
+        "name": "Duchy przodków są głodne",
         "base": {"cukier": 20, "cygara": 20, "żywność": 30},
         "desc": "Duchy naszych ojców wędrują niespokojne. Przynieś słodkie kryształy, wonny dym i mięso, by ucieszyć je przy ognisku. Wtedy będą chronić także ciebie, bladą twarzy."
     },
     {
-        "name": "Biali z północy palą nasze wioski – daj broń",
+        "name": "Biali z północy palą wioski",
         "base": {"stal": 15, "żelazo": 30},
         "desc": "Ludzie w niebieskich mundurach palą nasze tipi i zabijają nasze konie. Daj nam żelazo i stal, byśmy mogli zrobić włócznie i topory godne wojowników. Razem przepędzimy tych psów."
     },
     {
-        "name": "Szaman potrzebuje ziół z dalekich gór",
+        "name": "Szaman potrzebuje ziół",
         "base": {"zioła": 30, "medykamenty": 20},
         "desc": "Stary Szaman widział we śnie święte zioła rosnące tylko tam, gdzie biali kopią żółte kamienie. Przynieś je szybko, bo duchy chorób krążą nad naszymi dziećmi."
     },
     {
-        "name": "Nasze kobiety chcą pięknych tkanin od bladych twarzy",
+        "name": "Kobiety chcą pięknych tkanin od bladych twarzy",
         "base": {"ubrania": 60},
         "desc": "Nasze squaw słyszały o miękkich, kolorowych szmatach, które noszą kobiety z wielkich łodzi. Przynieś je, a nasze kobiety będą śpiewać pieśni o tobie przy ogniu."
     },
     {
-        "name": "Wodzowi ukradli konia – potrzebujemy żelaza na nowe podkowy",
+        "name": "Wodzowi ukradli konia",
         "base": {"żelazo": 20, "stal": 15},
         "desc": "Dalecy kuzyni z południa ukradli najlepszego ogiera Wielkiego Wodza. Musimy zrobić nowe podkowy i lance. Daj nam żelazo, a kiedy odzyskamy konie, podzielimy się z tobą łupami z bladych osadników."
     },
@@ -576,17 +666,17 @@ NATIVE_MISSIONS_DETAILS = [
         "desc": "We śnie Wielki Duch pokazał nam błyszczące kamienie z twoich skrzyń. Przynieś je nam jako dar, a my pokażemy ci ścieżki, gdzie ziemia rodzi jeszcze więcej – zanim inne blade twarzy zabiorą wszystko."
     },
     {
-        "name": "Przynieś rum i cukier na święto tańca słońca",
+        "name": "Rum i cukier na święto tańca słońca",
         "base": {"cukier": 20, "żywność": 50},
         "desc": "Za trzy księżyce będzie wielkie święto tańca słońca. Potrzebujemy słodkiego ognia z trzciny i dużo jedzenia. Przynieś – będziemy tańczyć i modlić się także za twoją osadę."
     },
     {
-        "name": "Nasze dzieci chorują – daj lekarstwa białego człowieka",
+        "name": "Dzieci chorują",
         "base": {"medykamenty": 15, "zioła": 30, "żywność": 40},
         "desc": "Czarna ospa przyszła z waszych statków i zabiera nasze dzieci. Słyszymy, że masz gorzkie wody, które leczą. Daj je nam szybko, bo inaczej duchy zemsty przyjdą także do twoich chat."
     },
     {
-        "name": "Chcemy handlować futrami – ale najpierw pokaż, że jesteś bratem",
+        "name": "Handel",
         "base": {"ubrania": 30, "żelazo": 20, "cygara": 15},
         "desc": "Mamy najlepsze bobrze i lisie futra na całym wybrzeżu. Ale najpierw udowodnij, że nie jesteś taki jak inne blade twarze, co kradną i kłamią. Przynieś dary – wtedy otworzymy nasze spichlerze."
     }

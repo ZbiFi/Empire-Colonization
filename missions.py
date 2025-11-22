@@ -78,7 +78,7 @@ class MissionsMixin:
         """
 
         win = self.create_window("Misje")
-        win.geometry("650x700")
+        win.geometry("650x800")
 
         # === GRID NA OKNIE: content + bottom bar ===
         win.grid_rowconfigure(0, weight=1)  # content rośnie
@@ -91,11 +91,16 @@ class MissionsMixin:
         bottom_frame = ttk.Frame(win)
         bottom_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=8)
 
+        # ====== FONTY SPÓJNE Z RESZTĄ UI (main.py) ======
+        top_title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
+        top_info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 12))
+        bold_info_font = (top_info_font[0], top_info_font[1], "bold")
+
         # ====== GŁÓWNY TYTUŁ OKNA ======
         ttk.Label(
             content_frame,
             text="MISJE",
-            font=("Arial", 15, "bold"),
+            font=(top_title_font[0], top_title_font[1] + 2, "bold"),
             anchor="center",
             justify="center"
         ).pack(pady=(8, 4))
@@ -111,7 +116,7 @@ class MissionsMixin:
         ttk.Label(
             royal_frame,
             text="✦ MISJA KRÓLEWSKA ✦",
-            font=("Arial", 13, "bold"),
+            font=top_title_font,
             anchor="center",
             justify="center"
         ).pack(fill="x", pady=(6, 8))
@@ -123,24 +128,45 @@ class MissionsMixin:
                 royal_frame,
                 text="Brak aktywnej misji królewskiej.",
                 foreground="gray",
+                font=top_info_font,
                 anchor="center",
                 justify="center"
             ).pack(pady=8, fill="x")
         else:
             end, req, sent, diff, text, idx = self.current_mission
 
+            # --- PRZYWRÓCONE: name na górze + desc poniżej ---
+            try:
+                mission_def = ROYAL_MISSIONS[idx]
+                mname = mission_def.get("name", "Misja królewska")
+                mdesc = mission_def.get("desc", text)
+            except Exception:
+                mname = "Misja królewska"
+                mdesc = text
+
             ttk.Label(
                 royal_frame,
-                text=text,
+                text=mname,
                 wraplength=600,
                 justify="center",
-                font=("Arial", 11)
+                anchor="center",
+                font=(bold_info_font[0], bold_info_font[1] + 1, "bold")
             ).pack(pady=6, fill="x")
+
+            if mdesc:
+                ttk.Label(
+                    royal_frame,
+                    text=mdesc,
+                    wraplength=600,
+                    justify="center",
+                    font=(top_info_font[0], top_info_font[1] + 1)
+                ).pack(pady=6, fill="x")
 
             ttk.Label(
                 royal_frame,
                 text=f"Pozostało: {(end - self.current_date).days} dni",
                 foreground="red",
+                font=top_info_font,
                 anchor="center",
                 justify="center"
             ).pack(fill="x", pady=3)
@@ -156,6 +182,7 @@ class MissionsMixin:
                     progress_frame,
                     text=f"{r}: {have}/{need}",
                     foreground=color,
+                    font=top_info_font,
                     anchor="center",
                     justify="center"
                 ).pack(fill="x")
@@ -174,22 +201,32 @@ class MissionsMixin:
                     royal_frame,
                     text=f"Koszt spłacenia dukatami: {dukaty_cost}",
                     foreground="orange",
-                    font=("Arial", 10, "bold"),
+                    font=bold_info_font,
                     anchor="center",
                     justify="center"
                 ).pack(pady=(6, 4), fill="x")
 
+                def _pay_and_maybe_close(cost=dukaty_cost):
+                    # jeśli nie ma dość dukatów -> pay_mission_with_gold zaloguje błąd, ale nie zamykamy okna
+                    if self.resources.get("dukaty", 0) < cost:
+                        self.pay_mission_with_gold()
+                        return
+                    # jak ma dość -> opłać i zamknij
+                    self.pay_mission_with_gold()
+                    win.destroy()
+
                 ttk.Button(
                     royal_frame,
                     text="Opłać dukatami",
-                    command=lambda: [self.pay_mission_with_gold(), win.destroy()]
+                    command=_pay_and_maybe_close
                 ).pack(pady=(4, 8), anchor="center")
+
             else:
                 ttk.Label(
                     royal_frame,
                     text="Misja już wykonana!",
                     foreground="green",
-                    font=("Arial", 10, "bold"),
+                    font=bold_info_font,
                     anchor="center",
                     justify="center"
                 ).pack(pady=8, fill="x")
@@ -203,7 +240,7 @@ class MissionsMixin:
         ttk.Label(
             native_frame,
             text="✦ MISJE INDIAŃSKIE ✦",
-            font=("Arial", 13, "bold"),
+            font=top_title_font,
             anchor="center",
             justify="center"
         ).pack(fill="x", pady=(6, 8))
@@ -277,7 +314,7 @@ class MissionsMixin:
             ttk.Label(
                 mframe,
                 text=f"{tribe}: {mission['name']}",
-                font=("Arial", 11, "bold"),
+                font=bold_info_font,
                 anchor="center",
                 justify="center"
             ).pack(fill="x")
@@ -287,6 +324,7 @@ class MissionsMixin:
                 text=mission.get("desc", ""),
                 wraplength=600,
                 justify="center",
+                font=top_info_font,
                 anchor="center"
             ).pack(fill="x", pady=2)
 
@@ -295,6 +333,7 @@ class MissionsMixin:
                 text=f"Termin: {mission['end'].strftime('%d %b %Y')} "
                      f"(pozostało {(mission['end'] - self.current_date).days} dni)",
                 foreground="red",
+                font=top_info_font,
                 anchor="center",
                 justify="center"
             ).pack(fill="x", pady=1)
@@ -302,7 +341,6 @@ class MissionsMixin:
             req = mission["required"]
             sent = mission["sent"]
 
-            # koloruj wg zasobów gracza w magazynie, NIE wg sent
             resource_sources = [
                 "storage", "warehouse", "inventory", "goods",
                 "colony_resources", "resources"
@@ -311,7 +349,6 @@ class MissionsMixin:
             for r in req:
                 need = req[r]
 
-                # ile gracz ma tego surowca
                 player_have = 0
                 for src in resource_sources:
                     d = getattr(self, src, None)
@@ -319,7 +356,6 @@ class MissionsMixin:
                         player_have = d.get(r, 0)
                         break
 
-                # kolor zależny od magazynu gracza
                 if player_have >= need:
                     color = "green"
                 elif player_have > 0:
@@ -327,13 +363,13 @@ class MissionsMixin:
                 else:
                     color = "red"
 
-                # (tekst zostaje jak był: sent/need)
                 have_sent = sent.get(r, 0)
 
                 ttk.Label(
                     mframe,
                     text=f"{r}: {have_sent}/{need}",
                     foreground=color,
+                    font=top_info_font,
                     anchor="center",
                     justify="center"
                 ).pack(fill="x")
@@ -404,6 +440,7 @@ class MissionsMixin:
                 native_list,
                 text="Brak aktywnych misji indiańskich.",
                 foreground="gray",
+                font=top_info_font,
                 anchor="center",
                 justify="center"
             ).pack(pady=8, fill="x")

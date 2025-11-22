@@ -1,27 +1,28 @@
-DONE !!! - eventy z lokalnymi -> misje
+                    DONE !!! - eventy z lokalnymi -> misje
 espedycje - cos ciekawego
 armia i walka?
 piractwo? -> może statki i z misją od króla by korsarzy wysyłać przeciwko komuś?
-DONE !!! +-1/+-10/+-100 przyciski przy handlu
-DONE !!! - lista budynkow jest zbugowana
+                    DONE !!! +-1/+-10/+-100 przyciski przy handlu
+                    DONE !!! - lista budynkow jest zbugowana
 atakowanie indian (porywanie i rajdy)
-DONE !!! - ekran z towarami na statku wymaga poprawy
-DONE !!! BUG z liczbą zatrudniowych
+                    DONE !!! - ekran z towarami na statku wymaga poprawy
+                    DONE !!! BUG z liczbą zatrudniowych
 
 
 <TOOLTIPS>
-DONE !!!!Do budynków
+                    DONE !!!!Do budynków
 Do misji
 Do reszty
 
-DONE !!! - bonusy do krajów na ekranie startowym
+                    DONE !!! - bonusy do krajów na ekranie startowym
 wiecej muzyki i ambiance
 drogi? -> bonus do produkcji.
 
 <UI>
-poprawić nazwy z logach obóz_myśliwski -> Obóz myśliwski
-DONE !!! poprawić nazwy z posiadanych budynkach
+                    DONE !!! poprawić nazwy z logach obóz_myśliwski -> Obóz myśliwski
+                    DONE !!! poprawić nazwy z posiadanych budynkach
 przenieść produkcję +/- obok danych zasobów
+spójnośćfontowa
 
 <SAVE/LOAD>
 save/load
@@ -29,14 +30,14 @@ settings
 localization
 
 <MAPA>
-DONE !!! - lepsze tile
+                    DONE !!! - lepsze tile
 tile dla osady i dzielnicy
 tile dla przystani
-DONE !!! tile dla terraincognita
-DONE !!! - budynki na mapie, że coś stoi
+                    DONE !!! tile dla terraincognita
+                    DONE !!! - budynki na mapie, że coś stoi
 
 <GAMEPLAY>
-DONE !!! NIE DZIAŁAJA QUESTY JAK POWINNY!!!!!!
+                    DONE !!! NIE DZIAŁAJA QUESTY JAK POWINNY!!!!!!
 eventy losowe - plaga, pozar, wypadki whatever, piractwo
 ?budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
 ?magazyn -> podobnie ale z surowcami
