@@ -80,6 +80,14 @@ class MapUIMixin:
             except Exception:
                 pass  # jeśli nie ma pliku, zostanie prostokąt z BASE_COLORS
 
+        # --- ikona osady/dzielnicy (camp.png) ---
+        try:
+            camp_path = self.resource_path("img/tiles/camp.png")
+            self.camp_icon_base = Image.open(camp_path).convert("RGBA")
+        except Exception:
+            self.camp_icon_base = None
+        self.camp_icon_cache = {}  # (size, small) -> ImageTk.PhotoImage
+
     def get_building_icon(self, cell_size: int):
         """
         Zwraca (PhotoImage, rozmiar) ikony budynku, przeskalowanej do 1/4 kafla,
@@ -110,6 +118,20 @@ class MapUIMixin:
         if "wzgórze" in r or "wzgorze" in r or "mountains" in r: return "mountains"
         if "morze" in r or "morze" in r or "sea" in r: return "sea"
         return None
+
+    def get_camp_icon(self, cell_size: int, small: bool = False):
+        """Zwraca przeskalowaną ikonę camp.png dla osady/dzielnicy albo None."""
+        if not getattr(self, "camp_icon_base", None):
+            return None
+
+        size = max(8, cell_size * 3// 4 if small else cell_size)
+        key = (size, small)
+
+        if key not in self.camp_icon_cache:
+            img = self.camp_icon_base.resize((size, size), Image.LANCZOS)
+            self.camp_icon_cache[key] = ImageTk.PhotoImage(img)
+
+        return self.camp_icon_cache[key], size
 
     def init_ocean_tiles(self):
         """Ładuje wszystkie pliki oceanu i rozbija ich nazwy na krawędzie/narożniki."""
@@ -683,14 +705,16 @@ class MapUIMixin:
         """
         Wspólne rysowanie JEDNEGO odkrytego pola mapy:
         - morze / las / wzniesienia: plains w tle + autotiling
-        - reszta terenów: prostokąt + tekstura (np. plains dla 'pole')
-        Bez nakładek typu budynki, %, '?', zielone ramki itp.
+        - osada / dzielnica: plains w tle + camp overlay (dzielnica 50% mniejsza)
+        - pole: plains sprite
+        - reszta terenów: prostokąt koloru
         """
         cell = self.map_grid[y][x]
         terrain = cell["terrain"]
 
+        # ===== morze / las / wzniesienia (jak było) =====
         if terrain in ("morze", "las", "wzniesienia"):
-            # tło – pole (plains), tak jak dla morza
+            # tło – pole (plains)
             try:
                 bg_img = self.get_plains_tile(cell_size)
                 canvas.create_image(
@@ -729,7 +753,6 @@ class MapUIMixin:
                     image=img
                 )
             else:
-                # awaryjny prostokąt, gdy brak tilesa
                 canvas.create_rectangle(
                     offset_x + x * cell_size,
                     offset_y + y * cell_size,
@@ -740,7 +763,73 @@ class MapUIMixin:
                 )
             return
 
-        # --- reszta terenów (np. 'pole', 'osada', 'dzielnica' itd.) ---
+        # ===== osada / dzielnica =====
+        if terrain in ("osada", "dzielnica"):
+            # tło jak "pole"
+            try:
+                bg_img = self.get_plains_tile(cell_size)
+                canvas.create_image(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    anchor="nw",
+                    image=bg_img
+                )
+            except Exception:
+                ground = BASE_COLORS.get("pole", "#CCCC99")
+                canvas.create_rectangle(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    offset_x + (x + 1) * cell_size,
+                    offset_y + (y + 1) * cell_size,
+                    fill=ground,
+                    outline="gray"
+                )
+
+            # nakładka camp.png
+            icon = self.get_camp_icon(cell_size, small=(terrain == "dzielnica"))
+            if icon:
+                img_icon, icon_size = icon
+                if terrain == "osada":
+                    canvas.create_image(
+                        offset_x + x * cell_size,
+                        offset_y + y * cell_size,
+                        anchor="nw",
+                        image=img_icon
+                    )
+                else:
+                    off = (cell_size - icon_size) // 2
+                    canvas.create_image(
+                        offset_x + x * cell_size + off,
+                        offset_y + y * cell_size + off,
+                        anchor="nw",
+                        image=img_icon
+                    )
+            return
+
+        # ===== pole (plains sprite) =====
+        if terrain == "pole":
+            try:
+                img = self.get_plains_tile(cell_size)
+                canvas.create_image(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    anchor="nw",
+                    image=img
+                )
+            except Exception:
+                # fallback na kolor jeśli plains.png nie ma
+                color = BASE_COLORS.get("pole", "#CCCC99")
+                canvas.create_rectangle(
+                    offset_x + x * cell_size,
+                    offset_y + y * cell_size,
+                    offset_x + (x + 1) * cell_size,
+                    offset_y + (y + 1) * cell_size,
+                    fill=color,
+                    outline="gray"
+                )
+            return
+
+        # ===== reszta terenów =====
         color = BASE_COLORS[terrain]
         canvas.create_rectangle(
             offset_x + x * cell_size,
@@ -750,15 +839,6 @@ class MapUIMixin:
             fill=color,
             outline="gray"
         )
-
-        if terrain == "pole":
-            img = self.get_plains_tile(cell_size)
-            canvas.create_image(
-                offset_x + x * cell_size,
-                offset_y + y * cell_size,
-                anchor="nw",
-                image=img
-            )
 
     # ===== MAPA BUDOWANIA =====
     def show_map(self):

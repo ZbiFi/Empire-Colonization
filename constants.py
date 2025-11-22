@@ -365,7 +365,7 @@ BUILDINGS = {
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True,
         "upgrades": [
-            {"name": "Chata", "cost": {"drewno": 40, "żelazo": 5}, "build_time": 5, "capacity": 6},
+            {"name": "Chata", "cost": {"drewno": 40, "żelazo": 5}, "build_time": 7, "capacity": 6},
             {"name": "Dom", "cost": {"drewno": 80, "żelazo": 10, "stal": 5, "skóry": 5}, "build_time": 21, "capacity": 10},
             {"name": "Dworek", "cost": {"drewno": 120, "żelazo": 15, "stal": 10, "ubrania": 10}, "build_time": 60, "capacity": 15}
         ]
@@ -376,9 +376,9 @@ BUILDINGS = {
         "name": "Drwalnia", "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
         "allowed_terrain": ["las"], "base_prod": {"drewno": 2},
         "upgrades": [
-            {"name": "Tartak ręczny", "cost": {"drewno": 40, "żelazo": 10}, "build_time": 10, "prod": {"drewno": 3}, "workers": 3},
-            {"name": "Tartak parowy", "cost": {"stal": 30, "żelazo": 20}, "build_time": 18, "prod": {"drewno": 4}, "workers": 4},
-            {"name": "Przemysłowy kompleks drzewny", "cost": {"stal": 60, "cukier": 10}, "build_time": 30, "prod": {"drewno": 5}, "workers": 5}
+            {"name": "Tartak ręczny", "cost": {"drewno": 40, "żelazo": 10}, "build_time": 14, "prod": {"drewno": 3}, "workers": 3},
+            {"name": "Tartak parowy", "cost": {"stal": 30, "żelazo": 20}, "build_time": 24, "prod": {"drewno": 4}, "workers": 4},
+            {"name": "Przemysłowy kompleks drzewny", "cost": {"stal": 60, "cukier": 10}, "build_time": 40, "prod": {"drewno": 5}, "workers": 5}
         ]
     },
 
@@ -387,9 +387,9 @@ BUILDINGS = {
         "name": "Pole uprawne", "base_cost": {"drewno": 15}, "build_time": 4, "base_workers": 2,
         "allowed_terrain": ["pole"], "base_prod": {"żywność": 1.5},
         "upgrades": [
-            {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 8, "prod": {"żywność": 2}, "workers": 3},
-            {"name": "Plantacja zbożowa", "cost": {"żelazo": 20, "stal": 10}, "build_time": 15, "prod": {"żywność": 2.5}, "workers": 4},
-            {"name": "Folwark z młynem", "cost": {"stal": 40, "cukier": 5}, "build_time": 25, "prod": {"żywność": 3}, "workers": 5}
+            {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 15, "prod": {"żywność": 2}, "workers": 3},
+            {"name": "Plantacja zbożowa", "cost": {"żelazo": 20, "stal": 10}, "build_time": 22, "prod": {"żywność": 2.5}, "workers": 4},
+            {"name": "Folwark z młynem", "cost": {"stal": 40, "cukier": 5}, "build_time": 30, "prod": {"żywność": 3}, "workers": 5}
         ]
     },
 
@@ -399,8 +399,8 @@ BUILDINGS = {
         "allowed_terrain": ["las", "pole"], "base_prod": {"skóry": 1, "żywność": 1},
         "upgrades": [
             {"name": "Stanica łowiecka", "cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "prod": {"skóry": 1, "żywność": 1}, "workers": 3},
-            {"name": "Rezerwat skórny", "cost": {"stal": 30}, "build_time": 16, "prod": {"skóry": 1.5, "żywność": 1.5}, "workers": 4},
-            {"name": "Kompania futrzarska", "cost": {"stal": 50, "cygara": 5}, "build_time": 25, "prod": {"skóry": 2, "żywność": 1.5}, "workers": 5}
+            {"name": "Rezerwat skórny", "cost": {"stal": 30}, "build_time": 24, "prod": {"skóry": 1.5, "żywność": 1.5}, "workers": 4},
+            {"name": "Kompania futrzarska", "cost": {"stal": 50, "cygara": 5}, "build_time": 35, "prod": {"skóry": 2, "żywność": 1.5}, "workers": 5}
         ]
     },
     "garbarnia_polowa": {
@@ -408,9 +408,9 @@ BUILDINGS = {
         "allowed_terrain": ["osada", "dzielnica"],
         "requires_settlement": True, "consumes": {"skóry": 1}, "base_prod": {"ubrania": 0.5},
         "upgrades": [
-            {"name": "Warsztat krawiecki", "cost": {"drewno": 50, "stal": 15}, "build_time": 12, "prod": {"ubrania": 0.6}, "workers": 3},
-            {"name": "Manufaktura odzieżowa", "cost": {"stal": 40, "cukier": 10}, "build_time": 20, "prod": {"ubrania": 0.8}, "workers": 4},
-            {"name": "Fabryka tekstyliów kolonialnych", "cost": {"stal": 80, "cygara": 10}, "build_time": 30, "prod": {"ubrania": 1}, "workers": 5}
+            {"name": "Warsztat krawiecki", "cost": {"drewno": 50, "stal": 15}, "build_time": 16, "prod": {"ubrania": 0.6}, "workers": 3},
+            {"name": "Manufaktura odzieżowa", "cost": {"stal": 40, "cukier": 10}, "build_time": 27, "prod": {"ubrania": 0.8}, "workers": 4},
+            {"name": "Fabryka tekstyliów kolonialnych", "cost": {"stal": 80, "cygara": 10}, "build_time": 45, "prod": {"ubrania": 1}, "workers": 5}
         ]
     },
 
@@ -419,9 +419,9 @@ BUILDINGS = {
         "name": "Ziołorośla", "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
         "allowed_terrain": ["pole", "las"], "base_prod": {"zioła": 1},
         "upgrades": [
-            {"name": "Ogród botaniczny", "cost": {"drewno": 35, "żelazo": 10}, "build_time": 9, "prod": {"zioła": 1.2}, "workers": 3},
-            {"name": "Plantacja ziół leczniczych", "cost": {"stal": 25}, "build_time": 14, "prod": {"zioła": 1.4}, "workers": 4},
-            {"name": "Instytut Etnobotaniki", "cost": {"stal": 50, "medykamenty": 5}, "build_time": 22, "prod": {"zioła": 1.6}, "workers": 5}
+            {"name": "Ogród botaniczny", "cost": {"drewno": 35, "żelazo": 10}, "build_time": 13, "prod": {"zioła": 1.2}, "workers": 3},
+            {"name": "Plantacja ziół leczniczych", "cost": {"stal": 25}, "build_time": 20, "prod": {"zioła": 1.4}, "workers": 4},
+            {"name": "Instytut Etnobotaniki", "cost": {"stal": 50, "medykamenty": 5}, "build_time": 43, "prod": {"zioła": 1.6}, "workers": 5}
         ]
     },
     "ziołolecznica": {
@@ -679,6 +679,56 @@ NATIVE_MISSIONS_DETAILS = [
         "name": "Handel",
         "base": {"ubrania": 30, "żelazo": 20, "cygara": 15},
         "desc": "Mamy najlepsze bobrze i lisie futra na całym wybrzeżu. Ale najpierw udowodnij, że nie jesteś taki jak inne blade twarze, co kradną i kłamią. Przynieś dary – wtedy otworzymy nasze spichlerze."
+    },
+    {
+        "name": "Susza na preriach",
+        "base": {"żywność": 50, "zioła": 20},
+        "desc": "Słońce wypiło wodę z rzek, a trawa stała się żółta jak stare kości. Nasze dzieci płaczą z głodu. Daj nam mięsa i ziół, byśmy przetrwali, zanim przyjdą deszcze."
+    },
+    {
+        "name": "Wojownicy wracają z wyprawy",
+        "base": {"żywność": 40, "cygara": 20},
+        "desc": "Nasi wojownicy wracają z dalekiej ścieżki. Musimy przywitać ich jedzeniem i wonnym dymem, żeby duchy widziały, że plemię jest silne. Przynieś dary, a usłyszysz pieśni o odwadze."
+    },
+    {
+        "name": "Naprawa palisady wioski",
+        "base": {"drewno": 60, "żelazo": 15},
+        "desc": "Wilki i ludzie z północy krążą przy naszych szałasach. Nasza palisada spróchniała. Daj nam drewno i żelazo na ostrza, a nieprzyjaciel nie wejdzie do naszych domów."
+    },
+    {
+        "name": "Nowe tipi na zimę",
+        "base": {"skóry": 40, "ubrania": 20},
+        "desc": "Zima będzie długa i twarda. Potrzebujemy skór na nowe tipi i ciepłych tkanin dla kobiet. Przynieś je nam, a nasze ogniska będą płonąć także dla ciebie."
+    },
+    {
+        "name": "Święto nadania imienia nowemu wodzowi",
+        "base": {"złoto": 5, "srebro": 15, "cygara": 10},
+        "desc": "Stary Wódz odszedł za rzekę duchów. Nowy musi otrzymać dary, by jego słowo było mocne. Przynieś błyszczące kamienie i dym – wtedy będziesz przyjacielem naszego rodu."
+    },
+    {
+        "name": "Końskie stado potrzebuje podków",
+        "base": {"stal": 20, "żelazo": 20},
+        "desc": "Nasze konie są szybkie jak wiatr, ale ich kopyta kruszą się na kamieniach. Daj nam stal i żelazo na podkowy, a nasi zwiadowcy będą strzec twoich granic."
+    },
+    {
+        "name": "Zaginieni myśliwi",
+        "base": {"żywność": 30, "medykamenty": 15},
+        "desc": "Trzech młodych myśliwych nie wróciło z lasu. Boimy się, że ranił ich niedźwiedź lub zbłądzili we mgle. Daj nam jedzenie i gorzkie leki, byśmy mogli ich szukać i uleczyć."
+    },
+    {
+        "name": "Kamienie na groby przodków",
+        "base": {"kamień": 80, "zioła": 10},
+        "desc": "Chcemy wznieść krąg kamieni dla naszych przodków, by duchy miały gdzie spocząć. Daj nam kamienie i święte zioła, a ich błogosławieństwo spadnie też na twoją osadę."
+    },
+    {
+        "name": "Biali handlarze oszukali naszych starszych",
+        "base": {"dukaty": 40, "ubrania": 25},
+        "desc": "Inne blade twarze dały nam stare szmaty i fałszywe obietnice. Pokaż, że jesteś inny. Przynieś prawdziwe tkaniny i srebrne monety, a odzyskasz nasze zaufanie."
+    },
+    {
+        "name": "Ogień w świętym gaju",
+        "base": {"drewno": 50, "żywność": 20, "cygara": 10},
+        "desc": "W świętym gaju zabrakło drewna na ognie, które odpędzają złe duchy. Potrzebujemy też mięsa i dymu na modlitwy. Przynieś to, a Szaman wypowie nad tobą dobre słowa."
     }
 ]
 
