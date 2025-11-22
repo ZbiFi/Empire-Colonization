@@ -88,6 +88,13 @@ class MapUIMixin:
             self.camp_icon_base = None
         self.camp_icon_cache = {}  # (size, small) -> ImageTk.PhotoImage
 
+        # camp jako terrain-icon-base (żeby legenda działała bez wyjątków)
+        if not hasattr(self, "terrain_icon_bases"):
+            self.terrain_icon_bases = {}
+        if self.camp_icon_base:
+            self.terrain_icon_bases["osada"] = self.camp_icon_base
+            self.terrain_icon_bases["dzielnica"] = self.camp_icon_base
+
     def get_building_icon(self, cell_size: int):
         """
         Zwraca (PhotoImage, rozmiar) ikony budynku, przeskalowanej do 1/4 kafla,
@@ -124,7 +131,7 @@ class MapUIMixin:
         if not getattr(self, "camp_icon_base", None):
             return None
 
-        size = max(8, cell_size * 3// 4 if small else cell_size)
+        size = max(8, cell_size * 3 // 4 if small else cell_size)
         key = (size, small)
 
         if key not in self.camp_icon_cache:
@@ -449,6 +456,8 @@ class MapUIMixin:
         base = self.terrain_icon_bases.get(terrain)
         if not base: return None
         icon_size = max(18, min(32, int(cell_size * 0.6)))
+        if terrain == "dzielnica":
+            icon_size = max(12, icon_size // 2)  # 50% mniejsze
         key = (terrain, icon_size)
         if key not in self.terrain_icon_cache:
             img = base.resize((icon_size, icon_size), Image.LANCZOS)
@@ -658,11 +667,21 @@ class MapUIMixin:
     def draw_legend(self, canvas, offset_x, offset_y, cell_size):
         legend_y = offset_y + self.map_size * cell_size + 30
 
-        # środek mapy (żeby ładnie wyśrodkować legendę)
         center_x = offset_x + (self.map_size * cell_size) / 2
 
+        # fonty spójne z UI
+        title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
+        info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 12))
+        small_info_font = (info_font[0], max(8, info_font[1] - 2))
+        small_info_bold = (info_font[0], max(8, info_font[1] - 2), "bold")
+
         # tytuł
-        canvas.create_text(center_x, legend_y, text="LEGENDA", anchor="center", font=("Arial", 14, "bold"))
+        canvas.create_text(
+            center_x, legend_y,
+            text="LEGENDA",
+            anchor="center",
+            font=title_font
+        )
 
         # --- grupa: tereny ---
         terrain_spacing = 80
@@ -678,8 +697,14 @@ class MapUIMixin:
             if icon:
                 canvas.create_image(x, terrain_y, image=icon)
             else:
-                canvas.create_rectangle(x - 10, terrain_y - 10, x + 10, terrain_y + 10, fill=color, outline="black")
-            canvas.create_text(x, terrain_y + 22, text=name.capitalize(), anchor="center", font=("Arial", 10))
+                canvas.create_rectangle(x - 10, terrain_y - 10, x + 10, terrain_y + 10,
+                                        fill=color, outline="black")
+            canvas.create_text(
+                x, terrain_y + 22,
+                text=name.capitalize(),
+                anchor="center",
+                font=small_info_font
+            )
 
         # --- grupa: surowce kopalniane ---
         mine_spacing = 80
@@ -697,8 +722,15 @@ class MapUIMixin:
                 canvas.create_image(x, mine_y, image=img)
             else:
                 color = MINE_COLORS[res]
-                canvas.create_rectangle(x - 10, mine_y - 10, x + 10, mine_y + 10, fill=color, outline="black")
-            canvas.create_text(x, mine_y + 22, text=MINE_NAMES[res], anchor="center", font=("Arial", 10))
+                canvas.create_rectangle(x - 10, mine_y - 10, x + 10, mine_y + 10,
+                                        fill=color, outline="black")
+
+            canvas.create_text(
+                x, mine_y + 22,
+                text=MINE_NAMES[res],
+                anchor="center",
+                font=small_info_font
+            )
 
     # ===== WSPÓLNE RYSOWANIE TERAENU =====
     def _draw_terrain_cell(self, canvas, x, y, offset_x, offset_y, cell_size):
@@ -842,21 +874,31 @@ class MapUIMixin:
 
     # ===== MAPA BUDOWANIA =====
     def show_map(self):
-
         win = self.create_window("Buduj - wybierz pole")
+
+        # fonty spójne z UI
+        title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
+        info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 12))
+        tile_label_font = (info_font[0], max(8, info_font[1] - 2), "bold")
+        tile_num_font = (info_font[0], max(9, info_font[1] - 1), "bold")
+
+        # większy napis dla osady/dzielnicy
+        settlement_label_font = (title_font[0], max(10, title_font[1] + 2), "bold")
 
         canvas_width = 850
         canvas_height = 850
-        canvas = tk.Canvas(win, width=canvas_width, height=canvas_height,
-                           bg=self.style.lookup("TFrame", "background"), highlightthickness=0)
+        canvas = tk.Canvas(
+            win, width=canvas_width, height=canvas_height,
+            bg=self.style.lookup("TFrame", "background"),
+            highlightthickness=0
+        )
         canvas.pack(pady=10)
 
         cell_size = self.get_cell_size()
         map_pixel_size = self.map_size * cell_size
 
-        # wyśrodkuj mapę na canvasie
         offset_x = (canvas_width - map_pixel_size) // 2
-        offset_y = 40  # u góry trochę miejsca na tytuł / legendę
+        offset_y = 40
 
         def draw():
             canvas.delete("all")
@@ -865,13 +907,11 @@ class MapUIMixin:
                     cell = self.map_grid[y][x]
 
                     if not cell["discovered"]:
-                        # spróbuj wczytać terra_incognita.png
                         try:
                             if not hasattr(self, "terra_incognita_img") or cell_size not in self.terra_incognita_img:
                                 path = self.resource_path("img/tiles/terra_incognita.png")
                                 base = Image.open(path)
                                 img = base.resize((cell_size, cell_size), Image.LANCZOS)
-
                                 if not hasattr(self, "terra_incognita_img"):
                                     self.terra_incognita_img = {}
                                 self.terra_incognita_img[cell_size] = ImageTk.PhotoImage(img)
@@ -882,9 +922,7 @@ class MapUIMixin:
                                 anchor="nw",
                                 image=self.terra_incognita_img[cell_size]
                             )
-
                         except Exception:
-                            # fallback – szary kwadrat
                             canvas.create_rectangle(
                                 offset_x + x * cell_size,
                                 offset_y + y * cell_size,
@@ -897,10 +935,8 @@ class MapUIMixin:
 
                     terrain = cell["terrain"]
 
-                    # wspólne rysowanie terenu (morze/las/wzniesienia/pole/.)
                     self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
 
-                    # budynek w budowie – procent postępu
                     building_in_progress = next(
                         (c for c in self.constructions if c[1]["pos"] == (y, x)), None
                     )
@@ -914,10 +950,9 @@ class MapUIMixin:
                             offset_y + y * cell_size + cell_size // 2 + 20,
                             text=f"{pct}%",
                             fill="white",
-                            font=("Arial", 9, "bold")
+                            font=tile_label_font
                         )
 
-                    # IKONA BUDYNKU: tylko na polach INNYCH niż osada/dzielnica
                     if terrain not in ["osada", "dzielnica"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
                         if buildings_here:
@@ -928,7 +963,6 @@ class MapUIMixin:
                                 cy = offset_y + y * cell_size + cell_size // 2
                                 canvas.create_image(cx, cy, image=img_icon)
 
-                    # opis osady / dzielnicy (tylko tekst, BEZ ikony)
                     if terrain in ["osada", "dzielnica"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
                         used = len(buildings_here)
@@ -937,17 +971,16 @@ class MapUIMixin:
                             offset_y + y * cell_size + cell_size // 2 - 20,
                             text=f"{terrain.capitalize()}",
                             fill="white",
-                            font=("Arial", 9, "bold")
+                            font=settlement_label_font
                         )
                         canvas.create_text(
                             offset_x + x * cell_size + cell_size // 2,
                             offset_y + y * cell_size + cell_size // 2,
                             text=f"{used}/5",
                             fill="yellow",
-                            font=("Arial", 10, "bold")
+                            font=tile_num_font
                         )
 
-                    # złoża na wzniesieniach – ikonki surowców
                     if terrain == "wzniesienia" and cell["resource"]:
                         icon = self.get_mine_icon(cell["resource"], cell_size)
                         if icon:
@@ -966,7 +999,6 @@ class MapUIMixin:
                                 outline="black"
                             )
 
-                    # zielone podświetlenia, gdzie można budować
                     if self.selected_building:
                         data = BUILDINGS[self.selected_building]
 
@@ -1019,19 +1051,22 @@ class MapUIMixin:
 
     # ===== MAPA EKSPLORACJI =====
     def show_explore_map(self):
-
         win = self.create_window("Eksploracja")
 
-        # informacje o kosztach
+        # fonty spójne z UI
+        title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
+        info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 12))
+        tile_q_font = (title_font[0], max(14, title_font[1] + 6), "bold")
+
         info_frame = ttk.Frame(win)
         info_frame.pack(pady=5)
 
-        ttk.Label(info_frame, text="Koszt eksploracji:", font=("Arial", 12, "bold")).pack()
+        ttk.Label(info_frame, text="Koszt eksploracji:", font=title_font).pack()
         ttk.Label(
             info_frame,
             text="• 3 ludzie • 15 żywności • 10 drewna",
             justify="center",
-            font=("Arial", 10)
+            font=info_font
         ).pack()
 
         canvas_width = 850
@@ -1056,7 +1091,6 @@ class MapUIMixin:
                 for x in range(self.map_size):
                     cell = self.map_grid[y][x]
 
-                    # nieodkryte pola, ale sąsiadujące z odkrytymi – potencjalne cele eksploracji
                     if not cell["discovered"]:
                         neighbors = [
                             (y + dy, x + dx)
@@ -1078,16 +1112,14 @@ class MapUIMixin:
                                 offset_y + y * cell_size + cell_size // 2,
                                 text="?",
                                 fill="white",
-                                font=("Arial", 20, "bold")
+                                font=tile_q_font
                             )
                         continue
 
                     terrain = cell["terrain"]
 
-                    # odkryte pole – rysowanie jak na mapie budowy
                     self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
 
-                    # opcjonalnie – ikona złoża również na mapie eksploracji
                     if terrain == "wzniesienia" and cell["resource"]:
                         icon = self.get_mine_icon(cell["resource"], cell_size)
                         if icon:
@@ -1099,7 +1131,6 @@ class MapUIMixin:
             self.draw_legend(canvas, offset_x, offset_y, cell_size)
 
         def debug_reveal_all():
-            """DEBUG: odkryj wszystkie pola na mapie eksploracji."""
             for row in self.map_grid:
                 for cell in row:
                     cell["discovered"] = True
@@ -1123,7 +1154,6 @@ class MapUIMixin:
             if not any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
                 return
 
-            # koszt i czas wyprawy
             days = random.randint(1, 3) + int(math.hypot(y - self.settlement_pos[0], x - self.settlement_pos[1]))
             cost_food = 15
             cost_wood = 10
@@ -1134,14 +1164,15 @@ class MapUIMixin:
             ttk.Label(
                 confirm,
                 text=f"Wyślij ekspedycję na pole ({y},{x})?",
-                font=getattr(self, "top_title_font", ("Cinzel", 14, "bold")),
+                font=title_font,
                 background=bg
             ).pack(pady=10)
+
             ttk.Label(
                 confirm,
                 text=f"Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna",
                 justify="center",
-                font=getattr(self, "top_info_font", ("EB Garamond Italic", 12)),
+                font=info_font,
                 background=bg
             ).pack(pady=5)
 
@@ -1168,7 +1199,6 @@ class MapUIMixin:
             ttk.Button(confirm, text="Wyślij", command=do_explore).pack(side="left", padx=10, pady=10)
             ttk.Button(confirm, text="Anuluj", command=confirm.destroy).pack(side="right", padx=10, pady=10)
 
-        # Przycisk debug – odkryj wszystkie pola od razu
         ttk.Button(
             info_frame,
             text="Odkryj wszystkie pola (debug)",
@@ -1180,3 +1210,4 @@ class MapUIMixin:
         ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
 
         self.center_window(win)
+

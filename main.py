@@ -644,6 +644,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             foreground="purple"
         )
         self.mission_counter_label.grid(row=0, column=2, sticky="e", padx=10)
+        Tooltip(self.mission_counter_label,
+                "Misje królewskie pojawiają się raz na trzy miesiące \nwraz z powrótem statku flagowego z Europy.\nMożna mieć tylko jedną misję na raz.")
 
         # ========== WIERSZ 2 – Ludzie / Wolni, wyśrodkowane ==========
 

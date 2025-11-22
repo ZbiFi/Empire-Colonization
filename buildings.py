@@ -386,7 +386,10 @@ class BuildingsMixin:
 
         win = self.create_window(f"Ulepsz / Zdegraduj / Zatrzymaj")
 
-        ttk.Label(win, text="Wybierz budynek:", font=("Arial", 12, "bold")).pack(pady=10)
+        # fonty spójne z resztą UI (misje)
+        title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
+
+        ttk.Label(win, text="Wybierz budynek:", font=title_font).pack(pady=10)
 
         has_any = False
         for i, b in enumerate(self.buildings):
@@ -464,8 +467,7 @@ class BuildingsMixin:
         self.center_window(win)
 
     # === Menu budowy ===
-    # === Menu budowy ===
-    # === Menu budowy ===
+
     def build_menu(self):
 
         win = self.create_window(f"Buduj")
@@ -635,6 +637,8 @@ class BuildingsMixin:
 
         win = self.create_window(f"Pracownicy")
 
+        title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
+
         self.worker_sliders = []
         for i, b in enumerate(self.buildings):
             if b["base"] in ["dzielnica", "namiot"]:
@@ -666,9 +670,11 @@ class BuildingsMixin:
                 win,
                 text="Brak miejsc pracy",
                 foreground="red",
-                font=("Arial", 11, "bold"),
+                font=title_font
             ).pack(pady=15)
             ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
+            self.center_window(win)
+            return
 
             # wyśrodkuj okno statków
             self.center_window(win)

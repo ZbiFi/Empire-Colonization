@@ -79,7 +79,7 @@ class ShipsMixin:
         return 1 + (sum(load.values()) // 500)
 
     def calculate_travel_days(self):
-        base = random.randint(60, 120)
+        base = random.randint(40, 80)
         if STATES[self.state].get("speed"):
             base = int(base / STATES[self.state]["speed"])
         return base
@@ -369,10 +369,10 @@ class ShipsMixin:
                 self.log(f"Statek {i+1} wrócił do kolonii. Gotowy do kolejnej podróży.", "blue")
                 self.play_sound("ship_arrived")
 
-                # Nowa misja (jeśli minęło 30 dni)
+                # Nowa misja (jeśli minęło 90 dni)
                 if i == self.flagship_index:
                     if (self.last_mission_date is None or
-                            (self.current_date - self.last_mission_date).days >= 30):
+                            (self.current_date - self.last_mission_date).days >= 90):
                         if not self.current_mission:
                             self.deliver_new_mission()
 
