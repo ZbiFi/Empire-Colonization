@@ -640,13 +640,31 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.work_lbl = ttk.Label(self.pop_frame, text="Wolni: 0", font=base_font)
         self.work_lbl.pack(side="left", padx=5)
 
+        res_frame = ttk.LabelFrame(self.root, text="Surowce")
+        res_frame.pack(fill="x", padx=10, pady=5)
 
-        res_frame = ttk.LabelFrame(self.root, text="Surowce"); res_frame.pack(fill="x", padx=10, pady=5)
+        # etykiety stanu surowców oraz ich zmiany netto / dzień
         self.res_labels = {}
-        row = ttk.Frame(res_frame); row.pack(fill="x")
+        self.res_net_labels = {}
+
+        row = ttk.Frame(res_frame)
+        row.pack(fill="x")
+
         for i, res in enumerate(RESOURCES):
-            if i % 6 == 0 and i > 0: row = ttk.Frame(res_frame); row.pack(fill="x")
-            lbl = ttk.Label(row, text=f"{res}: {self.resources[res]}", width=18); lbl.pack(side="left"); self.res_labels[res] = lbl
+            if i % 6 == 0 and i > 0:
+                row = ttk.Frame(res_frame)
+                row.pack(fill="x")
+
+            cell = ttk.Frame(row)
+            cell.pack(side="left", padx=2)
+
+            lbl = ttk.Label(cell, text=f"{res}: {int(self.resources[res])}", width=14, anchor="w")
+            lbl.pack(side="left")
+            self.res_labels[res] = lbl
+
+            net_lbl = ttk.Label(cell, text="", width=8, anchor="w", foreground="gray")
+            net_lbl.pack(side="left")
+            self.res_net_labels[res] = net_lbl
 
         prod_frame = ttk.LabelFrame(self.root, text="Produkcja"); prod_frame.pack(fill="x", padx=10, pady=5)
         self.prod_label = ttk.Label(prod_frame, text=""); self.prod_label.pack()
@@ -905,6 +923,25 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # przywróć poprzednią pozycję przewinięcia
         self.build_listbox.yview_moveto(first)
 
+        # aktualizuj zmiany netto przy surowcach
+        if hasattr(self, "res_net_labels"):
+            for r, v in net_total.items():
+                if abs(v) < 0.05:
+                    txt = " (≈0)"
+                    color = "gray"
+                elif v > 0:
+                    txt = f" (+{v:.1f})"
+                    color = "darkgreen"
+                else:
+                    # zużycie: jeśli brak surowca na stanie -> czerwony, jeśli jest -> żółty
+                    txt = f" ({v:.1f})"
+                    color = "red" if self.resources.get(r, 0) <= 0 else "goldenrod"
+
+                lbl = self.res_net_labels.get(r)
+                if lbl:
+                    lbl.config(text=txt, foreground=color)
+
+        # stara ramka produkcji zostaje
         final_items = [f"{r}: +{v:.1f}" for r, v in net_total.items() if v > 0]
         final_items.extend(f"{r}: {v:.1f}" for r, v in net_total.items() if v < 0)
 
