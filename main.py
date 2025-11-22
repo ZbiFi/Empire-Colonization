@@ -809,40 +809,41 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                     "red"
                 )
 
-        # --- PRODUKCJA (jak wcześniej, zbiorczo za 'days') ---
-        building_data = self.calculate_production()
-        total_net = {r: 0 for r in RESOURCES}
+                # po dziennej pętli głodu mamy finalną żywność w zmiennej `food`
+                # ustaw ją w zasobach, żeby stan się zgadzał
+                self.resources["żywność"] = food
 
-        # zużycie żywności przez populację (policzone wyżej, w pętli dziennej)
-        total_net["żywność"] -= people_food_consumption
+        # --- PRODUKCJA / KONSUMPCJA DZIEŃ PO DNIU ---
+        for _ in range(days):
+            building_data = self.calculate_production()
+            daily_net = {r: 0 for r in RESOURCES}
 
-        for b, prod, cons, eff in building_data:
-            if eff == 0 and any(cons.values()):
-                continue
-            for res, amt in prod.items():
-                total_net[res] += amt * days * eff
-            for res, amt in cons.items():
-                total_net[res] -= amt * days * eff
+            for b, prod, cons, eff in building_data:
+                # jeśli nie działa (brak wejść) to pomijamy
+                if eff == 0 and any(cons.values()):
+                    continue
 
-        # ograniczamy zużycie do dostępnych zasobów
-        for res, change in total_net.items():
-            if change < 0:
-                available = self.resources.get(res, 0)
-                to_consume = min(available, -change)
-                self.resources[res] -= to_consume
-                total_net[res] = -to_consume
+                for res, amt in prod.items():
+                    daily_net[res] += amt * eff
 
-        # dodajemy produkcję
-        for res, change in total_net.items():
-            if change > 0:
-                self.resources[res] += change
+                for res, amt in cons.items():
+                    daily_net[res] -= amt * eff
 
-        # --- czas i misje ---
-        self.current_date += timedelta(days=days)
-        # self.log(f"Minęło {days} dni.", "blue")
+            # ograniczamy dzienne zużycie do dostępnych zasobów
+            for res, change in daily_net.items():
+                if change < 0:
+                    available = self.resources.get(res, 0)
+                    to_consume = min(available, -change)
+                    self.resources[res] -= to_consume
+                elif change > 0:
+                    self.resources[res] += change
 
-        # sprawdź misje indiańskie każdego dnia
-        self.try_generate_native_missions()
+            # --- czas i misje ---
+            self.current_date += timedelta(days=days)
+            # self.log(f"Minęło {days} dni.", "blue")
+
+            # sprawdź misje indiańskie każdego dnia
+            self.try_generate_native_missions()
 
         if self.current_mission is not None and self.current_mission[0] < self.current_date:
             end, req, sent, diff, text, idx = self.current_mission
