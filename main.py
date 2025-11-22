@@ -666,9 +666,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             net_lbl.pack(side="left")
             self.res_net_labels[res] = net_lbl
 
-        prod_frame = ttk.LabelFrame(self.root, text="Produkcja"); prod_frame.pack(fill="x", padx=10, pady=5)
-        self.prod_label = ttk.Label(prod_frame, text=""); self.prod_label.pack()
-
         build_frame = ttk.LabelFrame(self.root, text="Budynki")
         build_frame.pack(fill="x", padx=10, pady=5)
 
@@ -809,9 +806,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                     "red"
                 )
 
-                # po dziennej pętli głodu mamy finalną żywność w zmiennej `food`
-                # ustaw ją w zasobach, żeby stan się zgadzał
-                self.resources["żywność"] = food
+        # po dziennej pętli głodu mamy finalną żywność w zmiennej `food`
+        # ustaw ją w zasobach, żeby stan się zgadzał
+        self.resources["żywność"] = food
 
         # --- PRODUKCJA / KONSUMPCJA DZIEŃ PO DNIU ---
         for _ in range(days):
@@ -942,12 +939,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 if lbl:
                     lbl.config(text=txt, foreground=color)
 
-        # stara ramka produkcji zostaje
-        final_items = [f"{r}: +{v:.1f}" for r, v in net_total.items() if v > 0]
-        final_items.extend(f"{r}: {v:.1f}" for r, v in net_total.items() if v < 0)
 
-        total_str = " | ".join(final_items) or "Brak"
-        self.prod_label.config(text=total_str, foreground="black")
 
         finished = [c for c in self.constructions if c[0] <= self.current_date]
         for c in finished:
