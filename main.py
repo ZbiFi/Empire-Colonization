@@ -862,6 +862,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         building_data = self.calculate_production()
         net_total = {r: 0 for r in RESOURCES}
 
+        # uwzględnij dzienne zużycie pożywienia przez ludzi w szacunkach netto
+        cap = self.calculate_population_capacity()
+        if self.people > cap:
+            excess = self.people - cap
+            base_food = cap * FOOD_CONSUMPTION_PER_PERSON
+            extra_food = excess * FOOD_CONSUMPTION_PER_PERSON * FOOD_OVERCROWDING_MULTIPLIER
+            food_needed = base_food + extra_food
+        else:
+            food_needed = self.people * FOOD_CONSUMPTION_PER_PERSON
+        net_total["żywność"] -= food_needed
+
         # zapamiętaj aktualną pozycję przewinięcia
         first, last = self.build_listbox.yview()
 

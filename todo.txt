@@ -21,8 +21,8 @@ drogi? -> bonus do produkcji.
 <UI>
                     DONE !!! poprawić nazwy z logach obóz_myśliwski -> Obóz myśliwski
                     DONE !!! poprawić nazwy z posiadanych budynkach
-przenieść produkcję +/- obok danych zasobów
-spójnośćfontowa
+brak pożywienia jeszcze - przenieść produkcję +/- obok danych zasobów
+spójność fontowa
 
 <SAVE/LOAD>
 save/load
