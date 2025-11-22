@@ -112,6 +112,26 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # reputacja z państwami europejskimi – na start 0, później własne państwo podbijemy
         self.europe_relations = {s: 0 for s in STATES}
 
+        self.native_prod = {}
+        self.native_cap = {}
+        self.native_stock = {}
+
+        for tribe in self.native_relations:
+            prod_map = {}
+            cap_map = {}
+            stock_map = {}
+            for res, econ in NATIVE_RESOURCE_ECONOMY.items():
+                p_min, p_max = econ["daily_prod"]
+                c_min, c_max = econ["stockpile"]
+                prod_val = random.uniform(p_min, p_max)
+                cap_val = random.uniform(c_min, c_max)
+                prod_map[res] = prod_val
+                cap_map[res] = cap_val
+                stock_map[res] = cap_val  # startują pełni, żeby handel miał sens od razu
+            self.native_prod[tribe] = prod_map
+            self.native_cap[tribe] = cap_map
+            self.native_stock[tribe] = stock_map
+
         # kumulacja wartości handlu (do progów reputacji)
         self.native_trade_value = {tribe: 0 for tribe in self.native_relations}
         self.europe_trade_value = {s: 0 for s in self.europe_relations}
@@ -812,6 +832,19 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         # --- PRODUKCJA / KONSUMPCJA DZIEŃ PO DNIU ---
         for _ in range(days):
+
+            # --- dzienna produkcja plemion indiańskich ---
+            for tribe in self.native_relations:
+                prod_map = self.native_prod.get(tribe, {})
+                cap_map = self.native_cap.get(tribe, {})
+                stock_map = self.native_stock.get(tribe, {})
+                for res, prod_val in prod_map.items():
+                    cap_val = cap_map.get(res, 0)
+                    cur = stock_map.get(res, 0)
+                    new_amt = min(cap_val, cur + prod_val)
+                    stock_map[res] = new_amt
+                self.native_stock[tribe] = stock_map
+
             building_data = self.calculate_production()
             daily_net = {r: 0 for r in RESOURCES}
 

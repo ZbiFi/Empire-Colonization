@@ -701,3 +701,19 @@ NATIVE_PRICES = {
 BLOCK_NATIVE_BUY = {"medykamenty", "ubrania", "cygara", "cukier", "stal"}
 
 TRIBES = ["Irokezi", "Czirokezi", "Apacze", "Siuksowie", "Krikowie", "Huronowie"]
+
+# ============== PRODUKCJA INDIAN ==============
+# min/max dziennej produkcji oraz min/max pojemności magazynu (na plemię)
+NATIVE_RESOURCE_ECONOMY = {
+    "żywność":   {"daily_prod": (5, 10),   "stockpile": (300, 500)},
+    "skóry":     {"daily_prod": (3, 5),   "stockpile": (150, 300)},
+    "drewno":    {"daily_prod": (5, 10),   "stockpile": (200, 400)},
+    "zioła":     {"daily_prod": (3, 5),   "stockpile": (150, 300)},
+    "trzcina":   {"daily_prod": (3, 5),   "stockpile": (100, 200)},
+    "tytoń":    {"daily_prod": (3, 5),   "stockpile": (50, 100)},
+    "węgiel":    {"daily_prod": (1, 3),   "stockpile": (50, 100)},
+    "żelazo":    {"daily_prod": (1, 3),   "stockpile": (50, 100)},
+    "srebro":    {"daily_prod": (0.5, 2),   "stockpile": (30, 50)},
+    "złoto":     {"daily_prod": (0.5, 1),   "stockpile": (30, 50)},
+    # itd., tylko dla tych zasobów które realnie mają sens u plemion
+}

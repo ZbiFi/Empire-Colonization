@@ -23,7 +23,7 @@ class RelationsMixin:
 
     # === WSPÓLNY HELPER DO WIERSZY HANDLU (spinbox + pionowe przyciski) ===
     def _create_trade_row(self, parent, res_name, max_q, unit_price,
-                          price_prefix, on_change, with_max):
+                          price_prefix, on_change, with_max, stock_info=None):
         """
         Tworzy wiersz:
         [nazwa towaru] [Spinbox] [kolumny +1/-1, +10/-10, +100/-100, (opcjonalnie Max)] [etykieta ceny]
@@ -32,7 +32,8 @@ class RelationsMixin:
         frame = ttk.Frame(parent)
         frame.pack(fill="x", pady=1)
 
-        ttk.Label(frame, text=res_name, width=15).pack(side="left")
+        label_text = res_name if not stock_info else f"{res_name} ({stock_info})"
+        ttk.Label(frame, text=label_text, width=28 if stock_info else 15).pack(side="left")
 
         var = tk.IntVar(value=0)
         spin = tk.Spinbox(
@@ -310,7 +311,10 @@ class RelationsMixin:
 
             # --- KUPNO U INDIAN ---
             if res not in BLOCK_NATIVE_BUY:
-                max_q_buy = 999  # miękki limit
+                native_stock = self.native_stock.get(tribe, {}).get(res, 0)
+                max_q_buy = int(native_stock)
+                debug_prod = self.native_prod.get(tribe, {}).get(res, 0)
+                stock_info = f"stan {max_q_buy}, prod {debug_prod:.1f}/d"
                 var_b = self._create_trade_row(
                     parent=buy_frame,
                     res_name=res,
@@ -318,7 +322,8 @@ class RelationsMixin:
                     unit_price=buy_price,
                     price_prefix="←",
                     on_change=update_sums,
-                    with_max=False
+                    with_max=True,
+                    stock_info=stock_info
                 )
                 buy_vars[res] = var_b
 
@@ -351,8 +356,18 @@ class RelationsMixin:
             # wykonanie handlu
             for r, a in sell.items():
                 self.resources[r] -= a
+                # Indianie dostają towar do swojego magazynu (jeśli go śledzimy)
+                if r in self.native_stock.get(tribe, {}):
+                    cap = self.native_cap[tribe].get(r, 0)
+                    cur = self.native_stock[tribe].get(r, 0)
+                    self.native_stock[tribe][r] = min(cap, cur + a)
+
             for r, a in buy.items():
                 self.resources[r] += a
+                # Indianie sprzedają ze swojego stanu
+                if r in self.native_stock.get(tribe, {}):
+                    cur = self.native_stock[tribe].get(r, 0)
+                    self.native_stock[tribe][r] = max(0, cur - a)
 
             self.log(
                 f"Handel z {tribe}: "
