@@ -1199,11 +1199,11 @@ class MapUIMixin:
             ttk.Button(confirm, text="Wyślij", command=do_explore).pack(side="left", padx=10, pady=10)
             ttk.Button(confirm, text="Anuluj", command=confirm.destroy).pack(side="right", padx=10, pady=10)
 
-        ttk.Button(
-            info_frame,
-            text="Odkryj wszystkie pola (debug)",
-            command=debug_reveal_all,
-        ).pack(pady=2)
+        # ttk.Button(
+        #     info_frame,
+        #     text="Odkryj wszystkie pola (debug)",
+        #     command=debug_reveal_all,
+        # ).pack(pady=2)
 
         canvas.bind("<Button-1>", click)
         draw()
