@@ -78,7 +78,7 @@ class MissionsMixin:
         """
 
         win = self.create_window("Misje")
-        win.geometry("650x800")
+        win.geometry("800x1000")
 
         # === GRID NA OKNIE: content + bottom bar ===
         win.grid_rowconfigure(0, weight=1)  # content rośnie

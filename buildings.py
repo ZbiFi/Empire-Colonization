@@ -237,6 +237,7 @@ class BuildingsMixin:
 
         self.constructions.append((end_date, new_b, data["base_workers"], start_date))
         self.busy_people += data["base_workers"]
+        name = self.get_building_display_name(new_b)
         self.log(f"Budowa: {name} → {end_date.strftime('%d %b %Y')}", "blue")
 
     # === Ulepszenia (w górę) ===

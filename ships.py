@@ -11,43 +11,92 @@ from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES
 class ShipsMixin:
     def ships_menu(self):
 
-        win = self.create_window(f"Statki")
+        win = self.create_window("Statki")
 
-        ttk.Label(win, text="STATKI HANDLOWE", font=("Arial", 14, "bold")).pack(pady=10)
+        # fonty spójne z resztą UI (misje)
+        title_font = getattr(self, "top_title_font", ("Cinzel", 16, "bold"))
+        info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 14))
+        small_info_font = (info_font[0], max(10, info_font[1] - 2))
+        small_info_bold = (info_font[0], max(10, info_font[1] - 2), "bold")
+
+        ttk.Label(win, text="STATKI HANDLOWE", font=title_font).pack(pady=10)
 
         for i, (arrival_to_eu, arrival_back, load, status, pending) in enumerate(self.ships):
             is_flagship = (i == self.flagship_index)
-            frame = ttk.LabelFrame(win, text=f"Statek {i+1}{' (okręt flagowy)' if is_flagship else ''}")
+            frame = ttk.LabelFrame(
+                win,
+                text=f"Statek {i + 1}{' (okręt flagowy)' if is_flagship else ''}"
+            )
             frame.pack(fill="x", padx=20, pady=5)
 
             if pending > 0:
-                ttk.Label(frame, text=f"Oczekiwani koloniści: {pending}", foreground="purple").pack(anchor="w")
+                ttk.Label(
+                    frame,
+                    text=f"Oczekiwani koloniści: {pending}",
+                    foreground="purple",
+                    font=small_info_bold
+                ).pack(anchor="w")
 
-            ttk.Label(frame, text=f"Status: {status}").pack(anchor="w")
+            ttk.Label(frame, text=f"Status: {status}", font=small_info_bold).pack(anchor="w")
 
             # Pokazuj odpowiednie daty w zależności od statusu
             if status == "w drodze do Europy" and arrival_to_eu:
-                ttk.Label(frame, text=f"Do Europy: {arrival_to_eu.strftime('%d %b %Y')}").pack(anchor="w")
+                ttk.Label(
+                    frame,
+                    text=f"Do Europy: {arrival_to_eu.strftime('%d %b %Y')}",
+                    font=small_info_font
+                ).pack(anchor="w")
                 if arrival_back:
-                    ttk.Label(frame, text=f"Powrót: {arrival_back.strftime('%d %b %Y')}").pack(anchor="w")
+                    ttk.Label(
+                        frame,
+                        text=f"Powrót: {arrival_back.strftime('%d %b %Y')}",
+                        font=small_info_font
+                    ).pack(anchor="w")
+
             elif status == "w porcie w Europie":
                 days_left = max(0, 7 - (self.current_date - arrival_to_eu).days)
-                ttk.Label(frame, text=f"Czeka w porcie: {days_left} dni").pack(anchor="w")
+                ttk.Label(
+                    frame,
+                    text=f"Czeka w porcie: {days_left} dni",
+                    font=small_info_font
+                ).pack(anchor="w")
                 if arrival_back:
-                    ttk.Label(frame, text=f"Powrót: {arrival_back.strftime('%d %b %Y')}").pack(anchor="w")
+                    ttk.Label(
+                        frame,
+                        text=f"Powrót: {arrival_back.strftime('%d %b %Y')}",
+                        font=small_info_font
+                    ).pack(anchor="w")
+
             elif status == "w drodze powrotnej" and arrival_back:
-                ttk.Label(frame, text=f"Powrót: {arrival_back.strftime('%d %b %Y')}").pack(anchor="w")
+                ttk.Label(
+                    frame,
+                    text=f"Powrót: {arrival_back.strftime('%d %b %Y')}",
+                    font=small_info_font
+                ).pack(anchor="w")
 
             if load:
                 load_str = ", ".join(f"{r}: {a}" for r, a in load.items())
                 total_units = sum(load.values())
-                ttk.Label(frame, text=f"Ładunek: {load_str}").pack(anchor="w")
+                ttk.Label(
+                    frame,
+                    text=f"Ładunek: {load_str}",
+                    font=small_info_font
+                ).pack(anchor="w")
+
                 load_color = "red" if total_units > MAX_SHIP_CARGO else "black"
-                ttk.Label(frame, text=f"Ładowność: {total_units}/{MAX_SHIP_CARGO}",
-                          foreground=load_color).pack(anchor="w")
+                ttk.Label(
+                    frame,
+                    text=f"Ładowność: {total_units}/{MAX_SHIP_CARGO}",
+                    foreground=load_color,
+                    font=small_info_font
+                ).pack(anchor="w")
 
                 gold = sum(a * EUROPE_PRICES.get(r, 0) for r, a in load.items())
-                ttk.Label(frame, text=f"Przewidywany zarobek: {gold} dukatów").pack(anchor="w")
+                ttk.Label(
+                    frame,
+                    text=f"Przewidywany zarobek: {gold} dukatów",
+                    font=small_info_font
+                ).pack(anchor="w")
 
                 if is_flagship and self.current_mission:
                     end, req, sent, diff, _, _ = self.current_mission
@@ -57,10 +106,15 @@ class ShipsMixin:
                             f"{k}: {v} (wysłano {sent.get(k, 0)}/{req[k]})"
                             for k, v in mission_part.items()
                         )
-                        ttk.Label(frame, text=f"Do misji: {mission_str}", foreground="purple").pack(anchor="w")
+                        ttk.Label(
+                            frame,
+                            text=f"Do misji: {mission_str}",
+                            foreground="purple",
+                            font=small_info_bold
+                        ).pack(anchor="w")
             else:
-                ttk.Label(frame, text="Ładunek: pusty").pack(anchor="w")
-                ttk.Label(frame, text=f"Ładowność: 0/{MAX_SHIP_CARGO}").pack(anchor="w")
+                ttk.Label(frame, text="Ładunek: pusty", font=small_info_font).pack(anchor="w")
+                ttk.Label(frame, text=f"Ładowność: 0/{MAX_SHIP_CARGO}", font=small_info_font).pack(anchor="w")
 
             if status == "w porcie":
                 ttk.Button(
@@ -69,7 +123,12 @@ class ShipsMixin:
                     command=lambda idx=i: self.open_load_menu(idx, win)
                 ).pack(pady=5)
 
-        ttk.Label(win, text=f"Łączne dukaty: {self.resources['dukaty']}").pack(pady=10)
+        ttk.Label(
+            win,
+            text=f"Łączne dukaty: {self.resources['dukaty']}",
+            font=info_font
+        ).pack(pady=10)
+
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
 
         # wyśrodkuj okno statków

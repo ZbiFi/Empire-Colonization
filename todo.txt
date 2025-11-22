@@ -11,7 +11,7 @@ atakowanie indian (porywanie i rajdy)
 
 <TOOLTIPS>
                     DONE !!!!Do budynków
-Do misji
+                    DONE !!!! Do misji
 Do reszty
 
                     DONE !!! - bonusy do krajów na ekranie startowym
@@ -22,7 +22,7 @@ drogi? -> bonus do produkcji.
                     DONE !!! poprawić nazwy z logach obóz_myśliwski -> Obóz myśliwski
                     DONE !!! poprawić nazwy z posiadanych budynkach
                     DONE !!! brak pożywienia jeszcze - przenieść produkcję +/- obok danych zasobów
-spójność fontowa
+                    DONE !!!! spójność fontowa
 
 <SAVE/LOAD>
 save/load

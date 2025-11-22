@@ -51,10 +51,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         self.title_font = ("IM Fell English SC", 28, "bold")
         self.ui_font = ("EB Garamond Italic", 18)
-        self.journal_font = ("EB Garamond Italic", 14)
+        self.journal_font = ("EB Garamond Italic", 16)
 
-        self.top_title_font = ("Cinzel", 14, "bold")
-        self.top_info_font = ("EB Garamond Italic", 12)
+        self.top_title_font = ("Cinzel", 16, "bold")
+        self.top_info_font = ("EB Garamond Italic", 14)
 
         self.style = ttk.Style(self.root)
         self.style.theme_use("clam")
@@ -472,23 +472,36 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             return
 
         win = self.create_window(f"Zamów kolonistów z Europy")
-
-        win.geometry("460x380")
+        win.geometry("460x420")
         win.resizable(False, False)
 
+        # === Fonty spójne z resztą UI (misje/top bar) ===
+        title_font = getattr(self, "top_title_font", ("Cinzel", 16, "bold"))
+        info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 14))
+        small_info_font = (info_font[0], max(10, info_font[1] - 2))
+        small_info_bold = (info_font[0], max(10, info_font[1] - 2), "bold")
+
         # === Nagłówek ===
-        ttk.Label(win, text="Zamów nowych kolonistów", font=("Arial", 14, "bold")).pack(pady=12)
+        ttk.Label(win, text="Zamów nowych kolonistów", font=title_font).pack(pady=12)
 
         # === Liczba kolonistów (slider) ===
         amount_frame = ttk.Frame(win)
         amount_frame.pack(pady=8, fill="x", padx=20)
 
-        ttk.Label(amount_frame, text="Liczba kolonistów:", font=("Arial", 10)).pack(anchor="w")
+        ttk.Label(amount_frame, text="Liczba kolonistów:", font=small_info_bold).pack(anchor="w")
+
         amount_var = tk.IntVar(value=1)
-        slider = tk.Scale(amount_frame, from_=1, to=20, orient="horizontal", variable=amount_var, length=380)
+        slider = tk.Scale(
+            amount_frame,
+            from_=1, to=20,
+            orient="horizontal",
+            variable=amount_var,
+            length=380,
+            font=small_info_font
+        )
         slider.pack(pady=5)
 
-        amount_lbl = ttk.Label(amount_frame, text="1", foreground="blue", font=("Arial", 11, "bold"))
+        amount_lbl = ttk.Label(amount_frame, text="1", foreground="blue", font=small_info_bold)
         amount_lbl.pack(anchor="w")
 
         def update_amount_label(*_):
@@ -503,15 +516,26 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         payment_method = tk.StringVar(value="reputation")
 
-        ttk.Radiobutton(method_frame, text="Reputacją (10 za osobę)", variable=payment_method, value="reputation").pack(anchor="w", padx=10, pady=3)
-        ttk.Radiobutton(method_frame, text="Dukatami (1000 za osobę)", variable=payment_method, value="gold").pack(anchor="w", padx=10, pady=3)
+        ttk.Radiobutton(
+            method_frame,
+            text="Reputacją (10 za osobę)",
+            variable=payment_method,
+            value="reputation"
+        ).pack(anchor="w", padx=10, pady=3)
+
+        ttk.Radiobutton(
+            method_frame,
+            text="Dukatami (1000 za osobę)",
+            variable=payment_method,
+            value="gold"
+        ).pack(anchor="w", padx=10, pady=3)
 
         # === Koszty ===
         cost_frame = ttk.Frame(win)
         cost_frame.pack(pady=10, fill="x", padx=20)
 
-        rep_cost_lbl = ttk.Label(cost_frame, text="Koszt reputacji: 10", foreground="purple")
-        gold_cost_lbl = ttk.Label(cost_frame, text="Koszt dukatów: 1000", foreground="gold")
+        rep_cost_lbl = ttk.Label(cost_frame, text="Koszt reputacji: 10", foreground="purple", font=small_info_font)
+        gold_cost_lbl = ttk.Label(cost_frame, text="Koszt dukatów: 1000", foreground="gold", font=small_info_font)
         rep_cost_lbl.pack(anchor="w")
         gold_cost_lbl.pack(anchor="w")
 
@@ -524,11 +548,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
             # Podświetl aktywną metodę
             if payment_method.get() == "reputation":
-                rep_cost_lbl.config(font=("Arial", 10, "bold"), foreground="purple")
-                gold_cost_lbl.config(font=("Arial", 10), foreground="gray")
+                rep_cost_lbl.config(font=small_info_bold, foreground="purple")
+                gold_cost_lbl.config(font=small_info_font, foreground="gray")
             else:
-                rep_cost_lbl.config(font=("Arial", 10), foreground="gray")
-                gold_cost_lbl.config(font=("Arial", 10, "bold"), foreground="DarkOrange")
+                rep_cost_lbl.config(font=small_info_font, foreground="gray")
+                gold_cost_lbl.config(font=small_info_bold, foreground="DarkOrange")
 
         payment_method.trace_add("write", lambda *_: update_costs())
         update_costs()
@@ -871,7 +895,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                     self.resources[res] += change
 
             # --- czas i misje ---
-            self.current_date += timedelta(days=days)
+            self.current_date += timedelta(days=1)
             # self.log(f"Minęło {days} dni.", "blue")
 
             # sprawdź misje indiańskie każdego dnia
@@ -889,6 +913,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.monarch_lbl.config(text=f" | Monarcha: {self.get_monarch()}")
         cap = self.calculate_population_capacity()
         self.pop_lbl.config(text=f"Ludzie: {self.people} / {cap}")
+
+        Tooltip(self.pop_lbl,
+                "By zdobyć więcej ludzi musisz sprowadzić ich z Europy lub zintegrować lokalnych Indian.")
+
         self.work_lbl.config(text=f" | Wolni: {self.free_workers()}")
 
         for res, lbl in self.res_labels.items():
