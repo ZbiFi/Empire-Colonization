@@ -305,12 +305,18 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.resources[r] -= a
 
     def get_monarch(self):
-        for monarch in STATES[self.state]['rulers']:
-            if self.current_date.year > monarch["start"] and self.current_date.year <= monarch["end"]:
+        # zabezpieczenie na wypadek złego self.state
+        if self.state not in STATES:
+            return self.loc.t("state.unknown_ruler")
+
+        year = self.current_date.year
+        for monarch in STATES[self.state]["rulers"]:
+            if monarch["start"] <= year <= monarch["end"]:
                 if self.current_monarch != monarch.get("name_key"):
                     self.europe_relations[self.state] = 50
                 self.current_monarch = monarch.get("name_key")
                 return self.loc.t(monarch.get("name_key"), default="Nieznany")
+
         return self.loc.t("state.unknown_ruler")
 
 
@@ -448,6 +454,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
     def start_game(self):
         display = self.state_var.get()
+        self.state_display = display
         self.state = self.state_display_to_id.get(display, display)
         if not self.state: return
 
@@ -621,10 +628,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 self.log(self.loc.t("log.colonists_ordered_rep"), "purple")
             else:
                 cost = amt * 1000
-                if self.resources["dukaty"] < cost:
+                if self.resources["ducats"] < cost:
                     self.log(self.loc.t("ui.not_enough_ducats"), "red")
                     return
-                self.resources["dukaty"] -= cost
+                self.resources["ducats"] -= cost
                 self.log(self.loc.t("log.colonists_ordered_ducats"), "purple")
 
             # Znajdź statek do transportu
@@ -687,7 +694,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         self.loc_state_lbl = ttk.Label(
             center_frame,
-            text=f"{self.location} | {self.state} | ",
+            text=f"{self.location} | {self.state_display} | ",
             font=self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12)
         )
         self.loc_state_lbl.pack(side="left")
@@ -753,7 +760,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
             res_key = RESOURCE_DISPLAY_KEYS.get(res, res)
             res_name = self.loc.t(res_key, default=res)
-            lbl = ttk.Label(cell, text=f"{res_name}: {int(self.resources[res])}", width=14, anchor="w")
+            lbl = ttk.Label(cell, text=f"{res_name}: {int(self.resources[res])}", width=26, anchor="w")
             lbl.pack(side="left")
             self.res_labels[res] = lbl
 
