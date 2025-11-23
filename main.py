@@ -1,5 +1,5 @@
 # main.py
-LANG = "de"  # "en" / "de"
+LANG = "pl"  # "en" / "de"
 
 import os
 from localization import Localization
@@ -102,13 +102,31 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
         self.resources = {r: 0 for r in RESOURCES}
+
         self.resources["food"] = 1000
-        self.resources["wood"] = 50
-        self.resources["iron"] = 30
-        self.resources["skins"] = 10
-        self.resources["silver"] = 10
-        self.resources["meds"] = 10
-        self.resources["ducats"] = 300
+        self.resources["wood"] = 1000
+        self.resources["skins"] = 1000
+        self.resources["clothes"] = 1000
+        self.resources["herbs"] = 1000
+        self.resources["meds"] = 1000
+        self.resources["iron"] = 1000
+        self.resources["steel"] = 1000
+        self.resources["cane"] = 1000
+        self.resources["sugar"] = 1000
+        self.resources["tobacco"] = 1000
+        self.resources["cigars"] = 1000
+        self.resources["coal"] = 1000
+        self.resources["silver"] = 1000
+        self.resources["gold"] = 1000
+        self.resources["ducats"] = 1000
+
+        # self.resources["food"] = 1000
+        # self.resources["wood"] = 50
+        # self.resources["iron"] = 30
+        # self.resources["skins"] = 10
+        # self.resources["silver"] = 10
+        # self.resources["meds"] = 10
+        # self.resources["ducats"] = 300
 
         self.buildings = []
         self.constructions = []
@@ -830,7 +848,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         #     return
 
         # Liczymy dzień po dniu, ale śmierć z głodu losujemy zbiorczo
-        initial_food = self.resources["żywność"]
+        initial_food = self.resources["food"]
         food = initial_food
         starvation_days = 0
         max_excess = 0  # do logowania przeludnienia
@@ -885,7 +903,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         # po dziennej pętli głodu mamy finalną żywność w zmiennej `food`
         # ustaw ją w zasobach, żeby stan się zgadzał
-        self.resources["żywność"] = food
+        self.resources["food"] = food
 
         # --- PRODUKCJA / KONSUMPCJA DZIEŃ PO DNIU ---
         for _ in range(days):
@@ -975,7 +993,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             food_needed = base_food + extra_food
         else:
             food_needed = self.people * FOOD_CONSUMPTION_PER_PERSON
-        net_total["żywność"] -= food_needed
+        net_total["food"] -= food_needed
 
         # zapamiętaj aktualną pozycję przewinięcia
         first, last = self.build_listbox.yview()

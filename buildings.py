@@ -52,7 +52,7 @@ class BuildingsMixin:
                     return True
         return False
 
-    # === Nazwa budynku na podstawie poziomu (namiot -> chata -> dom) ===
+    # === Nazwa budynku na podstawie poziomu (tent -> chata -> dom) ===
     def get_building_display_name(self, b):
         base_data = BUILDINGS[b["base"]]
         level = b.get("level", 0)
@@ -66,10 +66,10 @@ class BuildingsMixin:
         from constants import BUILDINGS
 
         total = 0
-        base_data = BUILDINGS["namiot"]
+        base_data = BUILDINGS["tent"]
 
         for b in self.buildings:
-            if b["base"] != "namiot":
+            if b["base"] != "tent":
                 continue
 
             level = b.get("level", 0)
@@ -232,7 +232,7 @@ class BuildingsMixin:
         if name == "dzielnica":
             new_b["is_district"] = True
             cell["terrain"] = "dzielnica"
-        if name == "namiot":
+        if name == "tent":
             new_b["capacity"] = 4
 
         self.constructions.append((end_date, new_b, data["base_workers"], start_date))
@@ -322,8 +322,8 @@ class BuildingsMixin:
                 if "capacity" in new_up:
                     b["capacity"] = new_up["capacity"]
             else:
-                if b["base"] == "namiot":
-                    b["capacity"] = BUILDINGS["namiot"].get("capacity", 4)
+                if b["base"] == "tent":
+                    b["capacity"] = BUILDINGS["tent"].get("capacity", 4)
 
             current_name = self.get_building_display_name(b)
             self.log(
@@ -556,7 +556,7 @@ class BuildingsMixin:
         """
 
         # === NAMIOT ===
-        if name == "namiot":
+        if name == "tent":
             cap = data.get("capacity", 0)
             return f"+{cap} mieszkań"
 
@@ -642,7 +642,7 @@ class BuildingsMixin:
 
         self.worker_sliders = []
         for i, b in enumerate(self.buildings):
-            if b["base"] in ["dzielnica", "namiot"]:
+            if b["base"] in ["dzielnica", "tent"]:
                 continue
 
             max_w = self.get_max_workers(b)
