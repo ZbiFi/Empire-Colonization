@@ -732,9 +732,9 @@ NATIVE_MISSIONS_DETAILS = [
         "desc": "Trzech młodych myśliwych nie wróciło z lasu. Boimy się, że ranił ich niedźwiedź lub zbłądzili we mgle. Daj nam jedzenie i gorzkie leki, byśmy mogli ich szukać i uleczyć."
     },
     {
-        "name": "Kamienie na groby przodków",
-        "base": {"kamień": 80, "zioła": 10},
-        "desc": "Chcemy wznieść krąg kamieni dla naszych przodków, by duchy miały gdzie spocząć. Daj nam kamienie i święte zioła, a ich błogosławieństwo spadnie też na twoją osadę."
+        "name": "Srebro na groby przodków",
+        "base": {"srebro": 30, "zioła": 10},
+        "desc": "Chcemy wznieść krąg kamieni dla naszych przodków, by duchy miały gdzie spocząć. Daj nam srebro i święte zioła, a ich błogosławieństwo spadnie też na twoją osadę."
     },
     {
         "name": "Biali handlarze oszukali naszych starszych",
