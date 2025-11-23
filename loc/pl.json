@@ -156,5 +156,96 @@
   "building.tobacco_drying_house.upgrade.premium_cigar_factory": "Fabryka cygar premium",
 
   "building.harbor.name": "Przystań",
-  "building.district.name": "Dzielnica"
+  "building.district.name": "Dzielnica",
+
+  "mission.royal.shipyard_wood.name": "Drewno na stocznie",
+  "mission.royal.shipyard_wood.desc": "Z woli naszej królewskiej rozkazuję, by niezwłocznie zgromadzono znaczny zapas drewna na budowę okrętów i umocnień morskich. Stocznie Korony mają pracować dniem i nocą, a brak surowca uznam za zaniedbanie przeciw interesowi państwa. Dostarcz drewno w pełnej mierze, aby flota mogła wyruszyć na wody bez zwłoki.",
+
+  "mission.royal.army_food.name": "Żywność dla armii",
+  "mission.royal.army_food.desc": "Rozkazuję zaopatrzyć wojska nasze w żywność, aby żaden żołnierz nie cierpiał głodu na służbie. Ponadto skóry dostarczysz na oporządzenie i naprawę rynsztunku, by armia trwała w gotowości. Niech zapasy dotrą na czas, gdyż od nich zależy siła marszu i zwycięstwo w polu.",
+
+  "mission.royal.cannons_iron.name": "Żelazo na działa",
+  "mission.royal.cannons_iron.desc": "Zlecam i nakazuję przygotować żelazo na odlew dział oraz naprawę arsenału. Twierdze i okręty muszą mieć broń pewną, a kuźnie królewskie nie mogą stać bez pracy. Nie zwlekaj z dostawą, bo od niej zależy bezpieczeństwo granic i chwała naszego oręża.",
+
+  "mission.royal.fleet_steel.name": "Stal dla floty",
+  "mission.royal.fleet_steel.desc": "Niechaj zostanie dostarczona stal na okucia, kotwice i uzbrojenie floty, a drewno na maszty i poszycie okrętów. Rozkaz ten ma pierwszeństwo przed innymi sprawami, gdyż morza wymagają siły i porządku. Dopełnij powinności bez wymówek, aby bandery nasze panowały na szlakach handlu.",
+
+  "mission.royal.court_sugar.name": "Cukier dla dworu",
+  "mission.royal.court_sugar.desc": "Rozkazuję, by cukier w należnej ilości trafił do królewskich spiżarni. Dwór mój ma być godnie podejmowany podczas uczt i poselstw, bo wspaniałość stołu świadczy o potędze Korony. Niech dostawa będzie czysta i pełna, bez zaniżania miary.",
+
+  "mission.royal.gift_for_king.name": "Prezent dla króla",
+  "mission.royal.gift_for_king.desc": "Nakazuję przygotować dary godne majestatu: złoto i srebro na skarbiec oraz cygara na użytek dworu i ważnych gości. Niechaj przybywają poselstwa widzą, iż Królestwo w dostatku stoi i splendoru mu nie brakuje. Dostarcz wszystko bez uszczerbku i w stanie nienagannym.",
+
+  "mission.royal.treasury_gold.name": "Złoto dla skarbu",
+  "mission.royal.treasury_gold.desc": "Rozkazuję zasilić skarb królewski złotem, aby państwo mogło prowadzić sprawy wojny i pokoju wedle naszej woli. Moneta musi płynąć do skarbca bez zwłoki, bo na niej wspiera się ład i prawo. Kto ociąga się z dostawą, ten szkodzi Koronie.",
+
+  "mission.royal.army_support.name": "Wsparcie dla armii",
+  "mission.royal.army_support.desc": "Stal przeznaczysz na broń, pancerze i naprawę rynsztunku, zaś ubrania na odzienie dla wojsk stojących w polu. Rozkazuję uczynić to natychmiast, by armia nie traciła ducha ani sprawności. Niech żołnierz nosi barwy Króla z dumą i trwa w gotowości do marszu.",
+
+  "mission.royal.disease_relief.name": "Zapomoga na choroby",
+  "mission.royal.disease_relief.desc": "Nakazuję zebrać zioła i medykamenty, aby zaraza i choroby nie pustoszyły naszych ludzi. Lekarze królewscy mają otrzymać środki do leczenia natychmiast, bo zdrowie poddanych jest siłą państwa. Niech dostawa będzie rzetelna, a jakość nieskazitelna.",
+
+  "mission.royal.church_support.name": "Wsparcie kościoła",
+  "mission.royal.church_support.desc": "Rozkazuję przekazać złoto i srebro na potrzeby świątyń oraz żywność dla zakonów i przytułków pod opieką Kościoła. Wiara i porządek duchowy wspierają tron, a kto lekceważy ten nakaz, ten sprzeciwia się ładowi Królestwa. Wykonaj polecenie bez ociągania.",
+
+  "mission.native.bison_hunt_help.name": "Pomoc w polowaniu na bizony",
+  "mission.native.bison_hunt_help.desc": "Wielkie stada bizonów oddalają się od naszych ziem. Daj nam mięsa i skór, żeby nasze kobiety i dzieci nie głodowały tej zimy, zanim biali myśliwi zabiorą nam wszystko.",
+
+  "mission.native.ancestors_hungry.name": "Duchy przodków są głodne",
+  "mission.native.ancestors_hungry.desc": "Duchy naszych ojców wędrują niespokojne. Przynieś słodkie kryształy, wonny dym i mięso, by ucieszyć je przy ognisku. Wtedy będą chronić także ciebie, bladą twarzy.",
+
+  "mission.native.northerners_burn_villages.name": "Biali z północy palą wioski",
+  "mission.native.northerners_burn_villages.desc": "Ludzie w niebieskich mundurach palą nasze tipi i zabijają nasze konie. Daj nam żelazo i stal, byśmy mogli zrobić włócznie i topory godne wojowników. Razem przepędzimy tych psów.",
+
+  "mission.native.shaman_needs_herbs.name": "Szaman potrzebuje ziół",
+  "mission.native.shaman_needs_herbs.desc": "Stary Szaman widział we śnie święte zioła rosnące tylko tam, gdzie biali kopią żółte kamienie. Przynieś je szybko, bo duchy chorób krążą nad naszymi dziećmi.",
+
+  "mission.native.women_want_fabrics.name": "Kobiety chcą pięknych tkanin od bladych twarzy",
+  "mission.native.women_want_fabrics.desc": "Nasze squaw słyszały o miękkich, kolorowych szmatach, które noszą kobiety z wielkich łodzi. Przynieś je, a nasze kobiety będą śpiewać pieśni o tobie przy ogniu.",
+
+  "mission.native.stolen_chief_horse.name": "Wodzowi ukradli konia",
+  "mission.native.stolen_chief_horse.desc": "Dalecy kuzyni z południa ukradli najlepszego ogiera Wielkiego Wodza. Musimy zrobić nowe podkowy i lance. Daj nam żelazo, a kiedy odzyskamy konie, podzielimy się z tobą łupami z bladych osadników.",
+
+  "mission.native.great_spirit_shiny_stones.name": "Wielki Duch pragnie błyszczących kamieni",
+  "mission.native.great_spirit_shiny_stones.desc": "We śnie Wielki Duch pokazał nam błyszczące kamienie z twoich skrzyń. Przynieś je nam jako dar, a my pokażemy ci ścieżki, gdzie ziemia rodzi jeszcze więcej – zanim inne blade twarzy zabiorą wszystko.",
+
+  "mission.native.sun_dance_feast.name": "Rum i cukier na święto tańca słońca",
+  "mission.native.sun_dance_feast.desc": "Za trzy księżyce będzie wielkie święto tańca słońca. Potrzebujemy słodkiego ognia z trzciny i dużo jedzenia. Przynieś – będziemy tańczyć i modlić się także za twoją osadę.",
+
+  "mission.native.children_sick.name": "Dzieci chorują",
+  "mission.native.children_sick.desc": "Czarna ospa przyszła z waszych statków i zabiera nasze dzieci. Słyszymy, że masz gorzkie wody, które leczą. Daj je nam szybko, bo inaczej duchy zemsty przyjdą także do twoich chat.",
+
+  "mission.native.trade.name": "Handel",
+  "mission.native.trade.desc": "Mamy najlepsze bobrze i lisie futra na całym wybrzeżu. Ale najpierw udowodnij, że nie jesteś taki jak inne blade twarze, co kradną i kłamią. Przynieś dary – wtedy otworzymy nasze spichlerze.",
+
+  "mission.native.prairie_drought.name": "Susza na preriach",
+  "mission.native.prairie_drought.desc": "Słońce wypiło wodę z rzek, a trawa stała się żółta jak stare kości. Nasze dzieci płaczą z głodu. Daj nam mięsa i ziół, byśmy przetrwali, zanim przyjdą deszcze.",
+
+  "mission.native.warriors_return.name": "Wojownicy wracają z wyprawy",
+  "mission.native.warriors_return.desc": "Nasi wojownicy wracają z dalekiej ścieżki. Musimy przywitać ich jedzeniem i wonnym dymem, żeby duchy widziały, że plemię jest silne. Przynieś dary, a usłyszysz pieśni o odwadze.",
+
+  "mission.native.palisade_repair.name": "Naprawa palisady wioski",
+  "mission.native.palisade_repair.desc": "Wilki i ludzie z północy krążą przy naszych szałasach. Nasza palisada spróchniała. Daj nam drewno i żelazo na ostrza, a nieprzyjaciel nie wejdzie do naszych domów.",
+
+  "mission.native.new_tipis_for_winter.name": "Nowe tipi na zimę",
+  "mission.native.new_tipis_for_winter.desc": "Zima będzie długa i twarda. Potrzebujemy skór na nowe tipi i ciepłych tkanin dla kobiet. Przynieś je nam, a nasze ogniska będą płonąć także dla ciebie.",
+
+  "mission.native.new_chief_naming_feast.name": "Święto nadania imienia nowemu wodzowi",
+  "mission.native.new_chief_naming_feast.desc": "Stary Wódz odszedł za rzekę duchów. Nowy musi otrzymać dary, by jego słowo było mocne. Przynieś błyszczące kamienie i dym – wtedy będziesz przyjacielem naszego rodu.",
+
+  "mission.native.horses_need_shoes.name": "Końskie stado potrzebuje podków",
+  "mission.native.horses_need_shoes.desc": "Nasze konie są szybkie jak wiatr, ale ich kopyta kruszą się na kamieniach. Daj nam stal i żelazo na podkowy, a nasi zwiadowcy będą strzec twoich granic.",
+
+  "mission.native.lost_hunters.name": "Zaginieni myśliwi",
+  "mission.native.lost_hunters.desc": "Trzech młodych myśliwych nie wróciło z lasu. Boimy się, że ranił ich niedźwiedź lub zbłądzili we mgle. Daj nam jedzenie i gorzkie leki, byśmy mogli ich szukać i uleczyć.",
+
+  "mission.native.silver_for_ancestors_graves.name": "Srebro na groby przodków",
+  "mission.native.silver_for_ancestors_graves.desc": "Chcemy wznieść krąg kamieni dla naszych przodków, by duchy miały gdzie spocząć. Daj nam srebro i święte zioła, a ich błogosławieństwo spadnie też na twoją osadę.",
+
+  "mission.native.traders_cheated_elders.name": "Biali handlarze oszukali naszych starszych",
+  "mission.native.traders_cheated_elders.desc": "Inne blade twarze dały nam stare szmaty i fałszywe obietnice. Pokaż, że jesteś inny. Przynieś prawdziwe tkaniny i srebrne monety, a odzyskasz nasze zaufanie.",
+
+  "mission.native.sacred_grove_fire.name": "Ogień w świętym gaju",
+  "mission.native.sacred_grove_fire.desc": "W świętym gaju zabrakło drewna na ognie, które odpędzają złe duchy. Potrzebujemy też mięsa i dymu na modlitwy. Przynieś to, a Szaman wypowie nad tobą dobre słowa."
+
 }
