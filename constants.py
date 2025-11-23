@@ -295,509 +295,534 @@ STATES = {'portugal': {'speed': 1.3,
                  'name': 'state.brandenburg.name'}}
 
 BUILDINGS = {
-    'tent': {
-        'base_cost': {'skóry': 10, 'żelazo': 5},
-        'build_time': 1,
-        'base_workers': 0,
-        'capacity': 4,
-        'allowed_terrain': ['osada', 'dzielnica'],
-        'requires_settlement': True,
-        'upgrades': [
+    "tent": {
+        "base_cost": {"skins": 10, "iron": 5},
+        "build_time": 1,
+        "base_workers": 0,
+        "capacity": 4,
+        "allowed_terrain": ["osada", "dzielnica"],
+        "requires_settlement": True,
+        "upgrades": [
             {
-                'cost': {'drewno': 40, 'żelazo': 5},
-                'build_time': 7,
-                'capacity': 6,
-                'name_key': 'building.tent.upgrade.hut'
+                "cost": {"wood": 40, "iron": 5},
+                "build_time": 7,
+                "capacity": 6,
+                "name_key": "building.tent.upgrade.hut",
             },
             {
-                'cost': {'drewno': 80, 'żelazo': 10, 'stal': 5, 'skóry': 5},
-                'build_time': 21,
-                'capacity': 10,
-                'name_key': 'building.tent.upgrade.house'
+                "cost": {"wood": 80, "iron": 10, "steel": 5, "skins": 5},
+                "build_time": 21,
+                "capacity": 10,
+                "name_key": "building.tent.upgrade.house",
             },
             {
-                'cost': {'drewno': 120, 'żelazo': 15, 'stal': 10, 'ubrania': 10},
-                'build_time': 60,
-                'capacity': 15,
-                'name_key': 'building.tent.upgrade.manor'
-            }
+                "cost": {"wood": 120, "iron": 15, "steel": 10, "clothes": 10},
+                "build_time": 60,
+                "capacity": 15,
+                "name_key": "building.tent.upgrade.manor",
+            },
         ],
-        'name_key': 'building.tent.name'
+        "name_key": "building.tent.name",
     },
 
-    'lumber_camp': {
-        'base_cost': {'drewno': 20},
-        'build_time': 5,
-        'base_workers': 2,
-        'allowed_terrain': ['las'],
-        'base_prod': {'drewno': 2},
-        'upgrades': [
+    "lumber_camp": {
+        "base_cost": {"wood": 20},
+        "build_time": 5,
+        "base_workers": 2,
+        "allowed_terrain": ["las"],
+        "base_prod": {"wood": 2},
+        "upgrades": [
             {
-                'cost': {'drewno': 40, 'żelazo': 10},
-                'build_time': 14,
-                'prod': {'drewno': 3},
-                'workers': 3,
-                'name_key': 'building.lumber_camp.upgrade.hand_sawmill'
+                "cost": {"wood": 40, "iron": 10},
+                "build_time": 14,
+                "prod": {"wood": 3},
+                "workers": 3,
+                "name_key": "building.lumber_camp.upgrade.hand_sawmill",
             },
             {
-                'cost': {'stal': 30, 'żelazo': 20},
-                'build_time': 24,
-                'prod': {'drewno': 4},
-                'workers': 4,
-                'name_key': 'building.lumber_camp.upgrade.steam_sawmill'
+                "cost": {"steel": 30, "iron": 20},
+                "build_time": 24,
+                "prod": {"wood": 4},
+                "workers": 4,
+                "name_key": "building.lumber_camp.upgrade.steam_sawmill",
             },
             {
-                'cost': {'stal': 60, 'cukier': 10},
-                'build_time': 40,
-                'prod': {'drewno': 5},
-                'workers': 5,
-                'name_key': 'building.lumber_camp.upgrade.industrial_logging_complex'
-            }
+                "cost": {"steel": 60, "sugar": 10},
+                "build_time": 40,
+                "prod": {"wood": 5},
+                "workers": 5,
+                "name_key": "building.lumber_camp.upgrade.industrial_logging_complex",
+            },
         ],
-        'name_key': 'building.lumber_camp.name'
+        "name_key": "building.lumber_camp.name",
     },
 
-    'cropland': {
-        'base_cost': {'drewno': 15},
-        'build_time': 4,
-        'base_workers': 2,
-        'allowed_terrain': ['pole'],
-        'base_prod': {'żywność': 1.5},
-        'upgrades': [
+    "cropland": {
+        "base_cost": {"wood": 15},
+        "build_time": 4,
+        "base_workers": 2,
+        "allowed_terrain": ["pole"],
+        "base_prod": {"food": 1.5},
+        "upgrades": [
             {
-                'cost': {'drewno': 30},
-                'build_time': 15,
-                'prod': {'żywność': 2},
-                'workers': 3,
-                'name_key': 'building.cropland.upgrade.farm'
+                "cost": {"wood": 30},
+                "build_time": 15,
+                "prod": {"food": 2},
+                "workers": 3,
+                "name_key": "building.cropland.upgrade.farm",
             },
             {
-                'cost': {'żelazo': 20, 'stal': 10},
-                'build_time': 22,
-                'prod': {'żywność': 2.5},
-                'workers': 4,
-                'name_key': 'building.cropland.upgrade.grain_plantation'
+                "cost": {"iron": 20, "steel": 10},
+                "build_time": 22,
+                "prod": {"food": 2.5},
+                "workers": 4,
+                "name_key": "building.cropland.upgrade.grain_plantation",
             },
             {
-                'cost': {'stal': 40, 'cukier': 5},
-                'build_time': 30,
-                'prod': {'żywność': 3},
-                'workers': 5,
-                'name_key': 'building.cropland.upgrade.folwark_with_mill'
-            }
+                "cost": {"steel": 40, "sugar": 5},
+                "build_time": 30,
+                "prod": {"food": 3},
+                "workers": 5,
+                "name_key": "building.cropland.upgrade.folwark_with_mill",
+            },
         ],
-        'name_key': 'building.cropland.name'
+        "name_key": "building.cropland.name",
     },
 
-    'hunting_camp': {
-        'base_cost': {'drewno': 25},
-        'build_time': 6,
-        'base_workers': 2,
-        'allowed_terrain': ['las', 'pole'],
-        'base_prod': {'skóry': 1, 'żywność': 1},
-        'upgrades': [
+    "hunting_camp": {
+        "base_cost": {"wood": 25},
+        "build_time": 6,
+        "base_workers": 2,
+        "allowed_terrain": ["las", "pole"],
+        "base_prod": {"skins": 1, "food": 1},
+        "upgrades": [
             {
-                'cost': {'drewno': 40, 'żelazo': 15},
-                'build_time': 10,
-                'prod': {'skóry': 1, 'żywność': 1},
-                'workers': 3,
-                'name_key': 'building.hunting_camp.upgrade.shepherd_outpost'
+                "cost": {"wood": 40, "iron": 15},
+                "build_time": 10,
+                "prod": {"skins": 1, "food": 1},
+                "workers": 3,
+                "name_key": "building.hunting_camp.upgrade.shepherd_outpost",
             },
             {
-                'cost': {'stal': 30},
-                'build_time': 24,
-                'prod': {'skóry': 1.5, 'żywność': 1.5},
-                'workers': 4,
-                'name_key': 'building.hunting_camp.upgrade.hide_reserve'
+                "cost": {"steel": 30},
+                "build_time": 24,
+                "prod": {"skins": 1.5, "food": 1.5},
+                "workers": 4,
+                "name_key": "building.hunting_camp.upgrade.hide_reserve",
             },
             {
-                'cost': {'stal': 50, 'cygara': 5},
-                'build_time': 35,
-                'prod': {'skóry': 2, 'żywność': 1.5},
-                'workers': 5,
-                'name_key': 'building.hunting_camp.upgrade.fur_company'
-            }
+                "cost": {"steel": 50, "cigars": 5},
+                "build_time": 35,
+                "prod": {"skins": 2, "food": 1.5},
+                "workers": 5,
+                "name_key": "building.hunting_camp.upgrade.fur_company",
+            },
         ],
-        'name_key': 'building.hunting_camp.name'
+        "name_key": "building.hunting_camp.name",
     },
 
-    'tannery': {
-        'base_cost': {'drewno': 30, 'żelazo': 10},
-        'build_time': 8,
-        'base_workers': 2,
-        'allowed_terrain': ['osada', 'dzielnica'],
-        'requires_settlement': True,
-        'consumes': {'skóry': 1},
-        'base_prod': {'ubrania': 0.5},
-        'upgrades': [
+    "tannery": {
+        "base_cost": {"wood": 30, "iron": 10},
+        "build_time": 8,
+        "base_workers": 2,
+        "allowed_terrain": ["osada", "dzielnica"],
+        "requires_settlement": True,
+        "consumes": {"skins": 1},
+        "base_prod": {"clothes": 0.5},
+        "upgrades": [
             {
-                'cost': {'drewno': 50, 'stal': 15},
-                'build_time': 16,
-                'prod': {'ubrania': 0.6},
-                'workers': 3,
-                'name_key': 'building.tannery.upgrade.tailor_workshop'
+                "cost": {"wood": 50, "steel": 15},
+                "build_time": 16,
+                "prod": {"clothes": 0.6},
+                "workers": 3,
+                "name_key": "building.tannery.upgrade.tailor_workshop",
             },
             {
-                'cost': {'stal': 40, 'cukier': 10},
-                'build_time': 27,
-                'prod': {'ubrania': 0.8},
-                'workers': 4,
-                'name_key': 'building.tannery.upgrade.clothing_manufactory'
+                "cost": {"steel": 40, "sugar": 10},
+                "build_time": 27,
+                "prod": {"clothes": 0.8},
+                "workers": 4,
+                "name_key": "building.tannery.upgrade.clothing_manufactory",
             },
             {
-                'cost': {'stal': 80, 'cygara': 10},
-                'build_time': 45,
-                'prod': {'ubrania': 1},
-                'workers': 5,
-                'name_key': 'building.tannery.upgrade.colonial_textile_factory'
-            }
+                "cost": {"steel": 80, "cigars": 10},
+                "build_time": 45,
+                "prod": {"clothes": 1},
+                "workers": 5,
+                "name_key": "building.tannery.upgrade.colonial_textile_factory",
+            },
         ],
-        'name_key': 'building.tannery.name'
+        "name_key": "building.tannery.name",
     },
 
-    'herb_garden': {
-        'base_cost': {'drewno': 20},
-        'build_time': 5,
-        'base_workers': 2,
-        'allowed_terrain': ['pole', 'las'],
-        'base_prod': {'zioła': 1},
-        'upgrades': [
+    "herb_garden": {
+        "base_cost": {"wood": 20},
+        "build_time": 5,
+        "base_workers": 2,
+        "allowed_terrain": ["pole", "las"],
+        "base_prod": {"herbs": 1},
+        "upgrades": [
             {
-                'cost': {'drewno': 35, 'żelazo': 10},
-                'build_time': 13,
-                'prod': {'zioła': 1.2},
-                'workers': 3,
-                'name_key': 'building.herb_garden.upgrade.botanical_garden'
+                "cost": {"wood": 35, "iron": 10},
+                "build_time": 13,
+                "prod": {"herbs": 1.2},
+                "workers": 3,
+                "name_key": "building.herb_garden.upgrade.botanical_garden",
             },
             {
-                'cost': {'stal': 25},
-                'build_time': 20,
-                'prod': {'zioła': 1.4},
-                'workers': 4,
-                'name_key': 'building.herb_garden.upgrade.medicinal_herb_plantation'
+                "cost": {"steel": 25},
+                "build_time": 20,
+                "prod": {"herbs": 1.4},
+                "workers": 4,
+                "name_key": "building.herb_garden.upgrade.medicinal_herb_plantation",
             },
             {
-                'cost': {'stal': 50, 'medykamenty': 5},
-                'build_time': 43,
-                'prod': {'zioła': 1.6},
-                'workers': 5,
-                'name_key': 'building.herb_garden.upgrade.ethnobotany_institute'
-            }
+                "cost": {"steel": 50, "meds": 5},
+                "build_time": 43,
+                "prod": {"herbs": 1.6},
+                "workers": 5,
+                "name_key": "building.herb_garden.upgrade.ethnobotany_institute",
+            },
         ],
-        'name_key': 'building.herb_garden.name'
+        "name_key": "building.herb_garden.name",
     },
 
-    'herbal_clinic': {
-        'base_cost': {'drewno': 40, 'żelazo': 15},
-        'build_time': 10,
-        'base_workers': 2,
-        'allowed_terrain': ['osada', 'dzielnica'],
-        'requires_settlement': True,
-        'consumes': {'zioła': 1},
-        'base_prod': {'medykamenty': 0.5},
-        'upgrades': [
+    "herbal_clinic": {
+        "base_cost": {"wood": 40, "iron": 15},
+        "build_time": 10,
+        "base_workers": 2,
+        "allowed_terrain": ["osada", "dzielnica"],
+        "requires_settlement": True,
+        "consumes": {"herbs": 1},
+        "base_prod": {"meds": 0.5},
+        "upgrades": [
             {
-                'cost': {'stal': 30},
-                'build_time': 14,
-                'prod': {'medykamenty': 0.6},
-                'workers': 3,
-                'name_key': 'building.herbal_clinic.upgrade.colonial_pharmacy'
+                "cost": {"steel": 30},
+                "build_time": 14,
+                "prod": {"meds": 0.6},
+                "workers": 3,
+                "name_key": "building.herbal_clinic.upgrade.colonial_pharmacy",
             },
             {
-                'cost': {'stal': 50, 'cukier': 10},
-                'build_time': 20,
-                'prod': {'medykamenty': 0.8},
-                'workers': 4,
-                'name_key': 'building.herbal_clinic.upgrade.pharmaceutical_laboratory'
+                "cost": {"steel": 50, "sugar": 10},
+                "build_time": 20,
+                "prod": {"meds": 0.8},
+                "workers": 4,
+                "name_key": "building.herbal_clinic.upgrade.pharmaceutical_laboratory",
             },
             {
-                'cost': {'stal': 100, 'cygara': 15},
-                'build_time': 32,
-                'prod': {'medykamenty': 1},
-                'workers': 5,
-                'name_key': 'building.herbal_clinic.upgrade.tropical_medicine_institute'
-            }
+                "cost": {"steel": 100, "cigars": 15},
+                "build_time": 32,
+                "prod": {"meds": 1},
+                "workers": 5,
+                "name_key": "building.herbal_clinic.upgrade.tropical_medicine_institute",
+            },
         ],
-        'name_key': 'building.herbal_clinic.name'
+        "name_key": "building.herbal_clinic.name",
     },
 
-    'mine': {
-        'base_cost': {'drewno': 35, 'żelazo': 15},
-        'build_time': 12,
-        'base_workers': 3,
-        'base_prod': {'trzcina': 1},
-        'allowed_terrain': ['wzniesienia'],
-        'upgrades': [
+    "mine": {
+        "base_cost": {"wood": 35, "iron": 15},
+        "build_time": 12,
+        "base_workers": 3,
+        "base_prod": {"cane": 1},
+        "allowed_terrain": ["wzniesienia"],
+        "upgrades": [
             {
-                'cost': {'stal': 30},
-                'build_time': 16,
-                'base_prod': {'trzcina': 1.2},
-                'workers': 4,
-                'name_key': 'building.mine.upgrade.mining_shaft'
+                "cost": {"steel": 30},
+                "build_time": 16,
+                "base_prod": {"cane": 1.2},
+                "workers": 4,
+                "name_key": "building.mine.upgrade.mining_shaft",
             },
             {
-                'cost': {'stal': 60, 'cukier': 5},
-                'build_time': 24,
-                'base_prod': {'trzcina': 1.4},
-                'workers': 5,
-                'name_key': 'building.mine.upgrade.deep_mine'
+                "cost": {"steel": 60, "sugar": 5},
+                "build_time": 24,
+                "base_prod": {"cane": 1.4},
+                "workers": 5,
+                "name_key": "building.mine.upgrade.deep_mine",
             },
             {
-                'cost': {'stal': 100, 'cygara': 10},
-                'build_time': 35,
-                'base_prod': {'trzcina': 1.6},
-                'workers': 7,
-                'name_key': 'building.mine.upgrade.mining_combine'
-            }
+                "cost": {"steel": 100, "cigars": 10},
+                "build_time": 35,
+                "base_prod": {"cane": 1.6},
+                "workers": 7,
+                "name_key": "building.mine.upgrade.mining_combine",
+            },
         ],
-        'name_key': 'building.mine.name'
+        "name_key": "building.mine.name",
     },
 
-    'field_forge': {
-        'base_cost': {'drewno': 50, 'żelazo': 20},
-        'build_time': 14,
-        'base_workers': 3,
-        'requires_settlement': True,
-        'allowed_terrain': ['osada', 'dzielnica'],
-        'consumes': {'węgiel': 1, 'żelazo': 1},
-        'base_prod': {'stal': 0.5},
-        'upgrades': [
+    "field_forge": {
+        "base_cost": {"wood": 50, "iron": 20},
+        "build_time": 14,
+        "base_workers": 3,
+        "requires_settlement": True,
+        "allowed_terrain": ["osada", "dzielnica"],
+        "consumes": {"coal": 1, "iron": 1},
+        "base_prod": {"steel": 0.5},
+        "upgrades": [
             {
-                'cost': {'stal': 40},
-                'build_time': 18,
-                'prod': {'stal': 0.6},
-                'workers': 4,
-                'name_key': 'building.field_forge.upgrade.pig_iron_smelter'
+                "cost": {"steel": 40},
+                "build_time": 18,
+                "prod": {"steel": 0.6},
+                "workers": 4,
+                "name_key": "building.field_forge.upgrade.pig_iron_smelter",
             },
             {
-                'cost': {'stal': 80, 'cukier': 10},
-                'build_time': 25,
-                'prod': {'stal': 0.8},
-                'workers': 5,
-                'name_key': 'building.field_forge.upgrade.martin_furnace'
+                "cost": {"steel": 80, "sugar": 10},
+                "build_time": 25,
+                "prod": {"steel": 0.8},
+                "workers": 5,
+                "name_key": "building.field_forge.upgrade.martin_furnace",
             },
             {
-                'cost': {'stal': 120, 'cygara': 15},
-                'build_time': 38,
-                'prod': {'stal': 1},
-                'workers': 6,
-                'name_key': 'building.field_forge.upgrade.siemens_martin_steelworks'
-            }
+                "cost": {"steel": 120, "cigars": 15},
+                "build_time": 38,
+                "prod": {"steel": 1},
+                "workers": 6,
+                "name_key": "building.field_forge.upgrade.siemens_martin_steelworks",
+            },
         ],
-        'name_key': 'building.field_forge.name'
+        "name_key": "building.field_forge.name",
     },
 
-    'sugarcane_plantation': {
-        'base_cost': {'drewno': 30},
-        'build_time': 7,
-        'base_workers': 3,
-        'allowed_terrain': ['pole'],
-        'base_prod': {'trzcina': 1},
-        'upgrades': [
+    "sugarcane_plantation": {
+        "base_cost": {"wood": 30},
+        "build_time": 7,
+        "base_workers": 3,
+        "allowed_terrain": ["pole"],
+        "base_prod": {"cane": 1},
+        "upgrades": [
             {
-                'cost': {'żelazo': 25},
-                'build_time': 12,
-                'prod': {'trzcina': 1.2},
-                'workers': 4,
-                'name_key': 'building.sugarcane_plantation.upgrade.hacienda'
+                "cost": {"iron": 25},
+                "build_time": 12,
+                "prod": {"cane": 1.2},
+                "workers": 4,
+                "name_key": "building.sugarcane_plantation.upgrade.hacienda",
             },
             {
-                'cost': {'stal': 40},
-                'build_time': 20,
-                'prod': {'trzcina': 1.4},
-                'workers': 5,
-                'name_key': 'building.sugarcane_plantation.upgrade.sugar_latifundium'
+                "cost": {"steel": 40},
+                "build_time": 20,
+                "prod": {"cane": 1.4},
+                "workers": 5,
+                "name_key": "building.sugarcane_plantation.upgrade.sugar_latifundium",
             },
             {
-                'cost': {'stal': 80, 'cygara': 10},
-                'build_time': 30,
-                'prod': {'trzcina': 1.6},
-                'workers': 6,
-                'name_key': 'building.sugarcane_plantation.upgrade.sugar_corporation'
-            }
+                "cost": {"steel": 80, "cigars": 10},
+                "build_time": 30,
+                "prod": {"cane": 1.6},
+                "workers": 6,
+                "name_key": "building.sugarcane_plantation.upgrade.sugar_corporation",
+            },
         ],
-        'name_key': 'building.sugarcane_plantation.name'
+        "name_key": "building.sugarcane_plantation.name",
     },
 
-    'manual_sugar_mill': {
-        'base_cost': {'drewno': 45, 'żelazo': 20},
-        'build_time': 12,
-        'base_workers': 3,
-        'allowed_terrain': ['osada', 'dzielnica'],
-        'requires_settlement': True,
-        'consumes': {'trzcina': 2},
-        'base_prod': {'cukier': 0.5},
-        'upgrades': [
+    "manual_sugar_mill": {
+        "base_cost": {"wood": 45, "iron": 20},
+        "build_time": 12,
+        "base_workers": 3,
+        "allowed_terrain": ["osada", "dzielnica"],
+        "requires_settlement": True,
+        "consumes": {"cane": 2},
+        "base_prod": {"sugar": 0.5},
+        "upgrades": [
             {
-                'cost': {'stal': 40},
-                'build_time': 16,
-                'prod': {'cukier': 0.6},
-                'workers': 4,
-                'name_key': 'building.manual_sugar_mill.upgrade.sugar_refinery'
+                "cost": {"steel": 40},
+                "build_time": 16,
+                "prod": {"sugar": 0.6},
+                "workers": 4,
+                "name_key": "building.manual_sugar_mill.upgrade.sugar_refinery",
             },
             {
-                'cost': {'stal': 70, 'cukier': 10},
-                'build_time': 24,
-                'prod': {'cukier': 0.7},
-                'workers': 5,
-                'name_key': 'building.manual_sugar_mill.upgrade.steam_sugar_distillery'
+                "cost": {"steel": 70, "sugar": 10},
+                "build_time": 24,
+                "prod": {"sugar": 0.7},
+                "workers": 5,
+                "name_key": "building.manual_sugar_mill.upgrade.steam_sugar_distillery",
             },
             {
-                'cost': {'stal': 110, 'cygara': 15},
-                'build_time': 36,
-                'prod': {'cukier': 0.8},
-                'workers': 6,
-                'name_key': 'building.manual_sugar_mill.upgrade.industrial_sugar_distillery'
-            }
+                "cost": {"steel": 110, "cigars": 15},
+                "build_time": 36,
+                "prod": {"sugar": 0.8},
+                "workers": 6,
+                "name_key": "building.manual_sugar_mill.upgrade.industrial_sugar_distillery",
+            },
         ],
-        'name_key': 'building.manual_sugar_mill.name'
+        "name_key": "building.manual_sugar_mill.name",
     },
 
-    'tobacco_plantation': {
-        'base_cost': {'drewno': 35},
-        'build_time': 8,
-        'base_workers': 3,
-        'allowed_terrain': ['pole'],
-        'base_prod': {'tytoń': 1},
-        'upgrades': [
+    "tobacco_plantation": {
+        "base_cost": {"wood": 35},
+        "build_time": 8,
+        "base_workers": 3,
+        "allowed_terrain": ["pole"],
+        "base_prod": {"tobacco": 1},
+        "upgrades": [
             {
-                'cost': {'żelazo': 30},
-                'build_time': 13,
-                'prod': {'tytoń': 1.2},
-                'workers': 4,
-                'name_key': 'building.tobacco_plantation.upgrade.estancia'
+                "cost": {"iron": 30},
+                "build_time": 13,
+                "prod": {"tobacco": 1.2},
+                "workers": 4,
+                "name_key": "building.tobacco_plantation.upgrade.estancia",
             },
             {
-                'cost': {'stal': 50},
-                'build_time': 20,
-                'prod': {'tytoń': 1.4},
-                'workers': 5,
-                'name_key': 'building.tobacco_plantation.upgrade.tobacco_latifundium'
+                "cost": {"steel": 50},
+                "build_time": 20,
+                "prod": {"tobacco": 1.4},
+                "workers": 5,
+                "name_key": "building.tobacco_plantation.upgrade.tobacco_latifundium",
             },
             {
-                'cost': {'stal': 90, 'cygara': 10},
-                'build_time': 32,
-                'prod': {'tytoń': 1.6},
-                'workers': 6,
-                'name_key': 'building.tobacco_plantation.upgrade.tobacco_consortium'
-            }
+                "cost": {"steel": 90, "cigars": 10},
+                "build_time": 32,
+                "prod": {"tobacco": 1.6},
+                "workers": 6,
+                "name_key": "building.tobacco_plantation.upgrade.tobacco_consortium",
+            },
         ],
-        'name_key': 'building.tobacco_plantation.name'
+        "name_key": "building.tobacco_plantation.name",
     },
 
-    'tobacco_drying_house': {
-        'base_cost': {'drewno': 50, 'żelazo': 25},
-        'build_time': 14,
-        'base_workers': 3,
-        'requires_settlement': True,
-        'consumes': {'tytoń': 1},
-        'base_prod': {'cygara': 0.5},
-        'allowed_terrain': ['osada', 'dzielnica'],
-        'upgrades': [
+    "tobacco_drying_house": {
+        "base_cost": {"wood": 50, "iron": 25},
+        "build_time": 14,
+        "base_workers": 3,
+        "requires_settlement": True,
+        "consumes": {"tobacco": 1},
+        "base_prod": {"cigars": 0.5},
+        "allowed_terrain": ["osada", "dzielnica"],
+        "upgrades": [
             {
-                'cost': {'stal': 45},
-                'build_time': 18,
-                'prod': {'cygara': 0.6},
-                'workers': 4,
-                'name_key': 'building.tobacco_drying_house.upgrade.cigar_manufactory'
+                "cost": {"steel": 45},
+                "build_time": 18,
+                "prod": {"cigars": 0.6},
+                "workers": 4,
+                "name_key": "building.tobacco_drying_house.upgrade.cigar_manufactory",
             },
             {
-                'cost': {'stal': 80, 'cukier': 15},
-                'build_time': 26,
-                'prod': {'cygara': 0.7},
-                'workers': 5,
-                'name_key': 'building.tobacco_drying_house.upgrade.handmade_cigar_factory'
+                "cost": {"steel": 80, "sugar": 15},
+                "build_time": 26,
+                "prod": {"cigars": 0.7},
+                "workers": 5,
+                "name_key": "building.tobacco_drying_house.upgrade.handmade_cigar_factory",
             },
             {
-                'cost': {'stal': 130, 'cygara': 20},
-                'build_time': 40,
-                'prod': {'cygara': 0.8},
-                'workers': 6,
-                'name_key': 'building.tobacco_drying_house.upgrade.premium_cigar_factory'
-            }
+                "cost": {"steel": 130, "cigars": 20},
+                "build_time": 40,
+                "prod": {"cigars": 0.8},
+                "workers": 6,
+                "name_key": "building.tobacco_drying_house.upgrade.premium_cigar_factory",
+            },
         ],
-        'name_key': 'building.tobacco_drying_house.name'
+        "name_key": "building.tobacco_drying_house.name",
     },
 
-    'harbor': {
-        'base_cost': {'drewno': 60, 'żelazo': 30},
-        'build_time': 16,
-        'base_workers': 2,
-        'base_prod': {'żywność': 2},
-        'requires_adjacent_settlement': True,
-        'allowed_terrain': ['morze'],
-        'upgrades': [],
-        'name_key': 'building.harbor.name'
+    "harbor": {
+        "base_cost": {"wood": 60, "iron": 30},
+        "build_time": 16,
+        "base_workers": 2,
+        "base_prod": {"food": 2},
+        "requires_adjacent_settlement": True,
+        "allowed_terrain": ["morze"],
+        "upgrades": [],
+        "name_key": "building.harbor.name",
     },
 
-    'district': {
-        'base_cost': {'drewno': 120, 'żelazo': 60, 'stal': 20},
-        'build_time': 25,
-        'base_workers': 5,
-        'requires_adjacent_settlement': True,
-        'allowed_terrain': ['las', 'pole', 'wzniesienia'],
-        'upgrades': [],
-        'name_key': 'building.district.name'
-    }
+    "district": {
+        "base_cost": {"wood": 120, "iron": 60, "steel": 20},
+        "build_time": 25,
+        "base_workers": 5,
+        "requires_adjacent_settlement": True,
+        "allowed_terrain": ["las", "pole", "wzniesienia"],
+        "upgrades": [],
+        "name_key": "building.district.name",
+    },
 }
 
-RESOURCES = ["żywność", "drewno", "skóry", "ubrania", "zioła", "medykamenty", "żelazo", "stal", "trzcina", "cukier", "tytoń", "cygara", "węgiel", "srebro", "złoto", "dukaty"]
-MINE_RESOURCES = ["węgiel", "żelazo", "srebro", "złoto"]
-MINE_COLORS = {"węgiel": "#000000", "żelazo": "#8B0000", "srebro": "#C0C0C0", "złoto": "#FFD700"}
-MINE_NAMES = {"węgiel": "Węgiel", "żelazo": "Żelazo", "srebro": "Srebro", "złoto": "Złoto"}
-BASE_COLORS = {"morze": "#0066CC", "pole": "#CCCC99", "las": "#228B22", "wzniesienia": "#8B4513", "osada": "#000000", "dzielnica": "#333333"}
+RESOURCES = [
+    "food", "wood", "skins", "clothes", "herbs", "meds",
+    "iron", "steel", "cane", "sugar", "tobacco", "cigars",
+    "coal", "silver", "gold", "ducats"
+]
+
+MINE_RESOURCES = ["coal", "iron", "silver", "gold"]
+
+MINE_COLORS = {
+    "coal": "#000000",
+    "iron": "#8B0000",
+    "silver": "#C0C0C0",
+    "gold": "#FFD700"
+}
+
+MINE_NAMES = {
+    "coal": "mine.coal.name",
+    "iron": "mine.iron.name",
+    "silver": "mine.silver.name",
+    "gold": "mine.gold.name"
+}
+
+BASE_COLORS = {
+    "sea": "#0066CC",
+    "field": "#CCCC99",
+    "forest": "#228B22",
+    "hills": "#8B4513",
+    "settlement": "#000000",
+    "district": "#333333"
+}
 
 # Misje królewskie
 ROYAL_MISSIONS = [
     {
         "name_key": "mission.royal.shipyard_wood.name",
         "desc_key": "mission.royal.shipyard_wood.desc",
-        "base": {"drewno": 300},
+        "base": {"wood": 300},
     },
     {
         "name_key": "mission.royal.army_food.name",
         "desc_key": "mission.royal.army_food.desc",
-        "base": {"żywność": 300, "skóry": 50},
+        "base": {"food": 300, "skins": 50},
     },
     {
         "name_key": "mission.royal.cannons_iron.name",
         "desc_key": "mission.royal.cannons_iron.desc",
-        "base": {"żelazo": 100},
+        "base": {"iron": 100},
     },
     {
         "name_key": "mission.royal.fleet_steel.name",
         "desc_key": "mission.royal.fleet_steel.desc",
-        "base": {"stal": 60, "drewno": 200},
+        "base": {"steel": 60, "wood": 200},
     },
     {
         "name_key": "mission.royal.court_sugar.name",
         "desc_key": "mission.royal.court_sugar.desc",
-        "base": {"cukier": 200},
+        "base": {"sugar": 200},
     },
     {
         "name_key": "mission.royal.gift_for_king.name",
         "desc_key": "mission.royal.gift_for_king.desc",
-        "base": {"złoto": 50, "cygara": 30, "srebro": 100},
+        "base": {"gold": 50, "cigars": 30, "silver": 100},
     },
     {
         "name_key": "mission.royal.treasury_gold.name",
         "desc_key": "mission.royal.treasury_gold.desc",
-        "base": {"złoto": 100},
+        "base": {"gold": 100},
     },
     {
         "name_key": "mission.royal.army_support.name",
         "desc_key": "mission.royal.army_support.desc",
-        "base": {"stal": 50, "ubrania": 100},
+        "base": {"steel": 50, "clothes": 100},
     },
     {
         "name_key": "mission.royal.disease_relief.name",
         "desc_key": "mission.royal.disease_relief.desc",
-        "base": {"zioła": 50, "medykamenty": 70},
+        "base": {"herbs": 50, "meds": 70},
     },
     {
         "name_key": "mission.royal.church_support.name",
         "desc_key": "mission.royal.church_support.desc",
-        "base": {"złoto": 30, "srebro": 50, "żywność": 100},
+        "base": {"gold": 30, "silver": 50, "food": 100},
     },
 ]
 
@@ -805,140 +830,139 @@ NATIVE_MISSIONS_DETAILS = [
     {
         "name_key": "mission.native.bison_hunt_help.name",
         "desc_key": "mission.native.bison_hunt_help.desc",
-        "base": {"żywność": 30, "żelazo": 20},
+        "base": {"food": 30, "iron": 20},
     },
     {
         "name_key": "mission.native.ancestors_hungry.name",
         "desc_key": "mission.native.ancestors_hungry.desc",
-        "base": {"cukier": 20, "cygara": 20, "żywność": 30},
+        "base": {"sugar": 20, "cigars": 20, "food": 30},
     },
     {
         "name_key": "mission.native.northerners_burn_villages.name",
         "desc_key": "mission.native.northerners_burn_villages.desc",
-        "base": {"stal": 15, "żelazo": 30},
+        "base": {"steel": 15, "iron": 30},
     },
     {
         "name_key": "mission.native.shaman_needs_herbs.name",
         "desc_key": "mission.native.shaman_needs_herbs.desc",
-        "base": {"zioła": 30, "medykamenty": 20},
+        "base": {"herbs": 30, "meds": 20},
     },
     {
         "name_key": "mission.native.women_want_fabrics.name",
         "desc_key": "mission.native.women_want_fabrics.desc",
-        "base": {"ubrania": 60},
+        "base": {"clothes": 60},
     },
     {
         "name_key": "mission.native.stolen_chief_horse.name",
         "desc_key": "mission.native.stolen_chief_horse.desc",
-        "base": {"żelazo": 20, "stal": 15},
+        "base": {"iron": 20, "steel": 15},
     },
     {
         "name_key": "mission.native.great_spirit_shiny_stones.name",
         "desc_key": "mission.native.great_spirit_shiny_stones.desc",
-        "base": {"złoto": 10, "srebro": 30},
+        "base": {"gold": 10, "silver": 30},
     },
     {
         "name_key": "mission.native.sun_dance_feast.name",
         "desc_key": "mission.native.sun_dance_feast.desc",
-        "base": {"cukier": 20, "żywność": 50},
+        "base": {"sugar": 20, "food": 50},
     },
     {
         "name_key": "mission.native.children_sick.name",
         "desc_key": "mission.native.children_sick.desc",
-        "base": {"medykamenty": 15, "zioła": 30, "żywność": 40},
+        "base": {"meds": 15, "herbs": 30, "food": 40},
     },
     {
         "name_key": "mission.native.trade.name",
         "desc_key": "mission.native.trade.desc",
-        "base": {"ubrania": 30, "żelazo": 20, "cygara": 15},
+        "base": {"clothes": 30, "iron": 20, "cigars": 15},
     },
     {
         "name_key": "mission.native.prairie_drought.name",
         "desc_key": "mission.native.prairie_drought.desc",
-        "base": {"żywność": 50, "zioła": 20},
+        "base": {"food": 50, "herbs": 20},
     },
     {
         "name_key": "mission.native.warriors_return.name",
         "desc_key": "mission.native.warriors_return.desc",
-        "base": {"żywność": 40, "cygara": 20},
+        "base": {"food": 40, "cigars": 20},
     },
     {
         "name_key": "mission.native.palisade_repair.name",
         "desc_key": "mission.native.palisade_repair.desc",
-        "base": {"drewno": 60, "żelazo": 15},
+        "base": {"wood": 60, "iron": 15},
     },
     {
         "name_key": "mission.native.new_tipis_for_winter.name",
         "desc_key": "mission.native.new_tipis_for_winter.desc",
-        "base": {"skóry": 40, "ubrania": 20},
+        "base": {"skins": 40, "clothes": 20},
     },
     {
         "name_key": "mission.native.new_chief_naming_feast.name",
         "desc_key": "mission.native.new_chief_naming_feast.desc",
-        "base": {"złoto": 5, "srebro": 15, "cygara": 10},
+        "base": {"gold": 5, "silver": 15, "cigars": 10},
     },
     {
         "name_key": "mission.native.horses_need_shoes.name",
         "desc_key": "mission.native.horses_need_shoes.desc",
-        "base": {"stal": 20, "żelazo": 20},
+        "base": {"steel": 20, "iron": 20},
     },
     {
         "name_key": "mission.native.lost_hunters.name",
         "desc_key": "mission.native.lost_hunters.desc",
-        "base": {"żywność": 30, "medykamenty": 15},
+        "base": {"food": 30, "meds": 15},
     },
     {
         "name_key": "mission.native.silver_for_ancestors_graves.name",
         "desc_key": "mission.native.silver_for_ancestors_graves.desc",
-        "base": {"srebro": 30, "zioła": 10},
+        "base": {"silver": 30, "herbs": 10},
     },
     {
         "name_key": "mission.native.traders_cheated_elders.name",
         "desc_key": "mission.native.traders_cheated_elders.desc",
-        "base": {"dukaty": 40, "ubrania": 25},
+        "base": {"ducats": 40, "clothes": 25},
     },
     {
         "name_key": "mission.native.sacred_grove_fire.name",
         "desc_key": "mission.native.sacred_grove_fire.desc",
-        "base": {"drewno": 50, "żywność": 20, "cygara": 10},
+        "base": {"wood": 50, "food": 20, "cigars": 10},
     },
 ]
 
 EUROPE_PRICES = {
-    "żywność": 1, "drewno": 8, "skóry": 4, "ubrania": 15,
-    "zioła": 1, "medykamenty": 4, "trzcina": 6, "cukier": 12, "tytoń": 8, "cygara": 15,
-    "żelazo": 10, "stal": 20, "złoto": 50, "srebro": 30, "węgiel": 3
+    "food": 1, "wood": 8, "skins": 4, "clothes": 15,
+    "herbs": 1, "meds": 4, "cane": 6, "sugar": 12, "tobacco": 8, "cigars": 15,
+    "iron": 10, "steel": 20, "gold": 50, "silver": 30, "coal": 3
 }
 
-BLOCK_EUROPE_BUY = {"srebro", "złoto", "trzcina", "tytoń"}
+BLOCK_EUROPE_BUY = {"silver", "gold", "cane", "tobacco"}
 
 NATIVE_PRICES = {
-    "żywność": 8, "drewno": 2, "skóry": 3, "ubrania": 8, "trzcina": 3, "cukier": 12, "tytoń": 5, "cygara": 15,
-    "zioła": 5, "medykamenty": 15,
-    "żelazo": 5, "stal": 8, "złoto": 3, "srebro": 2, "węgiel": 1
-
+    "food": 8, "wood": 2, "skins": 3, "clothes": 8,
+    "cane": 3, "sugar": 12, "tobacco": 5, "cigars": 15,
+    "herbs": 5, "meds": 15,
+    "iron": 5, "steel": 8, "gold": 3, "silver": 2, "coal": 1
 }
 
-# towary zabronione do kupna od Indian
-BLOCK_NATIVE_BUY = {"medykamenty", "ubrania", "cygara", "cukier", "stal"}
+BLOCK_NATIVE_BUY = {"meds", "clothes", "cigars", "sugar", "steel"}
 
 TRIBES = ["Irokezi", "Czirokezi", "Apacze", "Siuksowie", "Krikowie", "Huronowie"]
 
 # ============== PRODUKCJA INDIAN ==============
 # min/max dziennej produkcji oraz min/max pojemności magazynu (na plemię)
 NATIVE_RESOURCE_ECONOMY = {
-    "żywność":   {"daily_prod": (5, 10),   "stockpile": (300, 500)},
-    "skóry":     {"daily_prod": (3, 5),   "stockpile": (150, 300)},
-    "drewno":    {"daily_prod": (5, 10),   "stockpile": (200, 400)},
-    "zioła":     {"daily_prod": (3, 5),   "stockpile": (150, 300)},
-    "trzcina":   {"daily_prod": (3, 5),   "stockpile": (100, 200)},
-    "tytoń":    {"daily_prod": (3, 5),   "stockpile": (50, 100)},
-    "węgiel":    {"daily_prod": (1, 3),   "stockpile": (50, 100)},
-    "żelazo":    {"daily_prod": (1, 3),   "stockpile": (50, 100)},
-    "srebro":    {"daily_prod": (0.5, 2),   "stockpile": (30, 50)},
-    "złoto":     {"daily_prod": (0.5, 1),   "stockpile": (30, 50)},
-    # itd., tylko dla tych zasobów które realnie mają sens u plemion
+    "food":   {"daily_prod": (5, 10),   "stockpile": (300, 500)},
+    "skins":  {"daily_prod": (3, 5),    "stockpile": (150, 300)},
+    "wood":   {"daily_prod": (5, 10),   "stockpile": (200, 400)},
+    "herbs":  {"daily_prod": (3, 5),    "stockpile": (150, 300)},
+    "cane":   {"daily_prod": (3, 5),    "stockpile": (100, 200)},
+    "tobacco":{"daily_prod": (3, 5),    "stockpile": (50, 100)},
+    "coal":   {"daily_prod": (1, 3),    "stockpile": (50, 100)},
+    "iron":   {"daily_prod": (1, 3),    "stockpile": (50, 100)},
+    "silver": {"daily_prod": (0.5, 2),  "stockpile": (30, 50)},
+    "gold":   {"daily_prod": (0.5, 1),  "stockpile": (30, 50)},
 }
+
 # Mapping internal resource ids to localization keys
 RESOURCE_DISPLAY_KEYS = {
     'sugar': 'res.sugar',

@@ -270,5 +270,10 @@
   "tribe.huron": "Huronowie",
   "tribe.iroquois": "Irokezi",
   "tribe.creek": "Krikowie",
-  "tribe.sioux": "Siuksowie"
+  "tribe.sioux": "Siuksowie",
+
+  "mine.coal.name": "Węgiel",
+  "mine.iron.name": "Żelazo",
+  "mine.silver.name": "Srebro",
+  "mine.gold.name": "Złoto"
 }
