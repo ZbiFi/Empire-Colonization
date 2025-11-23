@@ -239,7 +239,7 @@ class MissionsMixin:
 
         ttk.Label(
             native_frame,
-            text="✦ MISJE INDIAŃSKIE ✦",
+            text=self.loc.t("native_missions.header"),
             font=top_title_font,
             anchor="center",
             justify="center"

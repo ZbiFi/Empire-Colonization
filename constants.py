@@ -25,516 +25,572 @@ FOOD_OVERCROWDING_MULTIPLIER = 1.5
 MAX_SHIP_CARGO = 1500
 
 # ============== PAŃSTWA ==============
-STATES = {
-    "Portugalia": {
-        "bonus": "szybsze statki (+30% szybkości podróży)", "speed": 1.3,
-        "rulers": [
-            {"name": "Jan II Doskonały", "start": 1481, "end": 1495},
-            {"name": "Manuel I Szczęśliwy", "start": 1495, "end": 1521},
-            {"name": "Jan III", "start": 1521, "end": 1557},
-            {"name": "Sebastian I", "start": 1557, "end": 1578},
-            {"name": "Henryk I Kardynał", "start": 1578, "end": 1580},
-            {"name": "Antoni I", "start": 1580, "end": 1580},
-            {"name": "Filip I", "start": 1580, "end": 1598},
-            {"name": "Filip II", "start": 1598, "end": 1621},
-            {"name": "Filip III", "start": 1621, "end": 1640},  # <- brakowało
-            {"name": "Jan IV Bragança", "start": 1640, "end": 1656},
-            {"name": "Alfons VI", "start": 1656, "end": 1683},
-            {"name": "Piotr II", "start": 1683, "end": 1706},
-            {"name": "Jan V", "start": 1706, "end": 1750},
-            {"name": "Józef I Reformator", "start": 1750, "end": 1777},
-            {"name": "Maria I", "start": 1777, "end": 1816}
-        ]
-    },
-    "Hiszpania": {
-        "bonus": "lepsza eksploracja (+40% nagrody)", "explore": 1.4,
-        "rulers": [
-            {"name": "Izabela I Kastylijska", "start": 1474, "end": 1504},
-            {"name": "Ferdynand II Aragoński", "start": 1479, "end": 1516},
-            {"name": "Joanna Szalona", "start": 1504, "end": 1555},
-            {"name": "Karol I", "start": 1516, "end": 1556},
-            {"name": "Filip II", "start": 1556, "end": 1598},
-            {"name": "Filip III", "start": 1598, "end": 1621},
-            {"name": "Filip IV", "start": 1621, "end": 1665},
-            {"name": "Karol II", "start": 1665, "end": 1700},
-            {"name": "Filip V Burbon", "start": 1700, "end": 1746},
-            {"name": "Ferdynand VI", "start": 1746, "end": 1759},
-            {"name": "Karol III", "start": 1759, "end": 1788},
-            {"name": "Karol IV", "start": 1788, "end": 1808}
-        ]
-    },
-    "Anglia": {
-        "bonus": "lepszy handel (-10%/+10% ceny)\nSzybsze statki (+10% szybkości podróży)", "trade": 0.1, "speed": 1.1,
-        "rulers": [
-            {"name": "Henryk VII Tudor", "start": 1485, "end": 1509},
-            {"name": "Henryk VIII", "start": 1509, "end": 1547},
-            {"name": "Edward VI", "start": 1547, "end": 1553},
-            {"name": "Maria I Krwawa", "start": 1553, "end": 1558},
-            {"name": "Elżbieta I", "start": 1558, "end": 1603},
-            {"name": "Jakub I Stuart", "start": 1603, "end": 1625},
-            {"name": "Karol I", "start": 1625, "end": 1649},
-            {"name": "Wspólnota Anglii (Commonwealth)", "start": 1649, "end": 1653},
-            {"name": "Oliver Cromwell (Lord Protektor)", "start": 1653, "end": 1658},
-            {"name": "Ryszard Cromwell", "start": 1658, "end": 1659},
-            {"name": "Rząd tymczasowy / Restytucja", "start": 1659, "end": 1660},
-            {"name": "Karol II", "start": 1660, "end": 1685},
-            {"name": "Jakub II", "start": 1685, "end": 1688},
-            {"name": "Wilhelm III Orański i Maria II", "start": 1689, "end": 1702},
-            {"name": "Anna Stuart", "start": 1702, "end": 1714},
-            {"name": "Jerzy I Hanowerski", "start": 1714, "end": 1727},
-            {"name": "Jerzy II", "start": 1727, "end": 1760},
-            {"name": "Jerzy III", "start": 1760, "end": 1820}
-        ]
-    },
-    "Francja": {
-        "bonus": "lepsza dyplomacja\n(nagroda reputacji przy 750 wartości (z 1000))", "reputation_threshold": 750,
-        "rulers": [
-            {"name": "Karol VIII", "start": 1483, "end": 1498},
-            {"name": "Ludwik XII", "start": 1498, "end": 1515},
-            {"name": "Franciszek I", "start": 1515, "end": 1547},
-            {"name": "Henryk II", "start": 1547, "end": 1559},
-            {"name": "Franciszek II", "start": 1559, "end": 1560},
-            {"name": "Karol IX", "start": 1560, "end": 1574},
-            {"name": "Henryk III", "start": 1574, "end": 1589},
-            {"name": "Henryk IV Burbon", "start": 1589, "end": 1610},
-            {"name": "Ludwik XIII", "start": 1610, "end": 1643},
-            {"name": "Ludwik XIV Król Słońce", "start": 1643, "end": 1715},
-            {"name": "Ludwik XV", "start": 1715, "end": 1774},
-            {"name": "Ludwik XVI", "start": 1774, "end": 1792}
-        ]
-    },
-    "Holandia": {
-        "bonus": "tańsze budowle (-20% kosztu budowy)", "build_cost": 0.8,
-        "rulers": [
-            {"name": "Filip II", "start": 1555, "end": 1581},
-            {"name": "Rada Stanu", "start": 1581, "end": 1588},
-            {"name": "Maurycy Orański", "start": 1585, "end": 1625},
-            {"name": "Fryderyk Henryk Orański", "start": 1625, "end": 1647},
-            {"name": "Wilhelm II Orański", "start": 1647, "end": 1650},
-            {"name": "Okres bez stadhoudera (I)", "start": 1650, "end": 1672},
-            {"name": "Wilhelm III Orański", "start": 1672, "end": 1702},
-            {"name": "Okres bez stadhoudera (II)", "start": 1702, "end": 1747},
-            {"name": "Wilhelm IV Orański", "start": 1747, "end": 1751},
-            {"name": "Wilhelm V Orański", "start": 1751, "end": 1795}
-        ]
-    },
-    "Szwecja": {
-        "bonus": "lepsza produkcja drewna (+50% produkcji)", "wood": 1.5,
-        "rulers": [
-            {"name": "Sten Starszy", "start": 1470, "end": 1497},
-            {"name": "Jan Oldenburński", "start": 1497, "end": 1501},
-            {"name": "Sten Sture Starszy (regent, II okres)", "start": 1501, "end": 1503},
-            {"name": "Svante Nilsson Sture (regent)", "start": 1503, "end": 1512},
-            {"name": "Sten Sture Młodszy", "start": 1512, "end": 1520},
-            {"name": "Krystian II", "start": 1520, "end": 1521},
-            {"name": "Gustaw Waza (regent)", "start": 1521, "end": 1523},
-            {"name": "Gustaw I Waza", "start": 1523, "end": 1560},
-            {"name": "Erik XIV", "start": 1560, "end": 1568},
-            {"name": "Jan III", "start": 1568, "end": 1592},
-            {"name": "Zygmunt III Waza", "start": 1592, "end": 1599},
-            {"name": "Karol IX", "start": 1599, "end": 1611},
-            {"name": "Gustaw II Adolf", "start": 1611, "end": 1632},
-            {"name": "Krystyna", "start": 1632, "end": 1654},
-            {"name": "Karol X Gustaw", "start": 1654, "end": 1660},
-            {"name": "Karol XI", "start": 1660, "end": 1697},
-            {"name": "Karol XII", "start": 1697, "end": 1718},
-            {"name": "Ulryka Eleonora", "start": 1718, "end": 1720},
-            {"name": "Fryderyk I", "start": 1720, "end": 1751},
-            {"name": "Adolf Fryderyk", "start": 1751, "end": 1771},
-            {"name": "Gustaw III", "start": 1771, "end": 1792},
-            {"name": "Gustaw IV Adolf", "start": 1792, "end": 1809}
-        ]
-    },
-    "Dania": {
-        "bonus": "lepsza żywność (+40% produkcji)", "food": 1.4,
-        "rulers": [
-            {"name": "Jan Oldenburński", "start": 1481, "end": 1513},
-            {"name": "Krystian II", "start": 1513, "end": 1523},
-            {"name": "Fryderyk I", "start": 1523, "end": 1533},
-            {"name": "Interregnum", "start": 1533, "end": 1534},
-            {"name": "Krystian III", "start": 1534, "end": 1559},
-            {"name": "Fryderyk II", "start": 1559, "end": 1588},
-            {"name": "Krystian IV", "start": 1588, "end": 1648},
-            {"name": "Fryderyk III", "start": 1648, "end": 1670},
-            {"name": "Krystian V", "start": 1670, "end": 1699},
-            {"name": "Fryderyk IV", "start": 1699, "end": 1730},
-            {"name": "Krystian VI", "start": 1730, "end": 1746},
-            {"name": "Fryderyk V", "start": 1746, "end": 1766},
-            {"name": "Krystian VII", "start": 1766, "end": 1808}
-        ]
-    },
-    "Wenecja": {
-        "bonus": "lepszy handel (-20%/+20% ceny)", "trade": 0.2,
-        "rulers": [
-            {"name": "Agostino Barbarigo", "start": 1486, "end": 1501},
-            {"name": "Leonardo Loredan", "start": 1501, "end": 1521},
-            {"name": "Antonio Grimani", "start": 1521, "end": 1523},
-            {"name": "Andrea Gritti", "start": 1523, "end": 1538},
-            {"name": "Pietro Lando", "start": 1538, "end": 1545},
-            {"name": "Francesco Donato", "start": 1545, "end": 1553},
-            {"name": "Marcantonio Trivisan", "start": 1553, "end": 1554},
-            {"name": "Francesco Venier", "start": 1554, "end": 1556},
-            {"name": "Lorenzo Priuli", "start": 1556, "end": 1559},
-            {"name": "Girolamo Priuli", "start": 1559, "end": 1567},
-            {"name": "Pietro Loredan", "start": 1567, "end": 1570},
-            {"name": "Alvise I Mocenigo", "start": 1570, "end": 1577},
-            {"name": "Sebastiano Venier", "start": 1577, "end": 1578},
-            {"name": "Nicolò da Ponte", "start": 1578, "end": 1585},
-            {"name": "Pasquale Cicogna", "start": 1585, "end": 1595},
-            {"name": "Marino Grimani", "start": 1595, "end": 1605},
-            {"name": "Leonardo Donato", "start": 1606, "end": 1612},
-            {"name": "Marcantonio Memmo", "start": 1612, "end": 1615},
-            {"name": "Giovanni Bembo", "start": 1615, "end": 1618},
-            {"name": "Nicolò Donato", "start": 1618, "end": 1618},
-            {"name": "Antonio Priuli", "start": 1618, "end": 1623},
-            {"name": "Francesco Contarini", "start": 1623, "end": 1624},
-            {"name": "Giovanni I Cornaro", "start": 1625, "end": 1629},
-            {"name": "Nicolò Contarini", "start": 1630, "end": 1631},
-            {"name": "Francesco Erizzo", "start": 1631, "end": 1646},
-            {"name": "Francesco Molin", "start": 1646, "end": 1655},
-            {"name": "Carlo Contarini", "start": 1655, "end": 1656},
-            {"name": "Francesco Cornaro", "start": 1656, "end": 1656},
-            {"name": "Bertuccio Valier", "start": 1656, "end": 1658},
-            {"name": "Giovanni Pesaro", "start": 1658, "end": 1659},
-            {"name": "Domenico II Contarini", "start": 1659, "end": 1675},
-            {"name": "Nicolò Sagredo", "start": 1675, "end": 1676},
-            {"name": "Alvise Contarini", "start": 1676, "end": 1684},
-            {"name": "Marcantonio Giustinian", "start": 1684, "end": 1688},
-            {"name": "Francesco Morosini", "start": 1688, "end": 1694},
-            {"name": "Sylwester Valier", "start": 1694, "end": 1700},
-            {"name": "Alvise II Mocenigo", "start": 1700, "end": 1709},
-            {"name": "Giovanni II Cornaro", "start": 1709, "end": 1722},
-            {"name": "Alvise III Mocenigo", "start": 1722, "end": 1732},
-            {"name": "Carlo Ruzzini", "start": 1732, "end": 1735},
-            {"name": "Alvise Pisani", "start": 1735, "end": 1741},
-            {"name": "Pietro Grimani", "start": 1741, "end": 1752},
-            {"name": "Francesco Loredan", "start": 1752, "end": 1762},
-            {"name": "Marco Foscarini", "start": 1762, "end": 1763},
-            {"name": "Alvise IV Mocenigo", "start": 1763, "end": 1779},
-            {"name": "Paolo Renier", "start": 1779, "end": 1789},
-            {"name": "Ludovico Manin", "start": 1789, "end": 1797}
-        ]
-    },
-    "Genua": {
-        "bonus": "bogate kopalnie (+20% produkcji)", "mine": 1.2,
-        "rulers": [
-            {"name": "Battista Fregoso", "start": 1478, "end": 1483},
-            {"name": "Paolo Fregoso", "start": 1483, "end": 1488},
-            {"name": "Ludwik XII Francji", "start": 1499, "end": 1512},
-            {"name": "Ottaviano Fregoso", "start": 1513, "end": 1515},
-            {"name": "Antoni Adorno", "start": 1522, "end": 1527},
-            {"name": "Teodoro Trivulzio", "start": 1528, "end": 1531},
-            {"name": "Andrea Doria (nieformalny)", "start": 1528, "end": 1560},
-            {"name": "Giovanni Battista Lascaris", "start": 1561, "end": 1573},
-            {"name": "Gianandrea Giustiniani", "start": 1573, "end": 1575},
-            {"name": "Ambrogio Di Negro", "start": 1581, "end": 1583},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1583, "end": 1607},
-            {"name": "Giovanni Battista Cattaneo", "start": 1607, "end": 1609},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1609, "end": 1611},
-            {"name": "Giulio Della Torre", "start": 1611, "end": 1613},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1613, "end": 1621},
-            {"name": "Pietro De Franchi", "start": 1621, "end": 1623},
-            {"name": "Federico De Franchi", "start": 1623, "end": 1625},
-            {"name": "Giovanni Luca Chiavari", "start": 1627, "end": 1629},
-            {"name": "Andrea Spinola", "start": 1629, "end": 1631},
-            {"name": "Leonardo Della Torre", "start": 1631, "end": 1633},
-            {"name": "Giovanni Francesco Brignole", "start": 1635, "end": 1637},
-            {"name": "Agostino Pallavicini", "start": 1637, "end": 1639},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1639, "end": 1675},
-            {"name": "Giovanni Battista Durazzo", "start": 1675, "end": 1677},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1677, "end": 1715},
-            {"name": "Francesco Maria Imperiale", "start": 1715, "end": 1717},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1717, "end": 1727},
-            {"name": "Giuseppe Maria Imperiale", "start": 1727, "end": 1729},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1729, "end": 1761},
-            {"name": "Domenico Invrea", "start": 1761, "end": 1763},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1763, "end": 1787},
-            {"name": "Rodolfo Emilio Brignole", "start": 1787, "end": 1789},
-            {"name": "Republika Genui (kolejni dożowie)", "start": 1789, "end": 1791},
-            {"name": "Alviso Lomellini", "start": 1791, "end": 1795},
-            {"name": "Giacomo Maria Brignole", "start": 1795, "end": 1797},
-        ]
-    },
-    "Polska": {
-        "bonus": "wzmożona emigracja (+10 ludzi na start)", "pop_start": 10,
-        "rulers": [
-            {"name": "Kazimierz IV Jagiellończyk", "start": 1447, "end": 1492},
-            {"name": "Jan I Olbracht", "start": 1492, "end": 1501},
-            {"name": "Aleksander Jagiellończyk", "start": 1501, "end": 1506},
-            {"name": "Zygmunt I Stary", "start": 1506, "end": 1548},
-            {"name": "Zygmunt II August", "start": 1548, "end": 1572},
-            {"name": "Henryk Walezy", "start": 1573, "end": 1574},
-            {"name": "Stefan Batory", "start": 1576, "end": 1586},
-            {"name": "Zygmunt III Waza", "start": 1587, "end": 1632},
-            {"name": "Władysław IV Waza", "start": 1632, "end": 1648},
-            {"name": "Jan II Kazimierz Waza", "start": 1648, "end": 1668},
-            {"name": "Michał Korybut Wiśniowiecki", "start": 1669, "end": 1673},
-            {"name": "Jan III Sobieski", "start": 1674, "end": 1696},
-            {"name": "August II Mocny", "start": 1697, "end": 1706},
-            {"name": "Stanisław Leszczyński", "start": 1704, "end": 1709},
-            {"name": "August II Mocny", "start": 1709, "end": 1733},
-            {"name": "Stanisław Leszczyński", "start": 1733, "end": 1736},
-            {"name": "August III Sas", "start": 1733, "end": 1763},
-            {"name": "Stanisław August Poniatowski", "start": 1764, "end": 1795}
-        ]
-    },
-    # "Szkocja": {
-    #     "bonus": "odporni na choroby", "health": 1.5,
-    #     "rulers": [
-    #         {"name": "Jakub III", "start": 1460, "end": 1488},
-    #         {"name": "Jakub IV", "start": 1488, "end": 1513},
-    #         {"name": "Jakub V", "start": 1513, "end": 1542},
-    #         {"name": "Maria Stuart", "start": 1542, "end": 1567},
-    #         {"name": "Jakub VI", "start": 1567, "end": 1625},
-    #         {"name": "Karol I", "start": 1625, "end": 1649},
-    #         {"name": "Karol II", "start": 1649, "end": 1685},
-    #         {"name": "Jakub VII", "start": 1685, "end": 1688},
-    #         {"name": "Maria II i Wilhelm III", "start": 1689, "end": 1702},
-    #         {"name": "Anna", "start": 1702, "end": 1707}
-    #     ]
-    # },
-    # "Neapol": {
-    #     "bonus": "szybkie plantacje", "plantation": 1.4,
-    #     "rulers": [
-    #         {"name": "Ferdynand I", "start": 1458, "end": 1494},
-    #         {"name": "Alfons II", "start": 1494, "end": 1495},
-    #         {"name": "Ferdynand II", "start": 1495, "end": 1496},
-    #         {"name": "Fryderyk I", "start": 1496, "end": 1501},
-    #         {"name": "Ludwik XII Francji", "start": 1501, "end": 1504},
-    #         {"name": "Ferdynand III Aragoński", "start": 1504, "end": 1516},
-    #         {"name": "Joanna III", "start": 1516, "end": 1555},
-    #         {"name": "Karol V", "start": 1516, "end": 1556},
-    #         {"name": "Filip I", "start": 1556, "end": 1598},
-    #         {"name": "Filip II", "start": 1598, "end": 1621},
-    #         {"name": "Filip III", "start": 1621, "end": 1665},
-    #         {"name": "Karol II Hiszpański", "start": 1665, "end": 1700},
-    #         {"name": "Filip IV", "start": 1700, "end": 1707},
-    #         {"name": "Karol VI Habsburg", "start": 1707, "end": 1734},
-    #         {"name": "Karol VII Burbon", "start": 1734, "end": 1759},
-    #         {"name": "Ferdynand IV", "start": 1759, "end": 1799}
-    #     ]
-    # },
-    # "Aragonia": {
-    #     "bonus": "lepsza marynarka", "ships": 1.3,
-    #     "rulers": [
-    #         {"name": "Jan II", "start": 1458, "end": 1479},
-    #         {"name": "Ferdynand II", "start": 1479, "end": 1516},
-    #         {"name": "Joanna Szalona", "start": 1516, "end": 1555},
-    #         {"name": "Karol I", "start": 1516, "end": 1556},
-    #         {"name": "Filip II", "start": 1556, "end": 1598},
-    #         {"name": "Filip III", "start": 1598, "end": 1621},
-    #         {"name": "Filip IV", "start": 1621, "end": 1665},
-    #         {"name": "Karol II", "start": 1665, "end": 1700},
-    #         {"name": "Filip V", "start": 1700, "end": 1746},
-    #         {"name": "Ferdynand VI", "start": 1746, "end": 1759},
-    #         {"name": "Karol III", "start": 1759, "end": 1788},
-    #         {"name": "Karol IV", "start": 1788, "end": 1808}
-    #     ]
-    # },
-    # "Kastylia": {
-    #     "bonus": "dużo złota", "gold_find": 1.6,
-    #     "rulers": [
-    #         {"name": "Jan II", "start": 1406, "end": 1454},
-    #         {"name": "Henryk IV", "start": 1454, "end": 1474},
-    #         {"name": "Izabela I", "start": 1474, "end": 1504},
-    #         {"name": "Joanna Szalona", "start": 1504, "end": 1555},
-    #         {"name": "Karol I", "start": 1516, "end": 1556},
-    #         {"name": "Filip II", "start": 1556, "end": 1598},
-    #         {"name": "Filip III", "start": 1598, "end": 1621},
-    #         {"name": "Filip IV", "start": 1621, "end": 1665},
-    #         {"name": "Karol II", "start": 1665, "end": 1700},
-    #         {"name": "Filip V", "start": 1700, "end": 1746},
-    #         {"name": "Ferdynand VI", "start": 1746, "end": 1759},
-    #         {"name": "Karol III", "start": 1759, "end": 1788},
-    #         {"name": "Karol IV", "start": 1788, "end": 1808}
-    #     ]
-    # },
-    "Brandenburgia": {
-        "bonus": "lepsza stal (+50% przy produkcji)", "steel": 1.5,
-        "rulers": [
-            {"name": "Fryderyk I", "start": 1415, "end": 1440},
-            {"name": "Fryderyk II Żelazny Ząb", "start": 1440, "end": 1470},
-            {"name": "Albrecht III Achilles", "start": 1470, "end": 1486},
-            {"name": "Jan Cicero", "start": 1486, "end": 1499},
-            {"name": "Joachim I Nestor", "start": 1499, "end": 1535},
-            {"name": "Joachim II Hektor", "start": 1535, "end": 1571},
-            {"name": "Jan Jerzy", "start": 1571, "end": 1598},
-            {"name": "Joachim Fryderyk", "start": 1598, "end": 1608},
-            {"name": "Jan Zygmunt", "start": 1608, "end": 1619},
-            {"name": "Jerzy Wilhelm", "start": 1619, "end": 1640},
-            {"name": "Fryderyk Wilhelm Wielki Elektor", "start": 1640, "end": 1688},
-            {"name": "Fryderyk III", "start": 1688, "end": 1713},
-            {"name": "Fryderyk Wilhelm I", "start": 1713, "end": 1740},
-            {"name": "Fryderyk II Wielki", "start": 1740, "end": 1786},
-            {"name": "Fryderyk Wilhelm II", "start": 1786, "end": 1797}
-        ]
-    }
-}
+STATES = {'portugal': {'speed': 1.3,
+              'rulers': [{'start': 1481, 'end': 1495, 'name_key': 'state.portugal.ruler.jan_ii_doskonay'},
+                         {'start': 1495, 'end': 1521, 'name_key': 'state.portugal.ruler.manuel_i_szczesliwy'},
+                         {'start': 1521, 'end': 1557, 'name_key': 'state.portugal.ruler.jan_iii'},
+                         {'start': 1557, 'end': 1578, 'name_key': 'state.portugal.ruler.sebastian_i'},
+                         {'start': 1578, 'end': 1580, 'name_key': 'state.portugal.ruler.henryk_i_kardyna'},
+                         {'start': 1580, 'end': 1580, 'name_key': 'state.portugal.ruler.antoni_i'},
+                         {'start': 1580, 'end': 1598, 'name_key': 'state.portugal.ruler.filip_i'},
+                         {'start': 1598, 'end': 1621, 'name_key': 'state.portugal.ruler.filip_ii'},
+                         {'start': 1621, 'end': 1640, 'name_key': 'state.portugal.ruler.filip_iii'},
+                         {'start': 1640, 'end': 1656, 'name_key': 'state.portugal.ruler.jan_iv_braganca'},
+                         {'start': 1656, 'end': 1683, 'name_key': 'state.portugal.ruler.alfons_vi'},
+                         {'start': 1683, 'end': 1706, 'name_key': 'state.portugal.ruler.piotr_ii'},
+                         {'start': 1706, 'end': 1750, 'name_key': 'state.portugal.ruler.jan_v'},
+                         {'start': 1750, 'end': 1777, 'name_key': 'state.portugal.ruler.jozef_i_reformator'},
+                         {'start': 1777, 'end': 1816, 'name_key': 'state.portugal.ruler.maria_i'}],
+              'bonus_key': 'state.portugal.bonus',
+              'name_key': 'state.portugal.name',
+              'name': 'state.portugal.name'},
+ 'spain': {'explore': 1.4,
+           'rulers': [{'start': 1474, 'end': 1504, 'name_key': 'state.spain.ruler.izabela_i_kastylijska'},
+                      {'start': 1479, 'end': 1516, 'name_key': 'state.spain.ruler.ferdynand_ii_aragonski'},
+                      {'start': 1504, 'end': 1555, 'name_key': 'state.spain.ruler.joanna_szalona'},
+                      {'start': 1516, 'end': 1556, 'name_key': 'state.spain.ruler.karol_i'},
+                      {'start': 1556, 'end': 1598, 'name_key': 'state.spain.ruler.filip_ii'},
+                      {'start': 1598, 'end': 1621, 'name_key': 'state.spain.ruler.filip_iii'},
+                      {'start': 1621, 'end': 1665, 'name_key': 'state.spain.ruler.filip_iv'},
+                      {'start': 1665, 'end': 1700, 'name_key': 'state.spain.ruler.karol_ii'},
+                      {'start': 1700, 'end': 1746, 'name_key': 'state.spain.ruler.filip_v_burbon'},
+                      {'start': 1746, 'end': 1759, 'name_key': 'state.spain.ruler.ferdynand_vi'},
+                      {'start': 1759, 'end': 1788, 'name_key': 'state.spain.ruler.karol_iii'},
+                      {'start': 1788, 'end': 1808, 'name_key': 'state.spain.ruler.karol_iv'}],
+           'bonus_key': 'state.spain.bonus',
+           'name_key': 'state.spain.name',
+           'name': 'state.spain.name'},
+ 'england': {'trade': 0.1,
+             'speed': 1.1,
+             'rulers': [{'start': 1485, 'end': 1509, 'name_key': 'state.england.ruler.henryk_vii_tudor'},
+                        {'start': 1509, 'end': 1547, 'name_key': 'state.england.ruler.henryk_viii'},
+                        {'start': 1547, 'end': 1553, 'name_key': 'state.england.ruler.edward_vi'},
+                        {'start': 1553, 'end': 1558, 'name_key': 'state.england.ruler.maria_i_krwawa'},
+                        {'start': 1558, 'end': 1603, 'name_key': 'state.england.ruler.elzbieta_i'},
+                        {'start': 1603, 'end': 1625, 'name_key': 'state.england.ruler.jakub_i_stuart'},
+                        {'start': 1625, 'end': 1649, 'name_key': 'state.england.ruler.karol_i'},
+                        {'start': 1649, 'end': 1653, 'name_key': 'state.england.ruler.wspolnota_anglii_commonwealth'},
+                        {'start': 1653, 'end': 1658, 'name_key': 'state.england.ruler.oliver_cromwell_lord_protektor'},
+                        {'start': 1658, 'end': 1659, 'name_key': 'state.england.ruler.ryszard_cromwell'},
+                        {'start': 1659, 'end': 1660, 'name_key': 'state.england.ruler.rzad_tymczasowy_restytucja'},
+                        {'start': 1660, 'end': 1685, 'name_key': 'state.england.ruler.karol_ii'},
+                        {'start': 1685, 'end': 1688, 'name_key': 'state.england.ruler.jakub_ii'},
+                        {'start': 1689, 'end': 1702, 'name_key': 'state.england.ruler.wilhelm_iii_oranski_i_maria_ii'},
+                        {'start': 1702, 'end': 1714, 'name_key': 'state.england.ruler.anna_stuart'},
+                        {'start': 1714, 'end': 1727, 'name_key': 'state.england.ruler.jerzy_i_hanowerski'},
+                        {'start': 1727, 'end': 1760, 'name_key': 'state.england.ruler.jerzy_ii'},
+                        {'start': 1760, 'end': 1820, 'name_key': 'state.england.ruler.jerzy_iii'}],
+             'bonus_key': 'state.england.bonus',
+             'name_key': 'state.england.name',
+             'name': 'state.england.name'},
+ 'france': {'reputation_threshold': 750,
+            'rulers': [{'start': 1483, 'end': 1498, 'name_key': 'state.france.ruler.karol_viii'},
+                       {'start': 1498, 'end': 1515, 'name_key': 'state.france.ruler.ludwik_xii'},
+                       {'start': 1515, 'end': 1547, 'name_key': 'state.france.ruler.franciszek_i'},
+                       {'start': 1547, 'end': 1559, 'name_key': 'state.france.ruler.henryk_ii'},
+                       {'start': 1559, 'end': 1560, 'name_key': 'state.france.ruler.franciszek_ii'},
+                       {'start': 1560, 'end': 1574, 'name_key': 'state.france.ruler.karol_ix'},
+                       {'start': 1574, 'end': 1589, 'name_key': 'state.france.ruler.henryk_iii'},
+                       {'start': 1589, 'end': 1610, 'name_key': 'state.france.ruler.henryk_iv_burbon'},
+                       {'start': 1610, 'end': 1643, 'name_key': 'state.france.ruler.ludwik_xiii'},
+                       {'start': 1643, 'end': 1715, 'name_key': 'state.france.ruler.ludwik_xiv_krol_sonce'},
+                       {'start': 1715, 'end': 1774, 'name_key': 'state.france.ruler.ludwik_xv'},
+                       {'start': 1774, 'end': 1792, 'name_key': 'state.france.ruler.ludwik_xvi'}],
+            'bonus_key': 'state.france.bonus',
+            'name_key': 'state.france.name',
+            'name': 'state.france.name'},
+ 'netherlands': {'build_cost': 0.8,
+                 'rulers': [{'start': 1555, 'end': 1581, 'name_key': 'state.netherlands.ruler.filip_ii'},
+                            {'start': 1581, 'end': 1588, 'name_key': 'state.netherlands.ruler.rada_stanu'},
+                            {'start': 1585, 'end': 1625, 'name_key': 'state.netherlands.ruler.maurycy_oranski'},
+                            {'start': 1625, 'end': 1647, 'name_key': 'state.netherlands.ruler.fryderyk_henryk_oranski'},
+                            {'start': 1647, 'end': 1650, 'name_key': 'state.netherlands.ruler.wilhelm_ii_oranski'},
+                            {'start': 1650, 'end': 1672, 'name_key': 'state.netherlands.ruler.okres_bez_stadhoudera_i'},
+                            {'start': 1672, 'end': 1702, 'name_key': 'state.netherlands.ruler.wilhelm_iii_oranski'},
+                            {'start': 1702,
+                             'end': 1747,
+                             'name_key': 'state.netherlands.ruler.okres_bez_stadhoudera_ii'},
+                            {'start': 1747, 'end': 1751, 'name_key': 'state.netherlands.ruler.wilhelm_iv_oranski'},
+                            {'start': 1751, 'end': 1795, 'name_key': 'state.netherlands.ruler.wilhelm_v_oranski'}],
+                 'bonus_key': 'state.netherlands.bonus',
+                 'name_key': 'state.netherlands.name',
+                 'name': 'state.netherlands.name'},
+ 'sweden': {'wood': 1.5,
+            'rulers': [{'start': 1470, 'end': 1497, 'name_key': 'state.sweden.ruler.sten_starszy'},
+                       {'start': 1497, 'end': 1501, 'name_key': 'state.sweden.ruler.jan_oldenburnski'},
+                       {'start': 1501,
+                        'end': 1503,
+                        'name_key': 'state.sweden.ruler.sten_sture_starszy_regent_ii_okres'},
+                       {'start': 1503, 'end': 1512, 'name_key': 'state.sweden.ruler.svante_nilsson_sture_regent'},
+                       {'start': 1512, 'end': 1520, 'name_key': 'state.sweden.ruler.sten_sture_modszy'},
+                       {'start': 1520, 'end': 1521, 'name_key': 'state.sweden.ruler.krystian_ii'},
+                       {'start': 1521, 'end': 1523, 'name_key': 'state.sweden.ruler.gustaw_waza_regent'},
+                       {'start': 1523, 'end': 1560, 'name_key': 'state.sweden.ruler.gustaw_i_waza'},
+                       {'start': 1560, 'end': 1568, 'name_key': 'state.sweden.ruler.erik_xiv'},
+                       {'start': 1568, 'end': 1592, 'name_key': 'state.sweden.ruler.jan_iii'},
+                       {'start': 1592, 'end': 1599, 'name_key': 'state.sweden.ruler.zygmunt_iii_waza'},
+                       {'start': 1599, 'end': 1611, 'name_key': 'state.sweden.ruler.karol_ix'},
+                       {'start': 1611, 'end': 1632, 'name_key': 'state.sweden.ruler.gustaw_ii_adolf'},
+                       {'start': 1632, 'end': 1654, 'name_key': 'state.sweden.ruler.krystyna'},
+                       {'start': 1654, 'end': 1660, 'name_key': 'state.sweden.ruler.karol_x_gustaw'},
+                       {'start': 1660, 'end': 1697, 'name_key': 'state.sweden.ruler.karol_xi'},
+                       {'start': 1697, 'end': 1718, 'name_key': 'state.sweden.ruler.karol_xii'},
+                       {'start': 1718, 'end': 1720, 'name_key': 'state.sweden.ruler.ulryka_eleonora'},
+                       {'start': 1720, 'end': 1751, 'name_key': 'state.sweden.ruler.fryderyk_i'},
+                       {'start': 1751, 'end': 1771, 'name_key': 'state.sweden.ruler.adolf_fryderyk'},
+                       {'start': 1771, 'end': 1792, 'name_key': 'state.sweden.ruler.gustaw_iii'},
+                       {'start': 1792, 'end': 1809, 'name_key': 'state.sweden.ruler.gustaw_iv_adolf'}],
+            'bonus_key': 'state.sweden.bonus',
+            'name_key': 'state.sweden.name',
+            'name': 'state.sweden.name'},
+ 'denmark': {'food': 1.4,
+             'rulers': [{'start': 1481, 'end': 1513, 'name_key': 'state.denmark.ruler.jan_oldenburnski'},
+                        {'start': 1513, 'end': 1523, 'name_key': 'state.denmark.ruler.krystian_ii'},
+                        {'start': 1523, 'end': 1533, 'name_key': 'state.denmark.ruler.fryderyk_i'},
+                        {'start': 1533, 'end': 1534, 'name_key': 'state.denmark.ruler.interregnum'},
+                        {'start': 1534, 'end': 1559, 'name_key': 'state.denmark.ruler.krystian_iii'},
+                        {'start': 1559, 'end': 1588, 'name_key': 'state.denmark.ruler.fryderyk_ii'},
+                        {'start': 1588, 'end': 1648, 'name_key': 'state.denmark.ruler.krystian_iv'},
+                        {'start': 1648, 'end': 1670, 'name_key': 'state.denmark.ruler.fryderyk_iii'},
+                        {'start': 1670, 'end': 1699, 'name_key': 'state.denmark.ruler.krystian_v'},
+                        {'start': 1699, 'end': 1730, 'name_key': 'state.denmark.ruler.fryderyk_iv'},
+                        {'start': 1730, 'end': 1746, 'name_key': 'state.denmark.ruler.krystian_vi'},
+                        {'start': 1746, 'end': 1766, 'name_key': 'state.denmark.ruler.fryderyk_v'},
+                        {'start': 1766, 'end': 1808, 'name_key': 'state.denmark.ruler.krystian_vii'}],
+             'bonus_key': 'state.denmark.bonus',
+             'name_key': 'state.denmark.name',
+             'name': 'state.denmark.name'},
+ 'venice': {'trade': 0.2,
+            'rulers': [{'start': 1486, 'end': 1501, 'name_key': 'state.venice.ruler.agostino_barbarigo'},
+                       {'start': 1501, 'end': 1521, 'name_key': 'state.venice.ruler.leonardo_loredan'},
+                       {'start': 1521, 'end': 1523, 'name_key': 'state.venice.ruler.antonio_grimani'},
+                       {'start': 1523, 'end': 1538, 'name_key': 'state.venice.ruler.andrea_gritti'},
+                       {'start': 1538, 'end': 1545, 'name_key': 'state.venice.ruler.pietro_lando'},
+                       {'start': 1545, 'end': 1553, 'name_key': 'state.venice.ruler.francesco_donato'},
+                       {'start': 1553, 'end': 1554, 'name_key': 'state.venice.ruler.marcantonio_trivisan'},
+                       {'start': 1554, 'end': 1556, 'name_key': 'state.venice.ruler.francesco_venier'},
+                       {'start': 1556, 'end': 1559, 'name_key': 'state.venice.ruler.lorenzo_priuli'},
+                       {'start': 1559, 'end': 1567, 'name_key': 'state.venice.ruler.girolamo_priuli'},
+                       {'start': 1567, 'end': 1570, 'name_key': 'state.venice.ruler.pietro_loredan'},
+                       {'start': 1570, 'end': 1577, 'name_key': 'state.venice.ruler.alvise_i_mocenigo'},
+                       {'start': 1577, 'end': 1578, 'name_key': 'state.venice.ruler.sebastiano_venier'},
+                       {'start': 1578, 'end': 1585, 'name_key': 'state.venice.ruler.nicolo_da_ponte'},
+                       {'start': 1585, 'end': 1595, 'name_key': 'state.venice.ruler.pasquale_cicogna'},
+                       {'start': 1595, 'end': 1605, 'name_key': 'state.venice.ruler.marino_grimani'},
+                       {'start': 1606, 'end': 1612, 'name_key': 'state.venice.ruler.leonardo_donato'},
+                       {'start': 1612, 'end': 1615, 'name_key': 'state.venice.ruler.marcantonio_memmo'},
+                       {'start': 1615, 'end': 1618, 'name_key': 'state.venice.ruler.giovanni_bembo'},
+                       {'start': 1618, 'end': 1618, 'name_key': 'state.venice.ruler.nicolo_donato'},
+                       {'start': 1618, 'end': 1623, 'name_key': 'state.venice.ruler.antonio_priuli'},
+                       {'start': 1623, 'end': 1624, 'name_key': 'state.venice.ruler.francesco_contarini'},
+                       {'start': 1625, 'end': 1629, 'name_key': 'state.venice.ruler.giovanni_i_cornaro'},
+                       {'start': 1630, 'end': 1631, 'name_key': 'state.venice.ruler.nicolo_contarini'},
+                       {'start': 1631, 'end': 1646, 'name_key': 'state.venice.ruler.francesco_erizzo'},
+                       {'start': 1646, 'end': 1655, 'name_key': 'state.venice.ruler.francesco_molin'},
+                       {'start': 1655, 'end': 1656, 'name_key': 'state.venice.ruler.carlo_contarini'},
+                       {'start': 1656, 'end': 1656, 'name_key': 'state.venice.ruler.francesco_cornaro'},
+                       {'start': 1656, 'end': 1658, 'name_key': 'state.venice.ruler.bertuccio_valier'},
+                       {'start': 1658, 'end': 1659, 'name_key': 'state.venice.ruler.giovanni_pesaro'},
+                       {'start': 1659, 'end': 1675, 'name_key': 'state.venice.ruler.domenico_ii_contarini'},
+                       {'start': 1675, 'end': 1676, 'name_key': 'state.venice.ruler.nicolo_sagredo'},
+                       {'start': 1676, 'end': 1684, 'name_key': 'state.venice.ruler.alvise_contarini'},
+                       {'start': 1684, 'end': 1688, 'name_key': 'state.venice.ruler.marcantonio_giustinian'},
+                       {'start': 1688, 'end': 1694, 'name_key': 'state.venice.ruler.francesco_morosini'},
+                       {'start': 1694, 'end': 1700, 'name_key': 'state.venice.ruler.sylwester_valier'},
+                       {'start': 1700, 'end': 1709, 'name_key': 'state.venice.ruler.alvise_ii_mocenigo'},
+                       {'start': 1709, 'end': 1722, 'name_key': 'state.venice.ruler.giovanni_ii_cornaro'},
+                       {'start': 1722, 'end': 1732, 'name_key': 'state.venice.ruler.alvise_iii_mocenigo'},
+                       {'start': 1732, 'end': 1735, 'name_key': 'state.venice.ruler.carlo_ruzzini'},
+                       {'start': 1735, 'end': 1741, 'name_key': 'state.venice.ruler.alvise_pisani'},
+                       {'start': 1741, 'end': 1752, 'name_key': 'state.venice.ruler.pietro_grimani'},
+                       {'start': 1752, 'end': 1762, 'name_key': 'state.venice.ruler.francesco_loredan'},
+                       {'start': 1762, 'end': 1763, 'name_key': 'state.venice.ruler.marco_foscarini'},
+                       {'start': 1763, 'end': 1779, 'name_key': 'state.venice.ruler.alvise_iv_mocenigo'},
+                       {'start': 1779, 'end': 1789, 'name_key': 'state.venice.ruler.paolo_renier'},
+                       {'start': 1789, 'end': 1797, 'name_key': 'state.venice.ruler.ludovico_manin'}],
+            'bonus_key': 'state.venice.bonus',
+            'name_key': 'state.venice.name',
+            'name': 'state.venice.name'},
+ 'genoa': {'mine': 1.2,
+           'rulers': [{'start': 1478, 'end': 1483, 'name_key': 'state.genoa.ruler.battista_fregoso'},
+                      {'start': 1483, 'end': 1488, 'name_key': 'state.genoa.ruler.paolo_fregoso'},
+                      {'start': 1499, 'end': 1512, 'name_key': 'state.genoa.ruler.ludwik_xii_francji'},
+                      {'start': 1513, 'end': 1515, 'name_key': 'state.genoa.ruler.ottaviano_fregoso'},
+                      {'start': 1522, 'end': 1527, 'name_key': 'state.genoa.ruler.antoni_adorno'},
+                      {'start': 1528, 'end': 1531, 'name_key': 'state.genoa.ruler.teodoro_trivulzio'},
+                      {'start': 1528, 'end': 1560, 'name_key': 'state.genoa.ruler.andrea_doria_nieformalny'},
+                      {'start': 1561, 'end': 1573, 'name_key': 'state.genoa.ruler.giovanni_battista_lascaris'},
+                      {'start': 1573, 'end': 1575, 'name_key': 'state.genoa.ruler.gianandrea_giustiniani'},
+                      {'start': 1581, 'end': 1583, 'name_key': 'state.genoa.ruler.ambrogio_di_negro'},
+                      {'start': 1583, 'end': 1607, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1607, 'end': 1609, 'name_key': 'state.genoa.ruler.giovanni_battista_cattaneo'},
+                      {'start': 1609, 'end': 1611, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1611, 'end': 1613, 'name_key': 'state.genoa.ruler.giulio_della_torre'},
+                      {'start': 1613, 'end': 1621, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1621, 'end': 1623, 'name_key': 'state.genoa.ruler.pietro_de_franchi'},
+                      {'start': 1623, 'end': 1625, 'name_key': 'state.genoa.ruler.federico_de_franchi'},
+                      {'start': 1627, 'end': 1629, 'name_key': 'state.genoa.ruler.giovanni_luca_chiavari'},
+                      {'start': 1629, 'end': 1631, 'name_key': 'state.genoa.ruler.andrea_spinola'},
+                      {'start': 1631, 'end': 1633, 'name_key': 'state.genoa.ruler.leonardo_della_torre'},
+                      {'start': 1635, 'end': 1637, 'name_key': 'state.genoa.ruler.giovanni_francesco_brignole'},
+                      {'start': 1637, 'end': 1639, 'name_key': 'state.genoa.ruler.agostino_pallavicini'},
+                      {'start': 1639, 'end': 1675, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1675, 'end': 1677, 'name_key': 'state.genoa.ruler.giovanni_battista_durazzo'},
+                      {'start': 1677, 'end': 1715, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1715, 'end': 1717, 'name_key': 'state.genoa.ruler.francesco_maria_imperiale'},
+                      {'start': 1717, 'end': 1727, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1727, 'end': 1729, 'name_key': 'state.genoa.ruler.giuseppe_maria_imperiale'},
+                      {'start': 1729, 'end': 1761, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1761, 'end': 1763, 'name_key': 'state.genoa.ruler.domenico_invrea'},
+                      {'start': 1763, 'end': 1787, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1787, 'end': 1789, 'name_key': 'state.genoa.ruler.rodolfo_emilio_brignole'},
+                      {'start': 1789, 'end': 1791, 'name_key': 'state.genoa.ruler.republika_genui_kolejni_dozowie'},
+                      {'start': 1791, 'end': 1795, 'name_key': 'state.genoa.ruler.alviso_lomellini'},
+                      {'start': 1795, 'end': 1797, 'name_key': 'state.genoa.ruler.giacomo_maria_brignole'}],
+           'bonus_key': 'state.genoa.bonus',
+           'name_key': 'state.genoa.name',
+           'name': 'state.genoa.name'},
+ 'poland': {'pop_start': 10,
+            'rulers': [{'start': 1447, 'end': 1492, 'name_key': 'state.poland.ruler.kazimierz_iv_jagiellonczyk'},
+                       {'start': 1492, 'end': 1501, 'name_key': 'state.poland.ruler.jan_i_olbracht'},
+                       {'start': 1501, 'end': 1506, 'name_key': 'state.poland.ruler.aleksander_jagiellonczyk'},
+                       {'start': 1506, 'end': 1548, 'name_key': 'state.poland.ruler.zygmunt_i_stary'},
+                       {'start': 1548, 'end': 1572, 'name_key': 'state.poland.ruler.zygmunt_ii_august'},
+                       {'start': 1573, 'end': 1574, 'name_key': 'state.poland.ruler.henryk_walezy'},
+                       {'start': 1576, 'end': 1586, 'name_key': 'state.poland.ruler.stefan_batory'},
+                       {'start': 1587, 'end': 1632, 'name_key': 'state.poland.ruler.zygmunt_iii_waza'},
+                       {'start': 1632, 'end': 1648, 'name_key': 'state.poland.ruler.wadysaw_iv_waza'},
+                       {'start': 1648, 'end': 1668, 'name_key': 'state.poland.ruler.jan_ii_kazimierz_waza'},
+                       {'start': 1669, 'end': 1673, 'name_key': 'state.poland.ruler.micha_korybut_wisniowiecki'},
+                       {'start': 1674, 'end': 1696, 'name_key': 'state.poland.ruler.jan_iii_sobieski'},
+                       {'start': 1697, 'end': 1706, 'name_key': 'state.poland.ruler.august_ii_mocny'},
+                       {'start': 1704, 'end': 1709, 'name_key': 'state.poland.ruler.stanisaw_leszczynski'},
+                       {'start': 1709, 'end': 1733, 'name_key': 'state.poland.ruler.august_ii_mocny'},
+                       {'start': 1733, 'end': 1736, 'name_key': 'state.poland.ruler.stanisaw_leszczynski'},
+                       {'start': 1733, 'end': 1763, 'name_key': 'state.poland.ruler.august_iii_sas'},
+                       {'start': 1764, 'end': 1795, 'name_key': 'state.poland.ruler.stanisaw_august_poniatowski'}],
+            'bonus_key': 'state.poland.bonus',
+            'name_key': 'state.poland.name',
+            'name': 'state.poland.name'},
+ 'brandenburg': {'steel': 1.5,
+                 'rulers': [{'start': 1415, 'end': 1440, 'name_key': 'state.brandenburg.ruler.fryderyk_i'},
+                            {'start': 1440, 'end': 1470, 'name_key': 'state.brandenburg.ruler.fryderyk_ii_zelazny_zab'},
+                            {'start': 1470, 'end': 1486, 'name_key': 'state.brandenburg.ruler.albrecht_iii_achilles'},
+                            {'start': 1486, 'end': 1499, 'name_key': 'state.brandenburg.ruler.jan_cicero'},
+                            {'start': 1499, 'end': 1535, 'name_key': 'state.brandenburg.ruler.joachim_i_nestor'},
+                            {'start': 1535, 'end': 1571, 'name_key': 'state.brandenburg.ruler.joachim_ii_hektor'},
+                            {'start': 1571, 'end': 1598, 'name_key': 'state.brandenburg.ruler.jan_jerzy'},
+                            {'start': 1598, 'end': 1608, 'name_key': 'state.brandenburg.ruler.joachim_fryderyk'},
+                            {'start': 1608, 'end': 1619, 'name_key': 'state.brandenburg.ruler.jan_zygmunt'},
+                            {'start': 1619, 'end': 1640, 'name_key': 'state.brandenburg.ruler.jerzy_wilhelm'},
+                            {'start': 1640,
+                             'end': 1688,
+                             'name_key': 'state.brandenburg.ruler.fryderyk_wilhelm_wielki_elektor'},
+                            {'start': 1688, 'end': 1713, 'name_key': 'state.brandenburg.ruler.fryderyk_iii'},
+                            {'start': 1713, 'end': 1740, 'name_key': 'state.brandenburg.ruler.fryderyk_wilhelm_i'},
+                            {'start': 1740, 'end': 1786, 'name_key': 'state.brandenburg.ruler.fryderyk_ii_wielki'},
+                            {'start': 1786, 'end': 1797, 'name_key': 'state.brandenburg.ruler.fryderyk_wilhelm_ii'}],
+                 'bonus_key': 'state.brandenburg.bonus',
+                 'name_key': 'state.brandenburg.name',
+                 'name': 'state.brandenburg.name'}}
 
-# ============== BUDYNKI ==============
-# === BUDYNKI ===
-BUILDINGS = {
+BUILDINGS = {'namiot': {'base_cost': {'skóry': 10, 'żelazo': 5},
+            'build_time': 1,
+            'base_workers': 0,
+            'capacity': 4,
+            'allowed_terrain': ['osada', 'dzielnica'],
+            'requires_settlement': True,
+            'upgrades': [{'cost': {'drewno': 40, 'żelazo': 5},
+                          'build_time': 7,
+                          'capacity': 6,
+                          'name_key': 'building.namiot.upgrade.chata'},
+                         {'cost': {'drewno': 80, 'żelazo': 10, 'stal': 5, 'skóry': 5},
+                          'build_time': 21,
+                          'capacity': 10,
+                          'name_key': 'building.namiot.upgrade.dom'},
+                         {'cost': {'drewno': 120, 'żelazo': 15, 'stal': 10, 'ubrania': 10},
+                          'build_time': 60,
+                          'capacity': 15,
+                          'name_key': 'building.namiot.upgrade.dworek'}],
+            'name_key': 'building.namiot.name'},
+ 'drwalnia': {'base_cost': {'drewno': 20},
+              'build_time': 5,
+              'base_workers': 2,
+              'allowed_terrain': ['las'],
+              'base_prod': {'drewno': 2},
+              'upgrades': [{'cost': {'drewno': 40, 'żelazo': 10},
+                            'build_time': 14,
+                            'prod': {'drewno': 3},
+                            'workers': 3,
+                            'name_key': 'building.drwalnia.upgrade.tartak_reczny'},
+                           {'cost': {'stal': 30, 'żelazo': 20},
+                            'build_time': 24,
+                            'prod': {'drewno': 4},
+                            'workers': 4,
+                            'name_key': 'building.drwalnia.upgrade.tartak_parowy'},
+                           {'cost': {'stal': 60, 'cukier': 10},
+                            'build_time': 40,
+                            'prod': {'drewno': 5},
+                            'workers': 5,
+                            'name_key': 'building.drwalnia.upgrade.przemysowy_kompleks_drzewny'}],
+              'name_key': 'building.drwalnia.name'},
+ 'pole_uprawne': {'base_cost': {'drewno': 15},
+                  'build_time': 4,
+                  'base_workers': 2,
+                  'allowed_terrain': ['pole'],
+                  'base_prod': {'żywność': 1.5},
+                  'upgrades': [{'cost': {'drewno': 30},
+                                'build_time': 15,
+                                'prod': {'żywność': 2},
+                                'workers': 3,
+                                'name_key': 'building.pole_uprawne.upgrade.gospodarstwo_rolne'},
+                               {'cost': {'żelazo': 20, 'stal': 10},
+                                'build_time': 22,
+                                'prod': {'żywność': 2.5},
+                                'workers': 4,
+                                'name_key': 'building.pole_uprawne.upgrade.plantacja_zbozowa'},
+                               {'cost': {'stal': 40, 'cukier': 5},
+                                'build_time': 30,
+                                'prod': {'żywność': 3},
+                                'workers': 5,
+                                'name_key': 'building.pole_uprawne.upgrade.folwark_z_mynem'}],
+                  'name_key': 'building.pole_uprawne.name'},
+ 'obóz_myśliwski': {'base_cost': {'drewno': 25},
+                    'build_time': 6,
+                    'base_workers': 2,
+                    'allowed_terrain': ['las', 'pole'],
+                    'base_prod': {'skóry': 1, 'żywność': 1},
+                    'upgrades': [{'cost': {'drewno': 40, 'żelazo': 15},
+                                  'build_time': 10,
+                                  'prod': {'skóry': 1, 'żywność': 1},
+                                  'workers': 3,
+                                  'name_key': 'building.oboz_mysliwski.upgrade.stanica_owiecka'},
+                                 {'cost': {'stal': 30},
+                                  'build_time': 24,
+                                  'prod': {'skóry': 1.5, 'żywność': 1.5},
+                                  'workers': 4,
+                                  'name_key': 'building.oboz_mysliwski.upgrade.rezerwat_skorny'},
+                                 {'cost': {'stal': 50, 'cygara': 5},
+                                  'build_time': 35,
+                                  'prod': {'skóry': 2, 'żywność': 1.5},
+                                  'workers': 5,
+                                  'name_key': 'building.oboz_mysliwski.upgrade.kompania_futrzarska'}],
+                    'name_key': 'building.oboz_mysliwski.name'},
+ 'garbarnia_polowa': {'base_cost': {'drewno': 30, 'żelazo': 10},
+                      'build_time': 8,
+                      'base_workers': 2,
+                      'allowed_terrain': ['osada', 'dzielnica'],
+                      'requires_settlement': True,
+                      'consumes': {'skóry': 1},
+                      'base_prod': {'ubrania': 0.5},
+                      'upgrades': [{'cost': {'drewno': 50, 'stal': 15},
+                                    'build_time': 16,
+                                    'prod': {'ubrania': 0.6},
+                                    'workers': 3,
+                                    'name_key': 'building.garbarnia_polowa.upgrade.warsztat_krawiecki'},
+                                   {'cost': {'stal': 40, 'cukier': 10},
+                                    'build_time': 27,
+                                    'prod': {'ubrania': 0.8},
+                                    'workers': 4,
+                                    'name_key': 'building.garbarnia_polowa.upgrade.manufaktura_odziezowa'},
+                                   {'cost': {'stal': 80, 'cygara': 10},
+                                    'build_time': 45,
+                                    'prod': {'ubrania': 1},
+                                    'workers': 5,
+                                    'name_key': 'building.garbarnia_polowa.upgrade.fabryka_tekstyliow_kolonialnych'}],
+                      'name_key': 'building.garbarnia_polowa.name'},
+ 'ziołorośla': {'base_cost': {'drewno': 20},
+                'build_time': 5,
+                'base_workers': 2,
+                'allowed_terrain': ['pole', 'las'],
+                'base_prod': {'zioła': 1},
+                'upgrades': [{'cost': {'drewno': 35, 'żelazo': 10},
+                              'build_time': 13,
+                              'prod': {'zioła': 1.2},
+                              'workers': 3,
+                              'name_key': 'building.zioorosla.upgrade.ogrod_botaniczny'},
+                             {'cost': {'stal': 25},
+                              'build_time': 20,
+                              'prod': {'zioła': 1.4},
+                              'workers': 4,
+                              'name_key': 'building.zioorosla.upgrade.plantacja_zio_leczniczych'},
+                             {'cost': {'stal': 50, 'medykamenty': 5},
+                              'build_time': 43,
+                              'prod': {'zioła': 1.6},
+                              'workers': 5,
+                              'name_key': 'building.zioorosla.upgrade.instytut_etnobotaniki'}],
+                'name_key': 'building.zioorosla.name'},
+ 'ziołolecznica': {'base_cost': {'drewno': 40, 'żelazo': 15},
+                   'build_time': 10,
+                   'base_workers': 2,
+                   'allowed_terrain': ['osada', 'dzielnica'],
+                   'requires_settlement': True,
+                   'consumes': {'zioła': 1},
+                   'base_prod': {'medykamenty': 0.5},
+                   'upgrades': [{'cost': {'stal': 30},
+                                 'build_time': 14,
+                                 'prod': {'medykamenty': 0.6},
+                                 'workers': 3,
+                                 'name_key': 'building.zioolecznica.upgrade.apteka_kolonialna'},
+                                {'cost': {'stal': 50, 'cukier': 10},
+                                 'build_time': 20,
+                                 'prod': {'medykamenty': 0.8},
+                                 'workers': 4,
+                                 'name_key': 'building.zioolecznica.upgrade.laboratorium_farmaceutyczne'},
+                                {'cost': {'stal': 100, 'cygara': 15},
+                                 'build_time': 32,
+                                 'prod': {'medykamenty': 1},
+                                 'workers': 5,
+                                 'name_key': 'building.zioolecznica.upgrade.instytut_medycyny_tropikalnej'}],
+                   'name_key': 'building.zioolecznica.name'},
+ 'kopalnia': {'base_cost': {'drewno': 35, 'żelazo': 15},
+              'build_time': 12,
+              'base_workers': 3,
+              'base_prod': {'trzcina': 1},
+              'allowed_terrain': ['wzniesienia'],
+              'upgrades': [{'cost': {'stal': 30},
+                            'build_time': 16,
+                            'base_prod': {'trzcina': 1.2},
+                            'workers': 4,
+                            'name_key': 'building.kopalnia.upgrade.szyb_kopalniany'},
+                           {'cost': {'stal': 60, 'cukier': 5},
+                            'build_time': 24,
+                            'base_prod': {'trzcina': 1.4},
+                            'workers': 5,
+                            'name_key': 'building.kopalnia.upgrade.kopalnia_gebinowa'},
+                           {'cost': {'stal': 100, 'cygara': 10},
+                            'build_time': 35,
+                            'base_prod': {'trzcina': 1.6},
+                            'workers': 7,
+                            'name_key': 'building.kopalnia.upgrade.kombinat_gorniczy'}],
+              'name_key': 'building.kopalnia.name'},
+ 'kuźnia_polowa': {'base_cost': {'drewno': 50, 'żelazo': 20},
+                   'build_time': 14,
+                   'base_workers': 3,
+                   'requires_settlement': True,
+                   'allowed_terrain': ['osada', 'dzielnica'],
+                   'consumes': {'węgiel': 1, 'żelazo': 1},
+                   'base_prod': {'stal': 0.5},
+                   'upgrades': [{'cost': {'stal': 40},
+                                 'build_time': 18,
+                                 'prod': {'stal': 0.6},
+                                 'workers': 4,
+                                 'name_key': 'building.kuznia_polowa.upgrade.huta_surowki'},
+                                {'cost': {'stal': 80, 'cukier': 10},
+                                 'build_time': 25,
+                                 'prod': {'stal': 0.8},
+                                 'workers': 5,
+                                 'name_key': 'building.kuznia_polowa.upgrade.wielki_piec_martenowski'},
+                                {'cost': {'stal': 120, 'cygara': 15},
+                                 'build_time': 38,
+                                 'prod': {'stal': 1},
+                                 'workers': 6,
+                                 'name_key': 'building.kuznia_polowa.upgrade.huta_stali_siemens_martin'}],
+                   'name_key': 'building.kuznia_polowa.name'},
+ 'plantacja_trzciny': {'base_cost': {'drewno': 30},
+                       'build_time': 7,
+                       'base_workers': 3,
+                       'allowed_terrain': ['pole'],
+                       'base_prod': {'trzcina': 1},
+                       'upgrades': [{'cost': {'żelazo': 25},
+                                     'build_time': 12,
+                                     'prod': {'trzcina': 1.2},
+                                     'workers': 4,
+                                     'name_key': 'building.plantacja_trzciny.upgrade.hacienda_trzcinowa'},
+                                    {'cost': {'stal': 40},
+                                     'build_time': 20,
+                                     'prod': {'trzcina': 1.4},
+                                     'workers': 5,
+                                     'name_key': 'building.plantacja_trzciny.upgrade.latifundium_cukrowe'},
+                                    {'cost': {'stal': 80, 'cygara': 10},
+                                     'build_time': 30,
+                                     'prod': {'trzcina': 1.6},
+                                     'workers': 6,
+                                     'name_key': 'building.plantacja_trzciny.upgrade.korporacja_trzcinowa'}],
+                       'name_key': 'building.plantacja_trzciny.name'},
+ 'cukrownia_ręczna': {'base_cost': {'drewno': 45, 'żelazo': 20},
+                      'build_time': 12,
+                      'base_workers': 3,
+                      'allowed_terrain': ['osada', 'dzielnica'],
+                      'requires_settlement': True,
+                      'consumes': {'trzcina': 2},
+                      'base_prod': {'cukier': 0.5},
+                      'upgrades': [{'cost': {'stal': 40},
+                                    'build_time': 16,
+                                    'prod': {'cukier': 0.6},
+                                    'workers': 4,
+                                    'name_key': 'building.cukrownia_reczna.upgrade.rafineria_cukru'},
+                                   {'cost': {'stal': 70, 'cukier': 10},
+                                    'build_time': 24,
+                                    'prod': {'cukier': 0.7},
+                                    'workers': 5,
+                                    'name_key': 'building.cukrownia_reczna.upgrade.destylarnia_cukru_parowa'},
+                                   {'cost': {'stal': 110, 'cygara': 15},
+                                    'build_time': 36,
+                                    'prod': {'cukier': 0.8},
+                                    'workers': 6,
+                                    'name_key': 'building.cukrownia_reczna.upgrade.przemysowa_destylarnia_cukru'}],
+                      'name_key': 'building.cukrownia_reczna.name'},
+ 'plantacja_tytoniu': {'base_cost': {'drewno': 35},
+                       'build_time': 8,
+                       'base_workers': 3,
+                       'allowed_terrain': ['pole'],
+                       'base_prod': {'tytoń': 1},
+                       'upgrades': [{'cost': {'żelazo': 30},
+                                     'build_time': 13,
+                                     'prod': {'tytoń': 1.2},
+                                     'workers': 4,
+                                     'name_key': 'building.plantacja_tytoniu.upgrade.estancia_tytoniowa'},
+                                    {'cost': {'stal': 50},
+                                     'build_time': 20,
+                                     'prod': {'tytoń': 1.4},
+                                     'workers': 5,
+                                     'name_key': 'building.plantacja_tytoniu.upgrade.latifundium_tytoniowe'},
+                                    {'cost': {'stal': 90, 'cygara': 10},
+                                     'build_time': 32,
+                                     'prod': {'tytoń': 1.6},
+                                     'workers': 6,
+                                     'name_key': 'building.plantacja_tytoniu.upgrade.konsorcjum_tytoniowe'}],
+                       'name_key': 'building.plantacja_tytoniu.name'},
+ 'suszenie_tytoniu': {'base_cost': {'drewno': 50, 'żelazo': 25},
+                      'build_time': 14,
+                      'base_workers': 3,
+                      'requires_settlement': True,
+                      'consumes': {'tytoń': 1},
+                      'base_prod': {'cygara': 0.5},
+                      'allowed_terrain': ['osada', 'dzielnica'],
+                      'upgrades': [{'cost': {'stal': 45},
+                                    'build_time': 18,
+                                    'prod': {'cygara': 0.6},
+                                    'workers': 4,
+                                    'name_key': 'building.suszenie_tytoniu.upgrade.manufaktura_cygar'},
+                                   {'cost': {'stal': 80, 'cukier': 15},
+                                    'build_time': 26,
+                                    'prod': {'cygara': 0.7},
+                                    'workers': 5,
+                                    'name_key': 'building.suszenie_tytoniu.upgrade.fabryka_cygar_recznych'},
+                                   {'cost': {'stal': 130, 'cygara': 20},
+                                    'build_time': 40,
+                                    'prod': {'cygara': 0.8},
+                                    'workers': 6,
+                                    'name_key': 'building.suszenie_tytoniu.upgrade.fabryka_cygar_premium'}],
+                      'name_key': 'building.suszenie_tytoniu.name'},
+ 'przystań': {'base_cost': {'drewno': 60, 'żelazo': 30},
+              'build_time': 16,
+              'base_workers': 2,
+              'base_prod': {'żywność': 2},
+              'requires_adjacent_settlement': True,
+              'allowed_terrain': ['morze'],
+              'upgrades': [],
+              'name_key': 'building.przystan.name'},
+ 'dzielnica': {'base_cost': {'drewno': 120, 'żelazo': 60, 'stal': 20},
+               'build_time': 25,
+               'base_workers': 5,
+               'requires_adjacent_settlement': True,
+               'allowed_terrain': ['las', 'pole', 'wzniesienia'],
+               'upgrades': [],
+               'name_key': 'building.dzielnica.name'}}
 
-    # === MIESZKANIA ===
-    "namiot": {
-        "name": "Namiot", "base_cost": {"skóry": 10, "żelazo": 5}, "build_time": 1, "base_workers": 0, "capacity": 4,
-        "allowed_terrain": ["osada", "dzielnica"],
-        "requires_settlement": True,
-        "upgrades": [
-            {"name": "Chata", "cost": {"drewno": 40, "żelazo": 5}, "build_time": 7, "capacity": 6},
-            {"name": "Dom", "cost": {"drewno": 80, "żelazo": 10, "stal": 5, "skóry": 5}, "build_time": 21, "capacity": 10},
-            {"name": "Dworek", "cost": {"drewno": 120, "żelazo": 15, "stal": 10, "ubrania": 10}, "build_time": 60, "capacity": 15}
-        ]
-    },
-
-    # === DREWNO ===
-    "drwalnia": {
-        "name": "Drwalnia", "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
-        "allowed_terrain": ["las"], "base_prod": {"drewno": 2},
-        "upgrades": [
-            {"name": "Tartak ręczny", "cost": {"drewno": 40, "żelazo": 10}, "build_time": 14, "prod": {"drewno": 3}, "workers": 3},
-            {"name": "Tartak parowy", "cost": {"stal": 30, "żelazo": 20}, "build_time": 24, "prod": {"drewno": 4}, "workers": 4},
-            {"name": "Przemysłowy kompleks drzewny", "cost": {"stal": 60, "cukier": 10}, "build_time": 40, "prod": {"drewno": 5}, "workers": 5}
-        ]
-    },
-
-    # === ŻYWNOŚĆ ===
-    "pole_uprawne": {
-        "name": "Pole uprawne", "base_cost": {"drewno": 15}, "build_time": 4, "base_workers": 2,
-        "allowed_terrain": ["pole"], "base_prod": {"żywność": 1.5},
-        "upgrades": [
-            {"name": "Gospodarstwo rolne", "cost": {"drewno": 30}, "build_time": 15, "prod": {"żywność": 2}, "workers": 3},
-            {"name": "Plantacja zbożowa", "cost": {"żelazo": 20, "stal": 10}, "build_time": 22, "prod": {"żywność": 2.5}, "workers": 4},
-            {"name": "Folwark z młynem", "cost": {"stal": 40, "cukier": 5}, "build_time": 30, "prod": {"żywność": 3}, "workers": 5}
-        ]
-    },
-
-    # === SKÓRY → UBRANIA ===
-    "obóz_myśliwski": {
-        "name": "Obóz myśliwski", "base_cost": {"drewno": 25}, "build_time": 6, "base_workers": 2,
-        "allowed_terrain": ["las", "pole"], "base_prod": {"skóry": 1, "żywność": 1},
-        "upgrades": [
-            {"name": "Stanica łowiecka", "cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "prod": {"skóry": 1, "żywność": 1}, "workers": 3},
-            {"name": "Rezerwat skórny", "cost": {"stal": 30}, "build_time": 24, "prod": {"skóry": 1.5, "żywność": 1.5}, "workers": 4},
-            {"name": "Kompania futrzarska", "cost": {"stal": 50, "cygara": 5}, "build_time": 35, "prod": {"skóry": 2, "żywność": 1.5}, "workers": 5}
-        ]
-    },
-    "garbarnia_polowa": {
-        "name": "Garbarnia polowa", "base_cost": {"drewno": 30, "żelazo": 10}, "build_time": 8, "base_workers": 2,
-        "allowed_terrain": ["osada", "dzielnica"],
-        "requires_settlement": True, "consumes": {"skóry": 1}, "base_prod": {"ubrania": 0.5},
-        "upgrades": [
-            {"name": "Warsztat krawiecki", "cost": {"drewno": 50, "stal": 15}, "build_time": 16, "prod": {"ubrania": 0.6}, "workers": 3},
-            {"name": "Manufaktura odzieżowa", "cost": {"stal": 40, "cukier": 10}, "build_time": 27, "prod": {"ubrania": 0.8}, "workers": 4},
-            {"name": "Fabryka tekstyliów kolonialnych", "cost": {"stal": 80, "cygara": 10}, "build_time": 45, "prod": {"ubrania": 1}, "workers": 5}
-        ]
-    },
-
-    # === ZIOŁA → MEDYKAMENTY ===
-    "ziołorośla": {
-        "name": "Ziołorośla", "base_cost": {"drewno": 20}, "build_time": 5, "base_workers": 2,
-        "allowed_terrain": ["pole", "las"], "base_prod": {"zioła": 1},
-        "upgrades": [
-            {"name": "Ogród botaniczny", "cost": {"drewno": 35, "żelazo": 10}, "build_time": 13, "prod": {"zioła": 1.2}, "workers": 3},
-            {"name": "Plantacja ziół leczniczych", "cost": {"stal": 25}, "build_time": 20, "prod": {"zioła": 1.4}, "workers": 4},
-            {"name": "Instytut Etnobotaniki", "cost": {"stal": 50, "medykamenty": 5}, "build_time": 43, "prod": {"zioła": 1.6}, "workers": 5}
-        ]
-    },
-    "ziołolecznica": {
-        "name": "Ziołolecznica", "base_cost": {"drewno": 40, "żelazo": 15}, "build_time": 10, "base_workers": 2,
-        "allowed_terrain": ["osada", "dzielnica"],
-        "requires_settlement": True, "consumes": {"zioła": 1}, "base_prod": {"medykamenty": 0.5},
-        "upgrades": [
-            {"name": "Apteka kolonialna", "cost": {"stal": 30}, "build_time": 14, "prod": {"medykamenty": 0.6}, "workers": 3},
-            {"name": "Laboratorium farmaceutyczne", "cost": {"stal": 50, "cukier": 10}, "build_time": 20, "prod": {"medykamenty": 0.8}, "workers": 4},
-            {"name": "Instytut Medycyny Tropikalnej", "cost": {"stal": 100, "cygara": 15}, "build_time": 32, "prod": {"medykamenty": 1}, "workers": 5}
-        ]
-    },
-
-    # === UNIWERSALNA KOPALNIA (węgiel, żelazo, srebro, złoto) ===
-    "kopalnia": {
-        "name": "Kopalnia", "base_cost": {"drewno": 35, "żelazo": 15}, "build_time": 12, "base_workers": 3, "base_prod": {"trzcina": 1},
-        "allowed_terrain": ["wzniesienia"],
-        "upgrades": [
-            {"name": "Szyb kopalniany", "cost": {"stal": 30}, "build_time": 16, "base_prod": {"trzcina": 1.2}, "workers": 4},
-            {"name": "Kopalnia głębinowa", "cost": {"stal": 60, "cukier": 5}, "build_time": 24, "base_prod": {"trzcina": 1.4}, "workers": 5},
-            {"name": "Kombinat górniczy", "cost": {"stal": 100, "cygara": 10}, "build_time": 35, "base_prod": {"trzcina": 1.6}, "workers": 7}
-        ]
-    },
-
-    # === STAL (przetwarzanie węgla + żelaza) ===
-    "kuźnia_polowa": {
-        "name": "Kuźnia polowa", "base_cost": {"drewno": 50, "żelazo": 20}, "build_time": 14, "base_workers": 3,
-        "requires_settlement": True,
-        "allowed_terrain": ["osada", "dzielnica"],
-        "consumes": {"węgiel": 1, "żelazo": 1}, "base_prod": {"stal": 0.5},
-        "upgrades": [
-            {"name": "Huta surówki", "cost": {"stal": 40}, "build_time": 18, "prod": {"stal": 0.6}, "workers": 4},
-            {"name": "Wielki piec martenowski", "cost": {"stal": 80, "cukier": 10}, "build_time": 25, "prod": {"stal": 0.8}, "workers": 5},
-            {"name": "Huta stali Siemens-Martin", "cost": {"stal": 120, "cygara": 15}, "build_time": 38, "prod": {"stal": 1}, "workers": 6}
-        ]
-    },
-
-    # === TRZCINA → CUKIER ===
-    "plantacja_trzciny": {
-        "name": "Plantacja trzciny", "base_cost": {"drewno": 30}, "build_time": 7, "base_workers": 3,
-        "allowed_terrain": ["pole"], "base_prod": {"trzcina": 1},
-        "upgrades": [
-            {"name": "Hacienda trzcinowa", "cost": {"żelazo": 25}, "build_time": 12, "prod": {"trzcina": 1.2}, "workers": 4},
-            {"name": "Latifundium cukrowe", "cost": {"stal": 40}, "build_time": 20, "prod": {"trzcina": 1.4}, "workers": 5},
-            {"name": "Korporacja trzcinowa", "cost": {"stal": 80, "cygara": 10}, "build_time": 30, "prod": {"trzcina": 1.6}, "workers": 6}
-        ]
-    },
-    "cukrownia_ręczna": {
-        "name": "Cukrownia ręczna", "base_cost": {"drewno": 45, "żelazo": 20}, "build_time": 12, "base_workers": 3,
-        "allowed_terrain": ["osada", "dzielnica"],
-        "requires_settlement": True, "consumes": {"trzcina": 2}, "base_prod": {"cukier": 0.5},
-        "upgrades": [
-            {"name": "Rafineria cukru", "cost": {"stal": 40}, "build_time": 16, "prod": {"cukier": 0.6}, "workers": 4},
-            {"name": "Destylarnia cukru parowa", "cost": {"stal": 70, "cukier": 10}, "build_time": 24, "prod": {"cukier": 0.7}, "workers": 5},
-            {"name": "Przemysłowa destylarnia cukru", "cost": {"stal": 110, "cygara": 15}, "build_time": 36, "prod": {"cukier": 0.8}, "workers": 6}
-        ]
-    },
-
-    # === TYTOŃ → CYGARA ===
-    "plantacja_tytoniu": {
-        "name": "Plantacja tytoniu", "base_cost": {"drewno": 35}, "build_time": 8, "base_workers": 3,
-        "allowed_terrain": ["pole"], "base_prod": {"tytoń": 1},
-        "upgrades": [
-            {"name": "Estancia tytoniowa", "cost": {"żelazo": 30}, "build_time": 13, "prod": {"tytoń": 1.2}, "workers": 4},
-            {"name": "Latifundium tytoniowe", "cost": {"stal": 50}, "build_time": 20, "prod": {"tytoń": 1.4}, "workers": 5},
-            {"name": "Konsorcjum tytoniowe", "cost": {"stal": 90, "cygara": 10}, "build_time": 32, "prod": {"tytoń": 1.6}, "workers": 6}
-        ]
-    },
-    "suszenie_tytoniu": {
-        "name": "Suszarnia tytoniu", "base_cost": {"drewno": 50, "żelazo": 25}, "build_time": 14, "base_workers": 3,
-        "requires_settlement": True, "consumes": {"tytoń": 1}, "base_prod": {"cygara": 0.5},
-        "allowed_terrain": ["osada", "dzielnica"],
-        "upgrades": [
-            {"name": "Manufaktura cygar", "cost": {"stal": 45}, "build_time": 18, "prod": {"cygara": 0.6}, "workers": 4},
-            {"name": "Fabryka cygar ręcznych", "cost": {"stal": 80, "cukier": 15}, "build_time": 26, "prod": {"cygara": 0.7}, "workers": 5},
-            {"name": "Fabryka cygar premium", "cost": {"stal": 130, "cygara": 20}, "build_time": 40, "prod": {"cygara": 0.8}, "workers": 6}
-        ]
-    },
-
-    # === PRZYSTAŃ ===
-    "przystań": {
-        "name": "Przystań", "base_cost": {"drewno": 60, "żelazo": 30}, "build_time": 16, "base_workers": 2, "base_prod": {"żywność": 2},
-        "requires_adjacent_settlement": True,
-        "allowed_terrain": ["morze"],
-        "upgrades": []
-    },
-
-    # === DZIELNICA ===
-    "dzielnica": {
-        "name": "Dzielnica", "base_cost": {"drewno": 120, "żelazo": 60, "stal": 20}, "build_time": 25, "base_workers": 5,
-        "requires_adjacent_settlement": True,
-        "allowed_terrain": ["las", "pole", "wzniesienia"],
-        "upgrades": []
-    }
-}
-
-# ============== INNE ==============
 RESOURCES = ["żywność", "drewno", "skóry", "ubrania", "zioła", "medykamenty", "żelazo", "stal", "trzcina", "cukier", "tytoń", "cygara", "węgiel", "srebro", "złoto", "dukaty"]
 MINE_RESOURCES = ["węgiel", "żelazo", "srebro", "złoto"]
 MINE_COLORS = {"węgiel": "#000000", "żelazo": "#8B0000", "srebro": "#C0C0C0", "złoto": "#FFD700"}
@@ -542,211 +598,97 @@ MINE_NAMES = {"węgiel": "Węgiel", "żelazo": "Żelazo", "srebro": "Srebro", "z
 BASE_COLORS = {"morze": "#0066CC", "pole": "#CCCC99", "las": "#228B22", "wzniesienia": "#8B4513", "osada": "#000000", "dzielnica": "#333333"}
 
 # Misje królewskie
-ROYAL_MISSIONS = [
-    {
-        "name": "Drewno na stocznie",
-        "base": {"drewno": 300},
-        "desc": (
-            "Z woli naszej królewskiej rozkazuję, by niezwłocznie zgromadzono znaczny zapas drewna "
-            "na budowę okrętów i umocnień morskich. Stocznie Korony mają pracować dniem i nocą, "
-            "a brak surowca uznam za zaniedbanie przeciw interesowi państwa. "
-            "Dostarcz drewno w pełnej mierze, aby flota mogła wyruszyć na wody bez zwłoki."
-        )
-    },
-    {
-        "name": "Żywność dla armii",
-        "base": {"żywność": 300, "skóry": 50},
-        "desc": (
-            "Rozkazuję zaopatrzyć wojska nasze w żywność, aby żaden żołnierz nie cierpiał głodu na służbie. "
-            "Ponadto skóry dostarczysz na oporządzenie i naprawę rynsztunku, by armia trwała w gotowości. "
-            "Niech zapasy dotrą na czas, gdyż od nich zależy siła marszu i zwycięstwo w polu."
-        )
-    },
-    {
-        "name": "Żelazo na działa",
-        "base": {"żelazo": 100},
-        "desc": (
-            "Zlecam i nakazuję przygotować żelazo na odlew dział oraz naprawę arsenału. "
-            "Twierdze i okręty muszą mieć broń pewną, a kuźnie królewskie nie mogą stać bez pracy. "
-            "Nie zwlekaj z dostawą, bo od niej zależy bezpieczeństwo granic i chwała naszego oręża."
-        )
-    },
-    {
-        "name": "Stal dla floty",
-        "base": {"stal": 60, "drewno": 200},
-        "desc": (
-            "Niechaj zostanie dostarczona stal na okucia, kotwice i uzbrojenie floty, "
-            "a drewno na maszty i poszycie okrętów. Rozkaz ten ma pierwszeństwo przed innymi sprawami, "
-            "gdyż morza wymagają siły i porządku. "
-            "Dopełnij powinności bez wymówek, aby bandery nasze panowały na szlakach handlu."
-        )
-    },
-    {
-        "name": "Cukier dla dworu",
-        "base": {"cukier": 200},
-        "desc": (
-            "Rozkazuję, by cukier w należnej ilości trafił do królewskich spiżarni. "
-            "Dwór mój ma być godnie podejmowany podczas uczt i poselstw, "
-            "bo wspaniałość stołu świadczy o potędze Korony. "
-            "Niech dostawa będzie czysta i pełna, bez zaniżania miary."
-        )
-    },
-    {
-        "name": "Prezent dla króla",
-        "base": {"złoto": 50, "cygara": 30, "srebro": 100},
-        "desc": (
-            "Nakazuję przygotować dary godne majestatu: złoto i srebro na skarbiec oraz cygara "
-            "na użytek dworu i ważnych gości. "
-            "Niechaj przybywają poselstwa widzą, iż Królestwo w dostatku stoi "
-            "i splendoru mu nie brakuje. "
-            "Dostarcz wszystko bez uszczerbku i w stanie nienagannym."
-        )
-    },
-    {
-        "name": "Złoto dla skarbu",
-        "base": {"złoto": 100},
-        "desc": (
-            "Rozkazuję zasilić skarb królewski złotem, aby państwo mogło prowadzić sprawy "
-            "wojny i pokoju wedle naszej woli. "
-            "Moneta musi płynąć do skarbca bez zwłoki, bo na niej wspiera się ład i prawo. "
-            "Kto ociąga się z dostawą, ten szkodzi Koronie."
-        )
-    },
-    {
-        "name": "Wsparcie dla armii",
-        "base": {"stal": 50, "ubrania": 100},
-        "desc": (
-            "Stal przeznaczysz na broń, pancerze i naprawę rynsztunku, "
-            "zaś ubrania na odzienie dla wojsk stojących w polu. "
-            "Rozkazuję uczynić to natychmiast, by armia nie traciła ducha ani sprawności. "
-            "Niech żołnierz nosi barwy Króla z dumą i trwa w gotowości do marszu."
-        )
-    },
-    {
-        "name": "Zapomoga na choroby",
-        "base": {"zioła": 50, "medykamenty": 70},
-        "desc": (
-            "Nakazuję zebrać zioła i medykamenty, aby zaraza i choroby nie pustoszyły naszych ludzi. "
-            "Lekarze królewscy mają otrzymać środki do leczenia natychmiast, "
-            "bo zdrowie poddanych jest siłą państwa. "
-            "Niech dostawa będzie rzetelna, a jakość nieskazitelna."
-        )
-    },
-    {
-        "name": "Wsparcie kościoła",
-        "base": {"złoto": 30, "srebro": 50, "żywność": 100},
-        "desc": (
-            "Rozkazuję przekazać złoto i srebro na potrzeby świątyń oraz żywność "
-            "dla zakonów i przytułków pod opieką Kościoła. "
-            "Wiara i porządek duchowy wspierają tron, "
-            "a kto lekceważy ten nakaz, ten sprzeciwia się ładowi Królestwa. "
-            "Wykonaj polecenie bez ociągania."
-        )
-    },
-]
+ROYAL_MISSIONS = [{'base': {'drewno': 300},
+  'name_key': 'royal_mission.drewno_na_stocznie.name',
+  'desc_key': 'royal_mission.drewno_na_stocznie.desc'},
+ {'base': {'żywność': 300, 'skóry': 50},
+  'name_key': 'royal_mission.zywnosc_dla_armii.name',
+  'desc_key': 'royal_mission.zywnosc_dla_armii.desc'},
+ {'base': {'żelazo': 100},
+  'name_key': 'royal_mission.zelazo_na_dziaa.name',
+  'desc_key': 'royal_mission.zelazo_na_dziaa.desc'},
+ {'base': {'stal': 60, 'drewno': 200},
+  'name_key': 'royal_mission.stal_dla_floty.name',
+  'desc_key': 'royal_mission.stal_dla_floty.desc'},
+ {'base': {'cukier': 200},
+  'name_key': 'royal_mission.cukier_dla_dworu.name',
+  'desc_key': 'royal_mission.cukier_dla_dworu.desc'},
+ {'base': {'złoto': 50, 'cygara': 30, 'srebro': 100},
+  'name_key': 'royal_mission.prezent_dla_krola.name',
+  'desc_key': 'royal_mission.prezent_dla_krola.desc'},
+ {'base': {'złoto': 100},
+  'name_key': 'royal_mission.zoto_dla_skarbu.name',
+  'desc_key': 'royal_mission.zoto_dla_skarbu.desc'},
+ {'base': {'stal': 50, 'ubrania': 100},
+  'name_key': 'royal_mission.wsparcie_dla_armii.name',
+  'desc_key': 'royal_mission.wsparcie_dla_armii.desc'},
+ {'base': {'zioła': 50, 'medykamenty': 70},
+  'name_key': 'royal_mission.zapomoga_na_choroby.name',
+  'desc_key': 'royal_mission.zapomoga_na_choroby.desc'},
+ {'base': {'złoto': 30, 'srebro': 50, 'żywność': 100},
+  'name_key': 'royal_mission.wsparcie_koscioa.name',
+  'desc_key': 'royal_mission.wsparcie_koscioa.desc'}]
 
-NATIVE_MISSIONS_DETAILS = [
-    {
-        "name": "Pomoc w polowaniu na bizony",
-        "base": {"żywność": 30, "żelazo": 20},
-        "desc": "Wielkie stada bizonów oddalają się od naszych ziem. Daj nam mięsa i skór, żeby nasze kobiety i dzieci nie głodowały tej zimy, zanim biali myśliwi zabiorą nam wszystko."
-    },
-    {
-        "name": "Duchy przodków są głodne",
-        "base": {"cukier": 20, "cygara": 20, "żywność": 30},
-        "desc": "Duchy naszych ojców wędrują niespokojne. Przynieś słodkie kryształy, wonny dym i mięso, by ucieszyć je przy ognisku. Wtedy będą chronić także ciebie, bladą twarzy."
-    },
-    {
-        "name": "Biali z północy palą wioski",
-        "base": {"stal": 15, "żelazo": 30},
-        "desc": "Ludzie w niebieskich mundurach palą nasze tipi i zabijają nasze konie. Daj nam żelazo i stal, byśmy mogli zrobić włócznie i topory godne wojowników. Razem przepędzimy tych psów."
-    },
-    {
-        "name": "Szaman potrzebuje ziół",
-        "base": {"zioła": 30, "medykamenty": 20},
-        "desc": "Stary Szaman widział we śnie święte zioła rosnące tylko tam, gdzie biali kopią żółte kamienie. Przynieś je szybko, bo duchy chorób krążą nad naszymi dziećmi."
-    },
-    {
-        "name": "Kobiety chcą pięknych tkanin od bladych twarzy",
-        "base": {"ubrania": 60},
-        "desc": "Nasze squaw słyszały o miękkich, kolorowych szmatach, które noszą kobiety z wielkich łodzi. Przynieś je, a nasze kobiety będą śpiewać pieśni o tobie przy ogniu."
-    },
-    {
-        "name": "Wodzowi ukradli konia",
-        "base": {"żelazo": 20, "stal": 15},
-        "desc": "Dalecy kuzyni z południa ukradli najlepszego ogiera Wielkiego Wodza. Musimy zrobić nowe podkowy i lance. Daj nam żelazo, a kiedy odzyskamy konie, podzielimy się z tobą łupami z bladych osadników."
-    },
-    {
-        "name": "Wielki Duch pragnie błyszczących kamieni",
-        "base": {"złoto": 10, "srebro": 30},
-        "desc": "We śnie Wielki Duch pokazał nam błyszczące kamienie z twoich skrzyń. Przynieś je nam jako dar, a my pokażemy ci ścieżki, gdzie ziemia rodzi jeszcze więcej – zanim inne blade twarzy zabiorą wszystko."
-    },
-    {
-        "name": "Rum i cukier na święto tańca słońca",
-        "base": {"cukier": 20, "żywność": 50},
-        "desc": "Za trzy księżyce będzie wielkie święto tańca słońca. Potrzebujemy słodkiego ognia z trzciny i dużo jedzenia. Przynieś – będziemy tańczyć i modlić się także za twoją osadę."
-    },
-    {
-        "name": "Dzieci chorują",
-        "base": {"medykamenty": 15, "zioła": 30, "żywność": 40},
-        "desc": "Czarna ospa przyszła z waszych statków i zabiera nasze dzieci. Słyszymy, że masz gorzkie wody, które leczą. Daj je nam szybko, bo inaczej duchy zemsty przyjdą także do twoich chat."
-    },
-    {
-        "name": "Handel",
-        "base": {"ubrania": 30, "żelazo": 20, "cygara": 15},
-        "desc": "Mamy najlepsze bobrze i lisie futra na całym wybrzeżu. Ale najpierw udowodnij, że nie jesteś taki jak inne blade twarze, co kradną i kłamią. Przynieś dary – wtedy otworzymy nasze spichlerze."
-    },
-    {
-        "name": "Susza na preriach",
-        "base": {"żywność": 50, "zioła": 20},
-        "desc": "Słońce wypiło wodę z rzek, a trawa stała się żółta jak stare kości. Nasze dzieci płaczą z głodu. Daj nam mięsa i ziół, byśmy przetrwali, zanim przyjdą deszcze."
-    },
-    {
-        "name": "Wojownicy wracają z wyprawy",
-        "base": {"żywność": 40, "cygara": 20},
-        "desc": "Nasi wojownicy wracają z dalekiej ścieżki. Musimy przywitać ich jedzeniem i wonnym dymem, żeby duchy widziały, że plemię jest silne. Przynieś dary, a usłyszysz pieśni o odwadze."
-    },
-    {
-        "name": "Naprawa palisady wioski",
-        "base": {"drewno": 60, "żelazo": 15},
-        "desc": "Wilki i ludzie z północy krążą przy naszych szałasach. Nasza palisada spróchniała. Daj nam drewno i żelazo na ostrza, a nieprzyjaciel nie wejdzie do naszych domów."
-    },
-    {
-        "name": "Nowe tipi na zimę",
-        "base": {"skóry": 40, "ubrania": 20},
-        "desc": "Zima będzie długa i twarda. Potrzebujemy skór na nowe tipi i ciepłych tkanin dla kobiet. Przynieś je nam, a nasze ogniska będą płonąć także dla ciebie."
-    },
-    {
-        "name": "Święto nadania imienia nowemu wodzowi",
-        "base": {"złoto": 5, "srebro": 15, "cygara": 10},
-        "desc": "Stary Wódz odszedł za rzekę duchów. Nowy musi otrzymać dary, by jego słowo było mocne. Przynieś błyszczące kamienie i dym – wtedy będziesz przyjacielem naszego rodu."
-    },
-    {
-        "name": "Końskie stado potrzebuje podków",
-        "base": {"stal": 20, "żelazo": 20},
-        "desc": "Nasze konie są szybkie jak wiatr, ale ich kopyta kruszą się na kamieniach. Daj nam stal i żelazo na podkowy, a nasi zwiadowcy będą strzec twoich granic."
-    },
-    {
-        "name": "Zaginieni myśliwi",
-        "base": {"żywność": 30, "medykamenty": 15},
-        "desc": "Trzech młodych myśliwych nie wróciło z lasu. Boimy się, że ranił ich niedźwiedź lub zbłądzili we mgle. Daj nam jedzenie i gorzkie leki, byśmy mogli ich szukać i uleczyć."
-    },
-    {
-        "name": "Srebro na groby przodków",
-        "base": {"srebro": 30, "zioła": 10},
-        "desc": "Chcemy wznieść krąg kamieni dla naszych przodków, by duchy miały gdzie spocząć. Daj nam srebro i święte zioła, a ich błogosławieństwo spadnie też na twoją osadę."
-    },
-    {
-        "name": "Biali handlarze oszukali naszych starszych",
-        "base": {"dukaty": 40, "ubrania": 25},
-        "desc": "Inne blade twarze dały nam stare szmaty i fałszywe obietnice. Pokaż, że jesteś inny. Przynieś prawdziwe tkaniny i srebrne monety, a odzyskasz nasze zaufanie."
-    },
-    {
-        "name": "Ogień w świętym gaju",
-        "base": {"drewno": 50, "żywność": 20, "cygara": 10},
-        "desc": "W świętym gaju zabrakło drewna na ognie, które odpędzają złe duchy. Potrzebujemy też mięsa i dymu na modlitwy. Przynieś to, a Szaman wypowie nad tobą dobre słowa."
-    }
-]
+NATIVE_MISSIONS_DETAILS = [{'base': {'żywność': 30, 'żelazo': 20},
+  'name_key': 'native_mission.pomoc_w_polowaniu_na_bizony.name',
+  'desc_key': 'native_mission.pomoc_w_polowaniu_na_bizony.desc'},
+ {'base': {'cukier': 20, 'cygara': 20, 'żywność': 30},
+  'name_key': 'native_mission.duchy_przodkow_sa_godne.name',
+  'desc_key': 'native_mission.duchy_przodkow_sa_godne.desc'},
+ {'base': {'stal': 15, 'żelazo': 30},
+  'name_key': 'native_mission.biali_z_ponocy_pala_wioski.name',
+  'desc_key': 'native_mission.biali_z_ponocy_pala_wioski.desc'},
+ {'base': {'zioła': 30, 'medykamenty': 20},
+  'name_key': 'native_mission.szaman_potrzebuje_zio.name',
+  'desc_key': 'native_mission.szaman_potrzebuje_zio.desc'},
+ {'base': {'ubrania': 60},
+  'name_key': 'native_mission.kobiety_chca_pieknych_tkanin_od_bladych_twarzy.name',
+  'desc_key': 'native_mission.kobiety_chca_pieknych_tkanin_od_bladych_twarzy.desc'},
+ {'base': {'żelazo': 20, 'stal': 15},
+  'name_key': 'native_mission.wodzowi_ukradli_konia.name',
+  'desc_key': 'native_mission.wodzowi_ukradli_konia.desc'},
+ {'base': {'złoto': 10, 'srebro': 30},
+  'name_key': 'native_mission.wielki_duch_pragnie_byszczacych_kamieni.name',
+  'desc_key': 'native_mission.wielki_duch_pragnie_byszczacych_kamieni.desc'},
+ {'base': {'cukier': 20, 'żywność': 50},
+  'name_key': 'native_mission.rum_i_cukier_na_swieto_tanca_sonca.name',
+  'desc_key': 'native_mission.rum_i_cukier_na_swieto_tanca_sonca.desc'},
+ {'base': {'medykamenty': 15, 'zioła': 30, 'żywność': 40},
+  'name_key': 'native_mission.dzieci_choruja.name',
+  'desc_key': 'native_mission.dzieci_choruja.desc'},
+ {'base': {'ubrania': 30, 'żelazo': 20, 'cygara': 15},
+  'name_key': 'native_mission.handel.name',
+  'desc_key': 'native_mission.handel.desc'},
+ {'base': {'żywność': 50, 'zioła': 20},
+  'name_key': 'native_mission.susza_na_preriach.name',
+  'desc_key': 'native_mission.susza_na_preriach.desc'},
+ {'base': {'żywność': 40, 'cygara': 20},
+  'name_key': 'native_mission.wojownicy_wracaja_z_wyprawy.name',
+  'desc_key': 'native_mission.wojownicy_wracaja_z_wyprawy.desc'},
+ {'base': {'drewno': 60, 'żelazo': 15},
+  'name_key': 'native_mission.naprawa_palisady_wioski.name',
+  'desc_key': 'native_mission.naprawa_palisady_wioski.desc'},
+ {'base': {'skóry': 40, 'ubrania': 20},
+  'name_key': 'native_mission.nowe_tipi_na_zime.name',
+  'desc_key': 'native_mission.nowe_tipi_na_zime.desc'},
+ {'base': {'złoto': 5, 'srebro': 15, 'cygara': 10},
+  'name_key': 'native_mission.swieto_nadania_imienia_nowemu_wodzowi.name',
+  'desc_key': 'native_mission.swieto_nadania_imienia_nowemu_wodzowi.desc'},
+ {'base': {'stal': 20, 'żelazo': 20},
+  'name_key': 'native_mission.konskie_stado_potrzebuje_podkow.name',
+  'desc_key': 'native_mission.konskie_stado_potrzebuje_podkow.desc'},
+ {'base': {'żywność': 30, 'medykamenty': 15},
+  'name_key': 'native_mission.zaginieni_mysliwi.name',
+  'desc_key': 'native_mission.zaginieni_mysliwi.desc'},
+ {'base': {'srebro': 30, 'zioła': 10},
+  'name_key': 'native_mission.srebro_na_groby_przodkow.name',
+  'desc_key': 'native_mission.srebro_na_groby_przodkow.desc'},
+ {'base': {'dukaty': 40, 'ubrania': 25},
+  'name_key': 'native_mission.biali_handlarze_oszukali_naszych_starszych.name',
+  'desc_key': 'native_mission.biali_handlarze_oszukali_naszych_starszych.desc'},
+ {'base': {'drewno': 50, 'żywność': 20, 'cygara': 10},
+  'name_key': 'native_mission.ogien_w_swietym_gaju.name',
+  'desc_key': 'native_mission.ogien_w_swietym_gaju.desc'}]
 
 EUROPE_PRICES = {
     "żywność": 1, "drewno": 8, "skóry": 4, "ubrania": 15,
@@ -783,3 +725,28 @@ NATIVE_RESOURCE_ECONOMY = {
     "złoto":     {"daily_prod": (0.5, 1),   "stockpile": (30, 50)},
     # itd., tylko dla tych zasobów które realnie mają sens u plemion
 }
+# Mapping internal resource ids to localization keys
+RESOURCE_DISPLAY_KEYS = {'cukier': 'res.sugar',
+ 'cygara': 'res.cigars',
+ 'drewno': 'res.wood',
+ 'dukaty': 'res.ducats',
+ 'medykamenty': 'res.meds',
+ 'skóry': 'res.skins',
+ 'srebro': 'res.silver',
+ 'stal': 'res.steel',
+ 'trzcina': 'res.cane',
+ 'tytoń': 'res.tobacco',
+ 'ubrania': 'res.clothes',
+ 'węgiel': 'res.coal',
+ 'zioła': 'res.herbs',
+ 'złoto': 'res.gold',
+ 'żelazo': 'res.iron',
+ 'żywność': 'res.food'}
+
+# Mapping tribe internal names to localization keys
+TRIBE_DISPLAY_KEYS = {'Apacze': 'tribe.apache',
+ 'Czirokezi': 'tribe.cherokee',
+ 'Huronowie': 'tribe.huron',
+ 'Irokezi': 'tribe.iroquois',
+ 'Krikowie': 'tribe.creek',
+ 'Siuksowie': 'tribe.sioux'}

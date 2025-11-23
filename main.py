@@ -1,5 +1,8 @@
 # main.py
+LANG = "de"  # "en" / "de"
+
 import os
+from localization import Localization
 import sys
 import tkinter as tk
 from ctypes import windll
@@ -33,7 +36,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Imperium Kolonii")
+        self.loc = Localization(LANG, locales_dir=os.path.join(os.path.dirname(__file__), "loc"))
+        self.root.title(self.loc.t("app.title"))
         self.root.geometry("1600x1000")
 
         # Załaduj wszystkie czcionki
@@ -137,7 +141,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.europe_trade_value = {s: 0 for s in self.europe_relations}
         self.trade_reputation_threshold = 1000
 
-        if self.state == "Francja":
+        if self.state == "france":
             self.trade_reputation_threshold += STATES[self.state]["reputation_threshold"]
 
         self.map_size = MAP_SIZE
@@ -180,7 +184,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.update_log_display()
 
     def center_window(self, win):
-        """Wyśrodkuj podane okno na ekranie."""
+        self.loc.t("dev.center_window_comment")
         win.update_idletasks()
         w = win.winfo_width()
         h = win.winfo_height()
@@ -213,7 +217,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             pygame.mixer.music.set_volume(0.2)  # głośność 0.0–1.0
             pygame.mixer.music.play(loops=1)  # -1 = gra w pętli bez końca
         except Exception as e:
-            print("Nie udało się załadować muzyki:", e)
+            print(self.loc.t("error.music_load_failed"), e)
 
         # tu od razu przygotujemy dźwięki efektów
         self.sounds = {}
@@ -222,7 +226,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.sounds["ship_arrived"] = pygame.mixer.Sound(self.resource_path("sounds/anchor.wav"))
             self.sounds["building_done"] = pygame.mixer.Sound(self.resource_path("sounds/building_done.wav"))
         except Exception as e:
-            print("Nie udało się załadować któregoś z efektów dźwiękowych:", e)
+            print(self.loc.t("error.sound_load_failed"), e)
 
     def play_sound(self, name):
         snd = getattr(self, "sounds", {}).get(name)
@@ -255,7 +259,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         real_cost = cost.copy()
 
         # --- BONUS HOLANDII ---
-        if self.state == "Holandia":
+        if self.state == "netherlands":
             mult = STATES[self.state].get("build_cost", 1)
             real_cost = {r: int(a * mult) for r, a in real_cost.items()}
 
@@ -266,7 +270,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         real_cost = cost.copy()
 
         # --- BONUS HOLANDII ---
-        if self.state == "Holandia":
+        if self.state == "netherlands":
             mult = STATES[self.state].get("build_cost", 1)
             real_cost = {r: int(a * mult) for r, a in real_cost.items()}
 
@@ -277,24 +281,28 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
     def get_monarch(self):
         for monarch in STATES[self.state]['rulers']:
             if self.current_date.year > monarch["start"] and self.current_date.year <= monarch["end"]:
-                if self.current_monarch != monarch["name"]:
+                if self.current_monarch != monarch.get("name_key"):
                     self.europe_relations[self.state] = 50
-                return monarch["name"]
-        return "Nieznany"
+                self.current_monarch = monarch.get("name_key")
+                return self.loc.t(monarch.get("name_key"), default="Nieznany")
+        return self.loc.t("state.unknown_ruler")
 
 
     # === Start gry ===
     def start_screen(self):
 
         def update_state_bonus(*_):
-            state = self.state_var.get()
+
+            display = self.state_var.get()
+            state = self.state_display_to_id.get(display, display)
             data = STATES.get(state, {})
-            bonus_text = data.get("bonus")
+            bonus_key = data.get('bonus_key')
+            bonus_text = self.loc.t(bonus_key, default='') if bonus_key else ''
 
             if bonus_text:
-                self.state_bonus_var.set(f"Bonus: {bonus_text}")
+                self.state_bonus_var.set(self.loc.t('ui.state_bonus_prefix', default='Bonus: {bonus}', bonus=bonus_text))
             else:
-                self.state_bonus_var.set("Bonus: brak unikalnego efektu.")
+                self.state_bonus_var.set(self.loc.t('ui.state_bonus_none', default='Bonus: brak unikalnego efektu.'))
 
         # wyczyść stare widgety
         for w in self.root.winfo_children():
@@ -314,7 +322,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             bg_label = tk.Label(self.root, image=self.start_bg_image)
             bg_label.place(x=0, y=0, relwidth=1, relheight=1)
         except Exception as e:
-            print("Nie udało się załadować tła colony.jpg:", e)
+            print(self.loc.t("error.background_load_failed"), e)
             bg_label = tk.Label(self.root)
             bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
@@ -322,14 +330,18 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         frame = ttk.Frame(bg_label, padding=20)
         frame.pack(expand=True)
 
-        ttk.Label(frame, text="IMPERIUM KOLONII", font=self.title_font).pack(pady=20)
-        ttk.Label(frame, text="Wybierz państwo:", font=self.ui_font).pack(pady=10)
+        ttk.Label(frame, text=self.loc.t("app.title"), font=self.title_font).pack(pady=20)
+        ttk.Label(frame, text=self.loc.t("ui.choose_state"), font=self.ui_font).pack(pady=10)
 
-        self.state_var = tk.StringVar(value="Portugalia")
+        # Build localized state display list (display -> state_id)
+        self.state_display_to_id = {self.loc.t(STATES[s]['name_key'], default=s): s for s in STATES}
+        self.state_id_to_display = {v: k for k, v in self.state_display_to_id.items()}
+        state_display_values = list(self.state_display_to_id.keys())
+        self.state_var = tk.StringVar(value=state_display_values[0])
         combo = ttk.Combobox(
             frame,
             textvariable=self.state_var,
-            values=list(STATES.keys()),
+            values=state_display_values,
             state="readonly",
             width=30
         )
@@ -360,15 +372,15 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         update_state_bonus()
 
         # === Wybór wielkości mapy ===
-        ttk.Label(frame, text="Wielkość mapy:", font=self.ui_font).pack(pady=(10, 5))
+        ttk.Label(frame, text=self.loc.t("ui.map_size"), font=self.ui_font).pack(pady=(10, 5))
 
-        self.map_size_var = tk.StringVar(value="średnia (normalna)")
+        self.map_size_var = tk.StringVar(value=self.loc.t("difficulty.map.medium", default=self.loc.t("difficulty.map.medium")))
         map_size_options = [
-            "najmniejsza (bardzo trudna)",
-            "mała (trudna)",
-            "średnia (normalna)",
-            "duża (łatwa)",
-            "najwięsza (bardzo łatwa)",
+            self.loc.t("difficulty.map.tiny"),
+            self.loc.t("difficulty.map.small"),
+            self.loc.t("difficulty.map.medium"),
+            self.loc.t("difficulty.map.large"),
+            self.loc.t("difficulty.map.huge"),
         ]
 
         map_size_combo = ttk.Combobox(
@@ -380,17 +392,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         )
         map_size_combo.pack(pady=5)
 
-        ttk.Label(frame, text="Długość gry (liczba misji królewskich):", font=self.ui_font).pack(pady=(15, 5))
+        ttk.Label(frame, text=self.loc.t("ui.game_length"), font=self.ui_font).pack(pady=(15, 5))
 
         self.game_length_var = tk.StringVar(value="zwykla")
 
         lengths = [
-            ("Błyskawiczna (15 misji)", "blyskawiczna"),
-            ("Szybka (30 misji)", "szybka"),
-            ("Zwykła (50 misji)", "zwykla"),
-            ("Długa (70 misji)", "dluga"),
-            ("Maraton (100 misji)", "maraton"),
-            ("Epicka (150 misji)", "epicka"),
+            (self.loc.t("difficulty.length.flash"), "blyskawiczna"),
+            (self.loc.t("difficulty.length.fast"), "szybka"),
+            (self.loc.t("difficulty.length.normal"), "zwykla"),
+            (self.loc.t("difficulty.length.long"), "dluga"),
+            (self.loc.t("difficulty.length.marathon"), "maraton"),
+            (self.loc.t("difficulty.length.epic"), "epicka"),
         ]
 
         length_frame = ttk.Frame(frame)
@@ -404,12 +416,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 value=val
             ).pack(anchor="w")
 
-        ttk.Button(frame, text="Losowe Państwo", style="ColonialSecondary.TButton", command=lambda: self.state_var.set(random.choice(list(STATES.keys())))).pack(pady=10)
-        start_btn = ttk.Button(frame, text="Rozpocznij", style="Colonial.TButton", command=self.start_game)
+        ttk.Button(frame, text=self.loc.t("ui.random_state"), style="ColonialSecondary.TButton", command=lambda: self.state_var.set(random.choice(state_display_values))).pack(pady=10)
+        start_btn = ttk.Button(frame, text=self.loc.t("ui.start_game"), style="Colonial.TButton", command=self.start_game)
         start_btn.pack(pady=10)
 
     def start_game(self):
-        self.state = self.state_var.get()
+        display = self.state_var.get()
+        self.state = self.state_display_to_id.get(display, display)
         if not self.state: return
 
         # ustawienie długości gry na podstawie wyboru na ekranie startowym
@@ -429,20 +442,28 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.europe_relations[self.state] = 50
 
         self.location = random.choice([
-            "Zatoka Meksykańska", "Wybrzeże Brazylii", "Karaiby", "Floryda", "Patagonia",
-            "Zatoka Hudsona", "Wyspy Bahama", "Delta Orinoko", "Wybrzeże Peru", "Nowy Jork"
+            self.loc.t("map.gulf_of_mexico"),
+            self.loc.t("map.brazil_coast"),
+            self.loc.t("map.caribbean"),
+            self.loc.t("map.florida"),
+            self.loc.t("map.patagonia"),
+            self.loc.t("map.hudson_bay"),
+            self.loc.t("map.bahamas"),
+            self.loc.t("map.orinoco_delta"),
+            self.loc.t("map.peru_coast"),
+            self.loc.t("map.new_york")
         ])
         if "pop_start" in STATES[self.state]:
             self.people += STATES[self.state]["pop_start"]
 
         # wybór wielkości mapy z ekranu startowego
-        size_label = getattr(self, "map_size_var", None).get() if hasattr(self, "map_size_var") else "średnia (normalna)"
+        size_label = getattr(self, "map_size_var", None).get() if hasattr(self, "map_size_var") else self.loc.t("difficulty.map.medium")
         size_map = {
-            "najmniejsza (bardzo trudna)": 6,
-            "mała (trudna)": 7,
-            "średnia (normalna)": 8,
-            "duża (łatwa)": 9,
-            "najwięsza (bardzo łatwa)": 10,
+            self.loc.t("difficulty.map.tiny"): 6,
+            self.loc.t("difficulty.map.small"): 7,
+            self.loc.t("difficulty.map.medium"): 8,
+            self.loc.t("difficulty.map.large"): 9,
+            self.loc.t("difficulty.map.huge"): 10,
         }
 
         self.map_size = size_map.get(size_label, 8)
@@ -466,12 +487,12 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.main_game()
 
     def order_colonists(self, state):
-        """Zamówienie nowych kolonistów z Europy – nowe okno z wyborem metody i sliderem."""
+        self.loc.t("tooltip.order_colonists")
         if state != self.state:
-            self.log("Możesz zamawiać kolonistów tylko od własnego państwa!", "red")
+            self.log(self.loc.t("ui.order_only_own_state"), "red")
             return
 
-        win = self.create_window(f"Zamów kolonistów z Europy")
+        win = self.create_window(self.loc.t("ui.order_colonists"))
         win.geometry("460x420")
         win.resizable(False, False)
 
@@ -482,13 +503,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         small_info_bold = (info_font[0], max(10, info_font[1] - 2), "bold")
 
         # === Nagłówek ===
-        ttk.Label(win, text="Zamów nowych kolonistów", font=title_font).pack(pady=12)
+        ttk.Label(win, text=self.loc.t("ui.order_new_colonists"), font=title_font).pack(pady=12)
 
         # === Liczba kolonistów (slider) ===
         amount_frame = ttk.Frame(win)
         amount_frame.pack(pady=8, fill="x", padx=20)
 
-        ttk.Label(amount_frame, text="Liczba kolonistów:", font=small_info_bold).pack(anchor="w")
+        ttk.Label(amount_frame, text=self.loc.t("ui.num_colonists"), font=small_info_bold).pack(anchor="w")
 
         amount_var = tk.IntVar(value=1)
         slider = tk.Scale(
@@ -511,21 +532,21 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         amount_var.trace_add("write", update_amount_label)
 
         # === Wybór metody płatności ===
-        method_frame = ttk.LabelFrame(win, text="Metoda płatności")
+        method_frame = ttk.LabelFrame(win, text=self.loc.t("ui.payment_method"))
         method_frame.pack(pady=10, fill="x", padx=20)
 
         payment_method = tk.StringVar(value="reputation")
 
         ttk.Radiobutton(
             method_frame,
-            text="Reputacją (10 za osobę)",
+            text=self.loc.t("ui.pay_with_reputation"),
             variable=payment_method,
             value="reputation"
         ).pack(anchor="w", padx=10, pady=3)
 
         ttk.Radiobutton(
             method_frame,
-            text="Dukatami (1000 za osobę)",
+            text=self.loc.t("ui.pay_with_ducats"),
             variable=payment_method,
             value="gold"
         ).pack(anchor="w", padx=10, pady=3)
@@ -534,8 +555,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         cost_frame = ttk.Frame(win)
         cost_frame.pack(pady=10, fill="x", padx=20)
 
-        rep_cost_lbl = ttk.Label(cost_frame, text="Koszt reputacji: 10", foreground="purple", font=small_info_font)
-        gold_cost_lbl = ttk.Label(cost_frame, text="Koszt dukatów: 1000", foreground="gold", font=small_info_font)
+        rep_cost_lbl = ttk.Label(cost_frame, text=self.loc.t("ui.rep_cost_fixed"), foreground="purple", font=small_info_font)
+        gold_cost_lbl = ttk.Label(cost_frame, text=self.loc.t("ui.ducat_cost_fixed"), foreground="gold", font=small_info_font)
         rep_cost_lbl.pack(anchor="w")
         gold_cost_lbl.pack(anchor="w")
 
@@ -543,8 +564,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             amt = amount_var.get()
             rep_cost = amt * 10
             gold_cost = amt * 1000
-            rep_cost_lbl.config(text=f"Koszt reputacji: {rep_cost}")
-            gold_cost_lbl.config(text=f"Koszt dukatów: {gold_cost}")
+            rep_cost_lbl.config(text=self.loc.t("ui.rep_cost"))
+            gold_cost_lbl.config(text=self.loc.t("ui.ducat_cost"))
 
             # Podświetl aktywną metodę
             if payment_method.get() == "reputation":
@@ -568,17 +589,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             if method == "reputation":
                 cost = amt * 10
                 if self.europe_relations[self.state] < cost:
-                    self.log(f"Za mało reputacji! Potrzeba: {cost}", "red")
+                    self.log(self.loc.t("ui.not_enough_reputation"), "red")
                     return
                 self.europe_relations[self.state] -= cost
-                self.log(f"Zamówiono {amt} kolonistów – zapłacono {cost} reputacji.", "purple")
+                self.log(self.loc.t("log.colonists_ordered_rep"), "purple")
             else:
                 cost = amt * 1000
                 if self.resources["dukaty"] < cost:
-                    self.log(f"Za mało dukatów! Potrzeba: {cost}", "red")
+                    self.log(self.loc.t("ui.not_enough_ducats"), "red")
                     return
                 self.resources["dukaty"] -= cost
-                self.log(f"Zamówiono {amt} kolonistów – zapłacono {cost} dukatów.", "purple")
+                self.log(self.loc.t("log.colonists_ordered_ducats"), "purple")
 
             # Znajdź statek do transportu
             target_ship = None
@@ -604,11 +625,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             a_eu, a_back, load, st, pend = current
             self.ships[target_ship] = (a_eu, a_back, load, st, pend + amt)
 
-            self.log(f"Kolonizatorzy ({amt}) zostaną dostarzeni najbliższym statkiem z Europy.", "blue")
+            self.log(self.loc.t("log.colonists_delivered_soon"), "blue")
             win.destroy()
 
-        ttk.Button(btn_frame, text="Zamów", command=confirm_order).pack(side="left", padx=8)
-        ttk.Button(btn_frame, text="Anuluj", command=win.destroy).pack(side="left", padx=8)
+        ttk.Button(btn_frame, text=self.loc.t("ui.order"), command=confirm_order).pack(side="left", padx=8)
+        ttk.Button(btn_frame, text=self.loc.t("ui.cancel"), command=win.destroy).pack(side="left", padx=8)
 
         # wyśrodkuj okno zamawiania kolonistów
         self.center_window(win)
@@ -661,7 +682,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         self.mission_counter_label = ttk.Label(
             top,
-            text=f"Misje królewskie wykonane: {self.completed_missions} / {self.missions_to_win}",
+            text=self.loc.t("ui.royal_missions_completed", completed=self.completed_missions, to_win=self.missions_to_win),
             font=( (self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
                    self.top_info_font[1] if hasattr(self, "top_info_font") else 12,
                    "bold"),
@@ -669,7 +690,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         )
         self.mission_counter_label.grid(row=0, column=2, sticky="e", padx=10)
         Tooltip(self.mission_counter_label,
-                "Misje królewskie pojawiają się raz na trzy miesiące \nwraz z powrótem statku flagowego z Europy.\nMożna mieć tylko jedną misję na raz.")
+                self.loc.t("tooltip.royal_missions_info"))
 
         # ========== WIERSZ 2 – Ludzie / Wolni, wyśrodkowane ==========
 
@@ -686,7 +707,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.work_lbl = ttk.Label(self.pop_frame, text="Wolni: 0", font=base_font)
         self.work_lbl.pack(side="left", padx=5)
 
-        res_frame = ttk.LabelFrame(self.root, text="Surowce")
+        res_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.resources"))
         res_frame.pack(fill="x", padx=10, pady=5)
 
         # etykiety stanu surowców oraz ich zmiany netto / dzień
@@ -704,7 +725,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             cell = ttk.Frame(row)
             cell.pack(side="left", padx=2)
 
-            lbl = ttk.Label(cell, text=f"{res}: {int(self.resources[res])}", width=14, anchor="w")
+            res_key = RESOURCE_DISPLAY_KEYS.get(res, res)
+            res_name = self.loc.t(res_key, default=res)
+            lbl = ttk.Label(cell, text=f"{res_name}: {int(self.resources[res])}", width=14, anchor="w")
             lbl.pack(side="left")
             self.res_labels[res] = lbl
 
@@ -712,7 +735,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             net_lbl.pack(side="left")
             self.res_net_labels[res] = net_lbl
 
-        build_frame = ttk.LabelFrame(self.root, text="Budynki")
+        build_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.buildings"))
         build_frame.pack(fill="x", padx=10, pady=5)
 
         build_inner = ttk.Frame(build_frame)
@@ -730,21 +753,21 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         action_frame.pack(fill="x", padx=10, pady=5)
 
         groups = [
-            [("Buduj", self.build_menu),
-             ("Ulepsz/Zdegraduj", self.show_upgrade_menu),
-             ("Zarządzaj ludźmi", self.manage_workers)],
+            [(self.loc.t("ui.build"), self.build_menu),
+             (self.loc.t("ui.upgrade"), self.show_upgrade_menu),
+             (self.loc.t("ui.manage_people"), self.manage_workers)],
 
-            [("Statki", self.ships_menu),
-             ("Handel z Indianami", self.native_menu),
-             ("Dyplomacja", self.diplomacy_menu)],
+            [(self.loc.t("ui.ships"), self.ships_menu),
+             (self.loc.t("ui.native_trade"), self.native_menu),
+             (self.loc.t("ui.diplomacy"), self.diplomacy_menu)],
 
-            [("Eksploruj", self.explore),
-             ("Mapa", self.show_map),
-             ("Misje", self.show_missions_overview)],
+            [(self.loc.t("ui.explore"), self.explore),
+             (self.loc.t("ui.map"), self.show_map),
+             (self.loc.t("ui.missions"), self.show_missions_overview)],
 
-            [("Czekaj 1 dzień", lambda: self.advance_date(1)),
-             ("Czekaj 3 dni", lambda: self.advance_date(3)),
-             ("Czekaj 7 dni", lambda: self.advance_date(7))],
+            [(self.loc.t("ui.wait_1_day"), lambda: self.advance_date(1)),
+             (self.loc.t("ui.wait_3_days"), lambda: self.advance_date(3)),
+             (self.loc.t("ui.wait_7_days"), lambda: self.advance_date(7))],
         ]
 
         # 3 kolumny dzielące szerokość *dla całego panelu* (uniform => te same w każdej linii)
@@ -768,7 +791,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
             current_row += 1
 
-        log_frame = ttk.LabelFrame(self.root, text="Dziennik");
+        log_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.journal"));
         log_frame.pack(fill="both", expand=True, padx=10, pady=5)
         self.log_text = tk.Text(
             log_frame,
@@ -789,13 +812,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.log_text.tag_configure("spacing", spacing3=4)
         self.log_text.tag_add("spacing", "1.0", "end")
 
-        self.log("Kolonizacja rozpoczęta!", "green")
-        self.log(f'{self.get_monarch()}, nasz monarcha wydał rozkaz, byś prowadził kolonię i ją rozbudował dla dobra naszego Imperium.', "green")
+        self.log(self.loc.t("log.colonization_started"), "green")
+        self.log(self.loc.t("story.monarch_order", monarch=self.get_monarch()), "green")
         self.update_display()
 
     def advance_date(self, days):
         # if days > 1 and self.free_workers() < 1:
-        #     self.log("Za mało ludzi!", "red")
+        #     self.log(self.loc.t("ui.not_enough_people"), "red")
         #     return
 
         # Liczymy dzień po dniu, ale śmierć z głodu losujemy zbiorczo
@@ -831,7 +854,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # przeludnienie — tylko log (brak wypędzania)
         if max_excess > 0:
             self.log(
-                f"Przeludnienie: {max_excess} osób ponad limit mieszkaniowy – zużywają +50% pożywienia.",
+                self.loc.t("log.overcrowding"),
                 "orange"
             )
 
@@ -848,7 +871,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             if deaths > 0:
                 self.people -= deaths
                 self.log(
-                    f"GŁÓD przez {starvation_days} dni! Zmarło {deaths} kolonistów.",
+                    self.loc.t("log.starvation"),
                     "red"
                 )
 
@@ -896,14 +919,14 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
             # --- czas i misje ---
             self.current_date += timedelta(days=1)
-            # self.log(f"Minęło {days} dni.", "blue")
+            # self.log(self.loc.t("log.days_passed"), "blue")
 
             # sprawdź misje indiańskie każdego dnia
             self.try_generate_native_missions()
 
         if self.current_mission is not None and self.current_mission[0] < self.current_date:
             end, req, sent, diff, text, idx = self.current_mission
-            self.log("MISJA KRÓLEWSKA NIE WYKONANA W TERMINIE! -reputacja", "red")
+            self.log(self.loc.t("log.royal_mission_failed"), "red")
             self.europe_relations[self.state] = max(0, self.europe_relations[self.state] - 10 * diff)
             self.current_mission = None
 
@@ -915,12 +938,14 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.pop_lbl.config(text=f"Ludzie: {self.people} / {cap}")
 
         Tooltip(self.pop_lbl,
-                "By zdobyć więcej ludzi musisz sprowadzić ich z Europy lub zintegrować lokalnych Indian.")
+                self.loc.t("tooltip.population"))
 
         self.work_lbl.config(text=f" | Wolni: {self.free_workers()}")
 
         for res, lbl in self.res_labels.items():
-            lbl.config(text=f"{res}: {int(self.resources[res])}")
+            res_key = RESOURCE_DISPLAY_KEYS.get(res, res)
+            res_name = self.loc.t(res_key, default=res)
+            lbl.config(text=f"{res_name}: {int(self.resources[res])}")
 
         building_data = self.calculate_production()
         net_total = {r: 0 for r in RESOURCES}
@@ -946,14 +971,14 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 continue
 
             base_info = BUILDINGS[b["base"]]
-            base_name = base_info.get("name", b["base"])  # nazwa z BUILDINGS
+            base_name = self.loc.t(base_info.get("name_key"), default=b["base"])  # nazwa z BUILDINGS
             level = b.get("level", 0)
 
             # nazwa ulepszenia (jeśli jest)
             upgrade_name = None
             if level > 0:
                 up = base_info.get("upgrades", [])[level - 1]
-                upgrade_name = up.get("name")
+                upgrade_name = self.loc.t(up.get("name_key"), default=None) if up.get("name_key") else up.get("name")
 
             # finalna nazwa do wyświetlenia
             if upgrade_name and upgrade_name != base_name:
@@ -1025,7 +1050,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.map_grid[y][x]["building"].append(new_b)
 
             nice_name = self.get_building_display_name(new_b)
-            self.log(f"Ukończono: {nice_name}", "green")
+            self.log(self.loc.t("log.completed_generic"), "green")
             self.play_sound("building_done")
 
         finished_upgrades = [u for u in self.upgrades_in_progress if u[0] <= self.current_date]
@@ -1041,19 +1066,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             base_data = BUILDINGS[self.buildings[idx]["base"]]
             # nazwa PRZED ulepszeniem
             if old_level == 0:
-                old_name = base_data.get("name", self.buildings[idx]["base"])
+                old_name = self.loc.t(base_data.get("name_key"), default=self.buildings[idx]["base"])
             else:
-                old_name = base_data["upgrades"][old_level - 1].get(
-                    "name",
-                    base_data.get("name", self.buildings[idx]["base"])
+                old_name = base_data["upgrades"][old_level - 1].get("name_key",
+                    self.loc.t(base_data.get("name_key"), default=self.buildings[idx]["base"])
                 )
             # nazwa PO ulepszeniu
-            new_name = base_data["upgrades"][u[2] - 1].get(
-                "name",
-                base_data.get("name", self.buildings[idx]["base"])
+            new_name = base_data["upgrades"][u[2] - 1].get("name_key",
+                self.loc.t(base_data.get("name_key"), default=self.buildings[idx]["base"])
             )
 
-            self.log(f"Ukończono ulepszenie: {old_name} → {new_name}", "DarkOrange")
+            self.log(self.loc.t("log.upgrade_done"), "DarkOrange")
             self.play_sound("building_done")
 
         self.process_arriving_ships()
@@ -1067,8 +1090,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.finish_expedition(e)
 
     def explore(self):
-        if self.free_workers() < 3: self.log("Za mało ludzi!", "red"); return
-        if self.resources["żywność"] < 15 and self.resources["drewno"] < 10: self.log("Za mało żywności lub drewna!", "red"); return
+        if self.free_workers() < 3: self.log(self.loc.t("ui.not_enough_people"), "red"); return
+        if self.resources["żywność"] < 15 and self.resources["drewno"] < 10: self.log(self.loc.t("ui.not_enough_food_or_wood"), "red"); return
         self.show_explore_map()
 
     def finish_expedition(self, exp):
@@ -1100,19 +1123,19 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 self.resources["drewno"] += wood
                 self.resources["skóry"] += skins
                 gains.append(f"drewno +{wood}")
-                gains.append(f"skóry +{skins}")
+                gains.append(self.loc.t("ui.skins_bonus", skins=skins))
 
             elif terrain == "pole":
                 # zapasy żywności
                 food = scaled(50)
                 self.resources["żywność"] += food
-                gains.append(f"żywność +{food}")
+                gains.append(self.loc.t("ui.food_bonus", food=food))
 
             elif terrain == "morze":
                 # „ryby” jako żywność
                 food = scaled(50)
                 self.resources["żywność"] += food
-                gains.append(f"żywność (ryby) +{food}")
+                gains.append(self.loc.t("ui.fish_food_bonus", food=food))
 
             elif terrain == "wzniesienia":
                 # jeśli jest surowiec kopalniany – trochę rudy
@@ -1125,17 +1148,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                     # jak nie ma konkretnego złoża, to coś symbolicznego
                     food = scaled(50)
                     self.resources["żywność"] += food
-                    gains.append(f"żywność +{food}")
+                    gains.append(self.loc.t("ui.food_bonus", food=food))
 
             else:
                 # inne tereny – mały uniwersalny bonus
                 food = scaled(50)
                 self.resources["żywność"] += food
-                gains.append(f"żywność +{food}")
+                gains.append(self.loc.t("ui.food_bonus", food=food))
 
             if gains:
                 self.log(
-                    "Eksploracja wróciła z łupami: " + ", ".join(gains),
+                    self.loc.t("log.exploration_loot") + ", ".join(gains),
                     "green"
                 )
 

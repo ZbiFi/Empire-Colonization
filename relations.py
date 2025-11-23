@@ -447,7 +447,7 @@ class RelationsMixin:
 
         ttk.Label(
             win,
-            text="Dar: koszt 10 złota + 250 żywności + 20 srebra + 15 stali"
+            text=self.loc.t("ui.gift_cost", default="Dar: koszt 10 złota + 250 żywności + 20 srebra + 15 stali")
         ).pack(pady=10)
 
         ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)

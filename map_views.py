@@ -1045,13 +1045,13 @@ class MapUIMixin:
 
         canvas.bind("<Button-1>", click)
         draw()
-        ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
+        ttk.Button(win, text=self.loc.t("ui.cancel"), command=win.destroy).pack(pady=5)
 
         self.center_window(win)
 
     # ===== MAPA EKSPLORACJI =====
     def show_explore_map(self):
-        win = self.create_window("Eksploracja")
+        win = self.create_window(self.loc.t("screen.exploration.title"))
 
         # fonty spójne z UI
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
@@ -1061,10 +1061,10 @@ class MapUIMixin:
         info_frame = ttk.Frame(win)
         info_frame.pack(pady=5)
 
-        ttk.Label(info_frame, text="Koszt eksploracji:", font=title_font).pack()
+        ttk.Label(info_frame, text=self.loc.t("screen.exploration.cost_title"), font=title_font).pack()
         ttk.Label(
             info_frame,
-            text="• 3 ludzie • 15 żywności • 10 drewna",
+            text=self.loc.t("screen.exploration.cost_line"),
             justify="center",
             font=info_font
         ).pack()
@@ -1158,19 +1158,19 @@ class MapUIMixin:
             cost_food = 15
             cost_wood = 10
 
-            confirm = self.create_window("Potwierdź ekspedycję")
+            confirm = self.create_window(self.loc.t("screen.exploration.confirm_title"))
             bg = self.style.lookup("TFrame", "background")
 
             ttk.Label(
                 confirm,
-                text=f"Wyślij ekspedycję na pole ({y},{x})?",
+                text=self.loc.t("screen.exploration.confirm_send_to", y=y, x=x),
                 font=title_font,
                 background=bg
             ).pack(pady=10)
 
             ttk.Label(
                 confirm,
-                text=f"Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {cost_food} żywności, {cost_wood} drewna",
+                text=self.loc.t("screen.exploration.confirm_time_cost", days=days, food=cost_food, wood=cost_wood),
                 justify="center",
                 font=info_font,
                 background=bg
@@ -1196,8 +1196,8 @@ class MapUIMixin:
                 confirm.destroy()
                 win.destroy()
 
-            ttk.Button(confirm, text="Wyślij", command=do_explore).pack(side="left", padx=10, pady=10)
-            ttk.Button(confirm, text="Anuluj", command=confirm.destroy).pack(side="right", padx=10, pady=10)
+            ttk.Button(confirm, text=self.loc.t("ui.send"), command=do_explore).pack(side="left", padx=10, pady=10)
+            ttk.Button(confirm, text=self.loc.t("ui.cancel"), command=confirm.destroy).pack(side="right", padx=10, pady=10)
 
         # ttk.Button(
         #     info_frame,
@@ -1207,7 +1207,7 @@ class MapUIMixin:
 
         canvas.bind("<Button-1>", click)
         draw()
-        ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=5)
+        ttk.Button(win, text=self.loc.t("ui.cancel"), command=win.destroy).pack(pady=5)
 
         self.center_window(win)
 

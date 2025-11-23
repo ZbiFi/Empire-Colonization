@@ -119,7 +119,7 @@ class ShipsMixin:
             if status == "w porcie":
                 ttk.Button(
                     frame,
-                    text="Wyślij",
+                    text=self.loc.t("ui.send"),
                     command=lambda idx=i: self.open_load_menu(idx, win)
                 ).pack(pady=5)
 
@@ -244,17 +244,17 @@ class ShipsMixin:
             load = {r: v.get() for r, v in cargo_vars.items() if v.get() > 0}
             total = sum(load.values())
             if not load:
-                self.log("Pusty ładunek!", "red")
+                self.log(self.loc.t("ui.empty_cargo"), "red")
                 return
             if total > MAX_SHIP_CARGO:
-                self.log(f"Za dużo! Max: {MAX_SHIP_CARGO} (masz {total})", "red")
+                self.log(fself.loc.t("ui.too_much_cargo", max=MAX_SHIP_CARGO, have=total), "red")
                 return
             if self.send_ship(load):
                 parent.destroy()
                 load_win.destroy()
 
-        ttk.Button(btn_frame, text="Wyślij", command=send).pack(side="left", padx=5)
-        ttk.Button(btn_frame, text="Anuluj", command=load_win.destroy).pack(side="left", padx=5)
+        ttk.Button(btn_frame, text=self.loc.t("ui.send"), command=send).pack(side="left", padx=5)
+        ttk.Button(btn_frame, text=self.loc.t("ui.cancel"), command=load_win.destroy).pack(side="left", padx=5)
 
         BG = self.style.lookup("TFrame", "background")  # kolor tła całego UI
 
@@ -385,7 +385,7 @@ class ShipsMixin:
                                         del excess[res]
 
                         if all(sent.get(r, 0) >= req[r] for r in req):
-                            self.log("MISJA KRÓLEWSKA WYKONANA!", "DarkOrange")
+                            self.log(self.loc.t("log.royal_mission_done"), "DarkOrange")
                             self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
                             self.current_mission = None
                             self.mission_multiplier *= 0.9

@@ -193,12 +193,12 @@ class BuildingsMixin:
 
         if data.get("requires_settlement"):
             if cell["terrain"] not in ["osada", "dzielnica"]:
-                self.log("Tylko w osadzie/dzielnicy!", "red")
+                self.log(self.loc.t("ui.must_be_in_settlement"), "red")
                 return
             used = len([b for b in cell["building"] if not b.get("is_district", False)])
             in_progress = [c for c in self.constructions if c[1]["pos"] == (y, x)]
             if used + len(in_progress) >= 5:
-                self.log("Brak miejsca w osadzie! (5/5, w tym budowa)", "red")
+                self.log(self.loc.t("ui.no_space_in_settlement"), "red")
                 return
         else:
             if cell["building"]:
@@ -220,7 +220,7 @@ class BuildingsMixin:
             self.log("Za mało surowców!", "red")
             return
         if self.free_workers() < data["base_workers"]:
-            self.log("Za mało wolnych ludzi!", "red")
+            self.log(self.loc.t("ui.not_enough_workers"), "red")
             return
 
         self.spend_resources(data["base_cost"])
@@ -248,11 +248,11 @@ class BuildingsMixin:
 
         # 🔒 jeśli ten budynek już ma ulepszenie w toku – nie zaczynamy kolejnego
         if any(u[1] == building_idx for u in self.upgrades_in_progress):
-            self.log("To ulepszenie jest już w trakcie realizacji!", "red")
+            self.log(self.loc.t("ui.building_already_in_progress"), "red")
             return
 
         if current_level >= len(base_data["upgrades"]):
-            self.log("Maksymalny poziom!", "red")
+            self.log(self.loc.t("ui.max_level_reached"), "red")
             return
 
         upgrade = base_data["upgrades"][current_level]
@@ -265,10 +265,10 @@ class BuildingsMixin:
             cost = {k: int(v * mult) for k, v in cost.items()}
 
         if not self.can_afford(cost):
-            self.log("Za mało surowców na ulepszenie!", "red")
+            self.log(self.loc.t("ui.not_enough_resources"), "red")
             return
         if self.free_workers() < workers_needed:
-            self.log("Za mało wolnych ludzi!", "red")
+            self.log(self.loc.t("ui.not_enough_workers"), "red")
             return
 
         self.spend_resources(cost)
@@ -304,7 +304,7 @@ class BuildingsMixin:
             self.busy_people -= workers_needed
             self.upgrades_in_progress.remove(u)
         if to_cancel:
-            self.log("Przerwano trwające ulepszenie tego budynku (bez zwrotu surowców).", "orange")
+            self.log(self.loc.t("ui.upgrade_cancelled_no_refund"), "orange")
 
         # DEGRADACJA POZIOMU (zwraca 50% kosztu poprzedniego ulepszenia)
         if level > 0:
