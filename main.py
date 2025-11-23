@@ -794,9 +794,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.update_display()
 
     def advance_date(self, days):
-        if days > 1 and self.free_workers() < 1:
-            self.log("Za mało ludzi!", "red")
-            return
+        # if days > 1 and self.free_workers() < 1:
+        #     self.log("Za mało ludzi!", "red")
+        #     return
 
         # Liczymy dzień po dniu, ale śmierć z głodu losujemy zbiorczo
         initial_food = self.resources["żywność"]

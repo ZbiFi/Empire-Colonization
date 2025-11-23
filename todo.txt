@@ -25,9 +25,9 @@ drogi? -> bonus do produkcji.
                     DONE !!!! spójność fontowa
 
 <SAVE/LOAD>
-save/load
-settings
-localization
+2.save/load
+3.settings
+1.localization
 
 <MAPA>
                     DONE !!! - lepsze tile
@@ -46,7 +46,7 @@ eventy losowe - plaga, pozar, wypadki whatever, piractwo
                     DONE !!! BUG z przesuwaniem dni - nadto jest liczona produkcja
 
 <EVENTY>
-po eksloracji -> znalazles idola indian co robisz 1) zabierasz +10 gold +20 silver (50/50 że indianie odkryją -25 relacji) 2) zostawiasz hołd (-50 żywność) +5 relacji do losowej grupy  3) zostawiasz (nic)
+4. po eksloracji -> znalazles idola indian co robisz 1) zabierasz +10 gold +20 silver (50/50 że indianie odkryją -25 relacji) 2) zostawiasz hołd (-50 żywność) +5 relacji do losowej grupy  3) zostawiasz (nic)
 
 
 TO EXE
