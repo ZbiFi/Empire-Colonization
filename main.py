@@ -112,7 +112,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.ships = []
         self.auto_sail_timer = None
 
-        self.native_relations = {tribe: 50 for tribe in random.sample(TRIBES, 3)}
+        self.native_relations = {
+            tribe: 50
+            for tribe in random.sample(list(TRIBE_DISPLAY_KEYS.keys()), 3)
+        }
         # reputacja z państwami europejskimi – na start 0, później własne państwo podbijemy
         self.europe_relations = {s: 0 for s in STATES}
 

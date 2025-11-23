@@ -940,27 +940,31 @@ NATIVE_RESOURCE_ECONOMY = {
     # itd., tylko dla tych zasobów które realnie mają sens u plemion
 }
 # Mapping internal resource ids to localization keys
-RESOURCE_DISPLAY_KEYS = {'cukier': 'res.sugar',
- 'cygara': 'res.cigars',
- 'drewno': 'res.wood',
- 'dukaty': 'res.ducats',
- 'medykamenty': 'res.meds',
- 'skóry': 'res.skins',
- 'srebro': 'res.silver',
- 'stal': 'res.steel',
- 'trzcina': 'res.cane',
- 'tytoń': 'res.tobacco',
- 'ubrania': 'res.clothes',
- 'węgiel': 'res.coal',
- 'zioła': 'res.herbs',
- 'złoto': 'res.gold',
- 'żelazo': 'res.iron',
- 'żywność': 'res.food'}
+RESOURCE_DISPLAY_KEYS = {
+    'sugar': 'res.sugar',
+    'cigars': 'res.cigars',
+    'wood': 'res.wood',
+    'ducats': 'res.ducats',
+    'meds': 'res.meds',
+    'skins': 'res.skins',
+    'silver': 'res.silver',
+    'steel': 'res.steel',
+    'cane': 'res.cane',
+    'tobacco': 'res.tobacco',
+    'clothes': 'res.clothes',
+    'coal': 'res.coal',
+    'herbs': 'res.herbs',
+    'gold': 'res.gold',
+    'iron': 'res.iron',
+    'food': 'res.food'
+}
 
 # Mapping tribe internal names to localization keys
-TRIBE_DISPLAY_KEYS = {'Apacze': 'tribe.apache',
- 'Czirokezi': 'tribe.cherokee',
- 'Huronowie': 'tribe.huron',
- 'Irokezi': 'tribe.iroquois',
- 'Krikowie': 'tribe.creek',
- 'Siuksowie': 'tribe.sioux'}
+TRIBE_DISPLAY_KEYS = {
+    'Apaches': 'tribe.apache',
+    'Cherokees': 'tribe.cherokee',
+    'Hurons': 'tribe.huron',
+    'Iroquois': 'tribe.iroquois',
+    'Creeks': 'tribe.creek',
+    'Sioux': 'tribe.sioux'
+}

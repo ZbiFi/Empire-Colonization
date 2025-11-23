@@ -246,6 +246,29 @@
   "mission.native.traders_cheated_elders.desc": "Inne blade twarze dały nam stare szmaty i fałszywe obietnice. Pokaż, że jesteś inny. Przynieś prawdziwe tkaniny i srebrne monety, a odzyskasz nasze zaufanie.",
 
   "mission.native.sacred_grove_fire.name": "Ogień w świętym gaju",
-  "mission.native.sacred_grove_fire.desc": "W świętym gaju zabrakło drewna na ognie, które odpędzają złe duchy. Potrzebujemy też mięsa i dymu na modlitwy. Przynieś to, a Szaman wypowie nad tobą dobre słowa."
+  "mission.native.sacred_grove_fire.desc": "W świętym gaju zabrakło drewna na ognie, które odpędzają złe duchy. Potrzebujemy też mięsa i dymu na modlitwy. Przynieś to, a Szaman wypowie nad tobą dobre słowa.",
 
+  "res.sugar": "Cukier",
+  "res.cigars": "Cygara",
+  "res.wood": "Drewno",
+  "res.ducats": "Dukaty",
+  "res.meds": "Medykamenty",
+  "res.skins": "Skóry",
+  "res.silver": "Srebro",
+  "res.steel": "Stal",
+  "res.cane": "Trzcina",
+  "res.tobacco": "Tytoń",
+  "res.clothes": "Ubrania",
+  "res.coal": "Węgiel",
+  "res.herbs": "Zioła",
+  "res.gold": "Złoto",
+  "res.iron": "Żelazo",
+  "res.food": "Żywność",
+
+  "tribe.apache": "Apacze",
+  "tribe.cherokee": "Czirokezi",
+  "tribe.huron": "Huronowie",
+  "tribe.iroquois": "Irokezi",
+  "tribe.creek": "Krikowie",
+  "tribe.sioux": "Siuksowie"
 }
