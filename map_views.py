@@ -14,7 +14,7 @@ from constants import BASE_COLORS, MINE_COLORS, MINE_RESOURCES, MINE_NAMES, BUIL
 class MapUIMixin:
     """
     Mixin odpowiedzialny za:
-    - grafiki kafelków mapy (las, itp.)
+    - grafiki kafelków mapy (forest, itp.)
     - rysowanie mapy budowy (show_map)
     - rysowanie mapy eksploracji (show_explore_map)
     """
@@ -69,10 +69,10 @@ class MapUIMixin:
         self.terrain_icon_bases = {}  # nazwa terenu -> PIL.Image
         self.terrain_icon_cache = {}  # (terrain, size) -> ImageTk.PhotoImage
         for terrain, fname in {
-            "las": "conifer_forest_inner.png",
-            "pole": "plains.png",
-            "wzniesienia": "mountains_inner.png",
-            "morze": "ocean_inner.png",
+            "forest": "conifer_forest_inner.png",
+            "field": "plains.png",
+            "hills": "mountains_inner.png",
+            "sea": "ocean_inner.png",
         }.items():
             try:
                 path = self.resource_path(f"img/tiles/{fname}")
@@ -92,8 +92,8 @@ class MapUIMixin:
         if not hasattr(self, "terrain_icon_bases"):
             self.terrain_icon_bases = {}
         if self.camp_icon_base:
-            self.terrain_icon_bases["osada"] = self.camp_icon_base
-            self.terrain_icon_bases["dzielnica"] = self.camp_icon_base
+            self.terrain_icon_bases["settlement"] = self.camp_icon_base
+            self.terrain_icon_bases["district"] = self.camp_icon_base
 
     def get_building_icon(self, cell_size: int):
         """
@@ -120,10 +120,10 @@ class MapUIMixin:
         if "żelazo" in r or "zelazo" in r or "iron" in r: return "iron"
         if "srebro" in r or "silver" in r: return "silver"
         if "złoto" in r or "zloto" in r or "gold" in r: return "gold"
-        if "las" in r or "las" in r or "forest" in r: return "forest"
-        if "pole" in r or "pole" in r or "plains" in r: return "plains"
+        if "forest" in r or "forest" in r or "forest" in r: return "forest"
+        if "field" in r or "field" in r or "plains" in r: return "plains"
         if "wzgórze" in r or "wzgorze" in r or "mountains" in r: return "mountains"
-        if "morze" in r or "morze" in r or "sea" in r: return "sea"
+        if "sea" in r or "sea" in r or "sea" in r: return "sea"
         return None
 
     def get_camp_icon(self, cell_size: int, small: bool = False):
@@ -374,7 +374,7 @@ class MapUIMixin:
 
         card_req, inner_req, _ = self._describe_ocean_neighbors(neigh)
 
-        # jeśli wszędzie "morze" / "las" / "góry" (czyli brak krawędzi) – szukamy czystego tilesa
+        # jeśli wszędzie "sea" / "forest" / "góry" (czyli brak krawędzi) – szukamy czystego tilesa
         if not any(neigh.values()):
             for d in defs:
                 if not d["card"] and not d["inner"] and not d["outer"]:
@@ -456,7 +456,7 @@ class MapUIMixin:
         base = self.terrain_icon_bases.get(terrain)
         if not base: return None
         icon_size = max(18, min(32, int(cell_size * 0.6)))
-        if terrain == "dzielnica":
+        if terrain == "district":
             icon_size = max(12, icon_size // 2)  # 50% mniejsze
         key = (terrain, icon_size)
         if key not in self.terrain_icon_cache:
@@ -490,7 +490,7 @@ class MapUIMixin:
         return self.tile_plains_cache[cell_size]
 
     def get_mountains_tile(self, cell_size: int):
-        """Zwraca kafelek wzgórz (wzniesienia) przeskalowany do aktualnego cell_size."""
+        """Zwraca kafelek wzgórz (hills) przeskalowany do aktualnego cell_size."""
         if cell_size not in self.tile_mountains_cache:
             img = self.tile_mountains_base.resize((cell_size, cell_size), Image.LANCZOS)
             self.tile_mountains_cache[cell_size] = ImageTk.PhotoImage(img)
@@ -504,14 +504,14 @@ class MapUIMixin:
         return self.tile_sea_cache[cell_size]
 
     def _is_land(self, y, x):
-        """True, jeśli to NIE jest morze (czyli ląd/brzeg)."""
+        """True, jeśli to NIE jest sea (czyli ląd/brzeg)."""
         if 0 <= y < self.map_size and 0 <= x < self.map_size:
-            return self.map_grid[y][x]["terrain"] != "morze"
+            return self.map_grid[y][x]["terrain"] != "sea"
         return False
 
     def _is_not_terrain(self, y, x, terrain_name: str) -> bool:
         """
-        True, jeśli pole NIE jest danym terenem (np. nie-las, nie-wzgórza).
+        True, jeśli field NIE jest danym terenem (np. nie-forest, nie-wzgórza).
         Używane do wykrywania 'krawędzi' lasu/wzgórz względem otoczenia.
         """
         if 0 <= y < self.map_size and 0 <= x < self.map_size:
@@ -546,27 +546,27 @@ class MapUIMixin:
         return {"N": n, "NE": ne, "E": e, "SE": se, "S": s, "SW": sw, "W": w, "NW": nw}
 
     def get_forest_neighbors(self, y, x):
-        """Sąsiedzi względem lasu: True tam, gdzie pole NIE jest lasem."""
-        n = self._is_not_terrain(y - 1, x, "las")
-        ne = self._is_not_terrain(y - 1, x + 1, "las")
-        e = self._is_not_terrain(y, x + 1, "las")
-        se = self._is_not_terrain(y + 1, x + 1, "las")
-        s = self._is_not_terrain(y + 1, x, "las")
-        sw = self._is_not_terrain(y + 1, x - 1, "las")
-        w = self._is_not_terrain(y, x - 1, "las")
-        nw = self._is_not_terrain(y - 1, x - 1, "las")
+        """Sąsiedzi względem lasu: True tam, gdzie field NIE jest lasem."""
+        n = self._is_not_terrain(y - 1, x, "forest")
+        ne = self._is_not_terrain(y - 1, x + 1, "forest")
+        e = self._is_not_terrain(y, x + 1, "forest")
+        se = self._is_not_terrain(y + 1, x + 1, "forest")
+        s = self._is_not_terrain(y + 1, x, "forest")
+        sw = self._is_not_terrain(y + 1, x - 1, "forest")
+        w = self._is_not_terrain(y, x - 1, "forest")
+        nw = self._is_not_terrain(y - 1, x - 1, "forest")
         return {"N": n, "NE": ne, "E": e, "SE": se, "S": s, "SW": sw, "W": w, "NW": nw}
 
     def get_mountains_neighbors(self, y, x):
-        """Sąsiedzi względem wzgórz: True tam, gdzie pole NIE jest wzniesieniami."""
-        n = self._is_not_terrain(y - 1, x, "wzniesienia")
-        ne = self._is_not_terrain(y - 1, x + 1, "wzniesienia")
-        e = self._is_not_terrain(y, x + 1, "wzniesienia")
-        se = self._is_not_terrain(y + 1, x + 1, "wzniesienia")
-        s = self._is_not_terrain(y + 1, x, "wzniesienia")
-        sw = self._is_not_terrain(y + 1, x - 1, "wzniesienia")
-        w = self._is_not_terrain(y, x - 1, "wzniesienia")
-        nw = self._is_not_terrain(y - 1, x - 1, "wzniesienia")
+        """Sąsiedzi względem wzgórz: True tam, gdzie field NIE jest wzniesieniami."""
+        n = self._is_not_terrain(y - 1, x, "hills")
+        ne = self._is_not_terrain(y - 1, x + 1, "hills")
+        e = self._is_not_terrain(y, x + 1, "hills")
+        se = self._is_not_terrain(y + 1, x + 1, "hills")
+        s = self._is_not_terrain(y + 1, x, "hills")
+        sw = self._is_not_terrain(y + 1, x - 1, "hills")
+        w = self._is_not_terrain(y, x - 1, "hills")
+        nw = self._is_not_terrain(y - 1, x - 1, "hills")
         return {"N": n, "NE": ne, "E": e, "SE": se, "S": s, "SW": sw, "W": w, "NW": nw}
 
     def get_cell_size(self):
@@ -678,7 +678,7 @@ class MapUIMixin:
         # tytuł
         canvas.create_text(
             center_x, legend_y,
-            text="LEGENDA",
+            text=self.loc.t("map.legend.title"),
             anchor="center",
             font=title_font
         )
@@ -701,7 +701,7 @@ class MapUIMixin:
                                         fill=color, outline="black")
             canvas.create_text(
                 x, terrain_y + 22,
-                text=name.capitalize(),
+                text=self.loc.t(f"terrain.{name}", default=name.capitalize()),
                 anchor="center",
                 font=small_info_font
             )
@@ -727,7 +727,7 @@ class MapUIMixin:
 
             canvas.create_text(
                 x, mine_y + 22,
-                text=MINE_NAMES[res],
+                text=self.loc.t(MINE_NAMES[res]),
                 anchor="center",
                 font=small_info_font
             )
@@ -736,17 +736,17 @@ class MapUIMixin:
     def _draw_terrain_cell(self, canvas, x, y, offset_x, offset_y, cell_size):
         """
         Wspólne rysowanie JEDNEGO odkrytego pola mapy:
-        - morze / las / wzniesienia: plains w tle + autotiling
-        - osada / dzielnica: plains w tle + camp overlay (dzielnica 50% mniejsza)
-        - pole: plains sprite
+        - sea / forest / hills: plains w tle + autotiling
+        - settlement / district: plains w tle + camp overlay (district 50% mniejsza)
+        - field: plains sprite
         - reszta terenów: prostokąt koloru
         """
         cell = self.map_grid[y][x]
         terrain = cell["terrain"]
 
-        # ===== morze / las / wzniesienia (jak było) =====
-        if terrain in ("morze", "las", "wzniesienia"):
-            # tło – pole (plains)
+        # ===== sea / forest / hills (jak było) =====
+        if terrain in ("sea", "forest", "hills"):
+            # tło – field (plains)
             try:
                 bg_img = self.get_plains_tile(cell_size)
                 canvas.create_image(
@@ -756,7 +756,7 @@ class MapUIMixin:
                     image=bg_img
                 )
             except Exception:
-                ground = BASE_COLORS.get("pole", "#7a6b4a")
+                ground = BASE_COLORS.get("field", "#7a6b4a")
                 canvas.create_rectangle(
                     offset_x + x * cell_size,
                     offset_y + y * cell_size,
@@ -767,15 +767,15 @@ class MapUIMixin:
                 )
 
             img = None
-            if terrain == "morze":
+            if terrain == "sea":
                 img = self.get_ocean_tile_image(y, x, cell_size)
-                fallback_color = BASE_COLORS["morze"]
-            elif terrain == "las":
+                fallback_color = BASE_COLORS["sea"]
+            elif terrain == "forest":
                 img = self.get_forest_tile_image(y, x, cell_size)
-                fallback_color = BASE_COLORS["las"]
-            else:  # "wzniesienia"
+                fallback_color = BASE_COLORS["forest"]
+            else:  # "hills"
                 img = self.get_mountains_tile_image(y, x, cell_size)
-                fallback_color = BASE_COLORS["wzniesienia"]
+                fallback_color = BASE_COLORS["hills"]
 
             if img:
                 canvas.create_image(
@@ -795,9 +795,9 @@ class MapUIMixin:
                 )
             return
 
-        # ===== osada / dzielnica =====
-        if terrain in ("osada", "dzielnica"):
-            # tło jak "pole"
+        # ===== settlement / district =====
+        if terrain in ("settlement", "district"):
+            # tło jak "field"
             try:
                 bg_img = self.get_plains_tile(cell_size)
                 canvas.create_image(
@@ -807,7 +807,7 @@ class MapUIMixin:
                     image=bg_img
                 )
             except Exception:
-                ground = BASE_COLORS.get("pole", "#CCCC99")
+                ground = BASE_COLORS.get("field", "#CCCC99")
                 canvas.create_rectangle(
                     offset_x + x * cell_size,
                     offset_y + y * cell_size,
@@ -818,10 +818,10 @@ class MapUIMixin:
                 )
 
             # nakładka camp.png
-            icon = self.get_camp_icon(cell_size, small=(terrain == "dzielnica"))
+            icon = self.get_camp_icon(cell_size, small=(terrain == "district"))
             if icon:
                 img_icon, icon_size = icon
-                if terrain == "osada":
+                if terrain == "settlement":
                     canvas.create_image(
                         offset_x + x * cell_size,
                         offset_y + y * cell_size,
@@ -838,8 +838,8 @@ class MapUIMixin:
                     )
             return
 
-        # ===== pole (plains sprite) =====
-        if terrain == "pole":
+        # ===== field (plains sprite) =====
+        if terrain == "field":
             try:
                 img = self.get_plains_tile(cell_size)
                 canvas.create_image(
@@ -850,7 +850,7 @@ class MapUIMixin:
                 )
             except Exception:
                 # fallback na kolor jeśli plains.png nie ma
-                color = BASE_COLORS.get("pole", "#CCCC99")
+                color = BASE_COLORS.get("field", "#CCCC99")
                 canvas.create_rectangle(
                     offset_x + x * cell_size,
                     offset_y + y * cell_size,
@@ -874,7 +874,7 @@ class MapUIMixin:
 
     # ===== MAPA BUDOWANIA =====
     def show_map(self):
-        win = self.create_window("Buduj - wybierz pole")
+        win = self.create_window(self.loc.t("screen.build_map.title"))
 
         # fonty spójne z UI
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
@@ -953,7 +953,7 @@ class MapUIMixin:
                             font=tile_label_font
                         )
 
-                    if terrain not in ["osada", "dzielnica"]:
+                    if terrain not in ["settlement", "district"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
                         if buildings_here:
                             icon = self.get_building_icon(cell_size)
@@ -963,7 +963,7 @@ class MapUIMixin:
                                 cy = offset_y + y * cell_size + cell_size // 2
                                 canvas.create_image(cx, cy, image=img_icon)
 
-                    if terrain in ["osada", "dzielnica"]:
+                    if terrain in ["settlement", "district"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
                         used = len(buildings_here)
                         canvas.create_text(
@@ -981,7 +981,7 @@ class MapUIMixin:
                             font=tile_num_font
                         )
 
-                    if terrain == "wzniesienia" and cell["resource"]:
+                    if terrain == "hills" and cell["resource"]:
                         icon = self.get_mine_icon(cell["resource"], cell_size)
                         if icon:
                             img_icon, icon_size = icon
@@ -1010,7 +1010,7 @@ class MapUIMixin:
                                 continue
 
                         if data.get("requires_settlement"):
-                            if terrain not in ["osada", "dzielnica"]:
+                            if terrain not in ["settlement", "district"]:
                                 continue
                             used = len([b for b in cell["building"] if not b.get("is_district", False)])
                             in_progress = len([c for c in self.constructions if c[1]["pos"] == (y, x)])
@@ -1020,7 +1020,7 @@ class MapUIMixin:
                         if data.get("requires_adjacent_settlement"):
                             if not self.is_adjacent_to_settlement((y, x)):
                                 continue
-                            if terrain == "morze" and self.selected_building != "przystań":
+                            if terrain == "sea" and self.selected_building != "przystań":
                                 continue
 
                         canvas.create_rectangle(
@@ -1110,7 +1110,7 @@ class MapUIMixin:
                             canvas.create_text(
                                 offset_x + x * cell_size + cell_size // 2,
                                 offset_y + y * cell_size + cell_size // 2,
-                                text="?",
+                                text=self.loc.t("screen.exploration.unknown_tile"),
                                 fill="white",
                                 font=tile_q_font
                             )
@@ -1120,7 +1120,7 @@ class MapUIMixin:
 
                     self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
 
-                    if terrain == "wzniesienia" and cell["resource"]:
+                    if terrain == "hills" and cell["resource"]:
                         icon = self.get_mine_icon(cell["resource"], cell_size)
                         if icon:
                             img_icon, icon_size = icon
@@ -1178,21 +1178,29 @@ class MapUIMixin:
 
             def do_explore():
                 if self.free_workers() < 3:
-                    self.log("Za mało ludzi!", "red")
+                    self.log(self.loc.t("log.not_enough_people"), "red")
                     confirm.destroy()
                     return
-                if self.resources["żywność"] < cost_food or self.resources["drewno"] < cost_wood:
-                    self.log("Za mało surowców!", "red")
+                if self.resources["food"] < cost_food or self.resources["wood"] < cost_wood:
+                    self.log(self.loc.t("log.not_enough_resources"), "red")
                     confirm.destroy()
                     return
 
                 self.busy_people += 3
-                self.resources["żywność"] -= cost_food
-                self.resources["drewno"] -= cost_wood
+                self.resources["food"] -= cost_food
+                self.resources["wood"] -= cost_wood
 
                 end_date = self.current_date + timedelta(days=days)
                 self.expeditions.append((end_date, (y, x), "explore"))
-                self.log(f"Eksploracja ({y},{x}): powrót {end_date.strftime('%d %b %Y')}", "blue")
+                self.log(
+                    self.loc.t(
+                        "log.exploration.return",
+                        y=y,
+                        x=x,
+                        date=end_date.strftime("%d %b %Y")
+                    ),
+                    "blue"
+                )
                 confirm.destroy()
                 win.destroy()
 
@@ -1201,7 +1209,7 @@ class MapUIMixin:
 
         # ttk.Button(
         #     info_frame,
-        #     text="Odkryj wszystkie pola (debug)",
+        #     text=self.loc.t("screen.exploration.debug_reveal_all"),
         #     command=debug_reveal_all,
         # ).pack(pady=2)
 

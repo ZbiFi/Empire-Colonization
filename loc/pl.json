@@ -156,7 +156,15 @@
   "building.tobacco_drying_house.upgrade.premium_cigar_factory": "Fabryka cygar premium",
 
   "building.harbor.name": "Przystań",
+  "building.settlement.name": "Osada",
   "building.district.name": "Dzielnica",
+
+  "terrain.sea.name": "Morze",
+  "terrain.field.name": "Pole",
+  "terrain.forest.name": "Las",
+  "terrain.hills.name": "Wzniesienia",
+  "terrain.settlement.name": "Osada",
+  "terrain.district.name": "Dzielnica",
 
   "mission.royal.shipyard_wood.name": "Drewno na stocznie",
   "mission.royal.shipyard_wood.desc": "Z woli naszej królewskiej rozkazuję, by niezwłocznie zgromadzono znaczny zapas drewna na budowę okrętów i umocnień morskich. Stocznie Korony mają pracować dniem i nocą, a brak surowca uznam za zaniedbanie przeciw interesowi państwa. Dostarcz drewno w pełnej mierze, aby flota mogła wyruszyć na wody bez zwłoki.",
@@ -509,6 +517,17 @@
   "state.brandenburg.ruler.frederick_iii.name": "Fryderyk III",
   "state.brandenburg.ruler.frederick_william_i.name": "Fryderyk Wilhelm I",
   "state.brandenburg.ruler.frederick_ii_the_great.name": "Fryderyk II Wielki",
-  "state.brandenburg.ruler.frederick_william_ii.name": "Fryderyk Wilhelm II"
+  "state.brandenburg.ruler.frederick_william_ii.name": "Fryderyk Wilhelm II",
+
+  "map.legend.title": "LEGENDA",
+  "screen.build_map.title": "Buduj - wybierz pole",
+
+  "screen.exploration.unknown_tile": "?",
+
+  "log.not_enough_people": "Za mało ludzi!",
+  "log.not_enough_resources": "Za mało surowców!",
+  "log.exploration.return": "Eksploracja ({y},{x}): powrót {date}",
+
+  "screen.exploration.debug_reveal_all": "Odkryj wszystkie pola (debug)"
 
 }
