@@ -275,5 +275,25 @@
   "mine.coal.name": "Węgiel",
   "mine.iron.name": "Żelazo",
   "mine.silver.name": "Srebro",
-  "mine.gold.name": "Złoto"
+  "mine.gold.name": "Złoto",
+
+  "ship.status.in_port": "w porcie",
+  "ship.status.to_europe": "w drodze do Europy",
+  "ship.status.in_europe_port": "w porcie w Europie",
+
+  "ui.date_label": "Data: {date}",
+  "ui.monarch_placeholder": "Monarcha: ...",
+  "ui.monarch_label": " | Monarcha: {monarch}",
+
+  "ui.population_placeholder": "Ludzie: 0 / 0",
+  "ui.population_label": "Ludzie: {people} / {cap}",
+
+  "ui.free_workers_placeholder": "Wolni: 0",
+  "ui.free_workers_label": " | Wolni: {free}",
+
+  "ui.none_resource": "brak",
+
+  "log.discovered_cell": "Odkryto ({y},{x}): {terrain} | {resource}",
+  "log.gain_resource": "{res} +{amount}"
+
 }

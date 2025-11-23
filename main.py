@@ -21,6 +21,11 @@ from ships import ShipsMixin
 from map_views import MapUIMixin
 from tooltip import Tooltip
 
+
+SHIP_STATUS_IN_PORT = "ship.status.in_port"
+SHIP_STATUS_TO_EUROPE = "ship.status.to_europe"
+SHIP_STATUS_IN_EUROPE_PORT = "ship.status.in_europe_port"
+
 def load_font_ttf(path):
     """
     Ładuje font TTF do pamięci procesu Windows.
@@ -97,13 +102,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
         self.resources = {r: 0 for r in RESOURCES}
-        self.resources["żywność"] = 1000
-        self.resources["drewno"] = 50
-        self.resources["żelazo"] = 30
-        self.resources["skóry"] = 10
-        self.resources["srebro"] = 10
-        self.resources["medykamenty"] = 10
-        self.resources["dukaty"] = 300
+        self.resources["food"] = 1000
+        self.resources["wood"] = 50
+        self.resources["iron"] = 30
+        self.resources["skins"] = 10
+        self.resources["silver"] = 10
+        self.resources["meds"] = 10
+        self.resources["ducats"] = 300
 
         self.buildings = []
         self.constructions = []
@@ -251,7 +256,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         workers_in_buildings = sum(
             b.get("workers", 0)
             for b in self.buildings
-            if not b.get("is_district", False) and b["base"] not in ["namiot"]
+            if not b.get("is_district", False) and b["base"] not in ["tent"]
         )
 
         # Wolni = wszyscy ludzie - ci w budowach/expedycjach - ci w budynkach
@@ -397,15 +402,15 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         ttk.Label(frame, text=self.loc.t("ui.game_length"), font=self.ui_font).pack(pady=(15, 5))
 
-        self.game_length_var = tk.StringVar(value="zwykla")
+        self.game_length_var = tk.StringVar(value="normal")
 
         lengths = [
-            (self.loc.t("difficulty.length.flash"), "blyskawiczna"),
-            (self.loc.t("difficulty.length.fast"), "szybka"),
-            (self.loc.t("difficulty.length.normal"), "zwykla"),
-            (self.loc.t("difficulty.length.long"), "dluga"),
-            (self.loc.t("difficulty.length.marathon"), "maraton"),
-            (self.loc.t("difficulty.length.epic"), "epicka"),
+            (self.loc.t("difficulty.length.flash"), 15),
+            (self.loc.t("difficulty.length.fast"), 30),
+            (self.loc.t("difficulty.length.normal"), 50),
+            (self.loc.t("difficulty.length.long"), 70),
+            (self.loc.t("difficulty.length.marathon"), 100),
+            (self.loc.t("difficulty.length.epic"), 150),
         ]
 
         length_frame = ttk.Frame(frame)
@@ -429,15 +434,15 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         if not self.state: return
 
         # ustawienie długości gry na podstawie wyboru na ekranie startowym
-        length_key = getattr(self, "game_length_var", None).get() if hasattr(self, "game_length_var") else "zwykla"
+        length_key = getattr(self, "game_length_var", None).get() if hasattr(self, "game_length_var") else "normal"
 
         length_map = {
-            "blyskawiczna": 15,
-            "szybka": 30,
-            "zwykla": 50,
-            "dluga": 70,
-            "maraton": 100,
-            "epicka": 150,
+            "flash": 15,
+            "fast": 30,
+            "normal": 50,
+            "long": 70,
+            "marathon": 100,
+            "epic": 150,
         }
         self.missions_to_win = length_map.get(length_key, 50)
 
@@ -480,11 +485,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         sy, sx = self.settlement_pos
         for _ in range(3):
-            tent = {"base": "namiot", "level": 0, "workers": 0, "pos": (sy, sx)}
+            tent = {"base": "tent", "level": 0, "workers": 0, "pos": (sy, sx)}
             self.buildings.append(tent)
             self.map_grid[sy][sx]["building"].append(tent)
 
-        self.ships = [(None, None, {}, "w porcie", 0)]
+        self.ships = [(None, None, {}, SHIP_STATUS_IN_PORT, 0)]
         self.flagship_index = 0
         self.auto_sail_timer = self.current_date + timedelta(days=14)
         self.main_game()
@@ -609,14 +614,14 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             earliest = None
             for i, ship in enumerate(self.ships):
                 a_eu = ship[0] if len(ship) > 0 else None
-                status = ship[3] if len(ship) > 3 else "w porcie"
-                if status in ("w drodze do Europy", "w porcie w Europie") and a_eu:
+                status = ship[3] if len(ship) > 3 else SHIP_STATUS_IN_PORT
+                if status in (SHIP_STATUS_TO_EUROPE, SHIP_STATUS_IN_EUROPE_PORT) and a_eu:
                     if earliest is None or a_eu < earliest:
                         earliest = a_eu
                         target_ship = i
 
             if target_ship is None:
-                target_ship = next((i for i, s in enumerate(self.ships) if s[3] == "w porcie"), 0)
+                target_ship = next((i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT), 0)
 
             # Upewnij się, że statek ma 5 elementów
             current = self.ships[target_ship]
@@ -672,7 +677,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # Monarcha tuż po państwie, pogrubiony
         self.monarch_lbl = ttk.Label(
             center_frame,
-            text="Monarcha: ...",
+            text=self.loc.t("ui.monarch_placeholder"),
             font=( (self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
                    self.top_info_font[1] if hasattr(self, "top_info_font") else 12,
                    "bold")
@@ -702,12 +707,12 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         base_font = self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12)
 
-        self.pop_lbl = ttk.Label(self.pop_frame, text="Ludzie: 0 / 0", font=base_font)
+        self.pop_lbl = ttk.Label(self.pop_frame, text=self.loc.t("ui.population_placeholder"), font=base_font)
         self.pop_lbl.pack(side="left", padx=5)
 
         ttk.Label(self.pop_frame, text="|", font=base_font).pack(side="left", padx=5)
 
-        self.work_lbl = ttk.Label(self.pop_frame, text="Wolni: 0", font=base_font)
+        self.work_lbl = ttk.Label(self.pop_frame, text=self.loc.t("ui.free_workers_placeholder"), font=base_font)
         self.work_lbl.pack(side="left", padx=5)
 
         res_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.resources"))
@@ -935,15 +940,23 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
     def update_display(self):
         if not hasattr(self, 'day_lbl'): return
-        self.day_lbl.config(text=f"Data: {self.current_date.strftime('%d %B %Y')}")
-        self.monarch_lbl.config(text=f" | Monarcha: {self.get_monarch()}")
+        self.day_lbl.config(
+            text=self.loc.t("ui.date_label", date=self.current_date.strftime('%d %B %Y'))
+        )
+        self.monarch_lbl.config(
+            text=self.loc.t("ui.monarch_label", monarch=self.get_monarch())
+        )
         cap = self.calculate_population_capacity()
-        self.pop_lbl.config(text=f"Ludzie: {self.people} / {cap}")
+        self.pop_lbl.config(
+            text=self.loc.t("ui.population_label", people=self.people, cap=cap)
+        )
 
         Tooltip(self.pop_lbl,
                 self.loc.t("tooltip.population"))
 
-        self.work_lbl.config(text=f" | Wolni: {self.free_workers()}")
+        self.work_lbl.config(
+            text=self.loc.t("ui.free_workers_label", free=self.free_workers())
+        )
 
         for res, lbl in self.res_labels.items():
             res_key = RESOURCE_DISPLAY_KEYS.get(res, res)
@@ -1094,7 +1107,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
     def explore(self):
         if self.free_workers() < 3: self.log(self.loc.t("ui.not_enough_people"), "red"); return
-        if self.resources["żywność"] < 15 and self.resources["drewno"] < 10: self.log(self.loc.t("ui.not_enough_food_or_wood"), "red"); return
+        if self.resources["food"] < 15 and self.resources["wood"] < 10: self.log(self.loc.t("ui.not_enough_food_or_wood"), "red"); return
         self.show_explore_map()
 
     def finish_expedition(self, exp):
@@ -1104,11 +1117,20 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         if exp[2] == "explore":
             cell["discovered"] = True
-            res = cell["resource"] or "brak"
-            self.log(f"Odkryto ({y},{x}): {cell['terrain']} | {res}", "DarkOrange")
-
-            # ===== BONUS ZA EKSPLORACJĘ ZALEŻNY OD POLA =====
+            res = cell["resource"] or self.loc.t("ui.none_resource")
             terrain = cell["terrain"]
+            terrain_name = self.loc.t(f"terrain.{terrain}", default=terrain)
+            res_name = self.loc.t(RESOURCE_DISPLAY_KEYS.get(res, res), default=res)
+
+            self.log(
+                self.loc.t(
+                    "log.discovered_cell",
+                    y=y, x=x,
+                    terrain=terrain_name,
+                    resource=res_name
+                ),
+                "DarkOrange"
+            )
 
             # bonus eksploracyjny państwa (np. Hiszpania ma 'explore': 1.4)
             from constants import STATES
@@ -1119,44 +1141,38 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
             gains = []
 
-            if terrain == "las":
-                # trochę drewna i skór
+            if terrain == "forest":
                 wood = scaled(50)
                 skins = scaled(25)
-                self.resources["drewno"] += wood
-                self.resources["skóry"] += skins
-                gains.append(f"drewno +{wood}")
+                self.resources["wood"] += wood
+                self.resources["skins"] += skins
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.wood"), amount=wood))
                 gains.append(self.loc.t("ui.skins_bonus", skins=skins))
 
-            elif terrain == "pole":
-                # zapasy żywności
+            elif terrain == "field":
                 food = scaled(50)
-                self.resources["żywność"] += food
+                self.resources["food"] += food
                 gains.append(self.loc.t("ui.food_bonus", food=food))
 
-            elif terrain == "morze":
-                # „ryby” jako żywność
+            elif terrain == "sea":
                 food = scaled(50)
-                self.resources["żywność"] += food
+                self.resources["food"] += food
                 gains.append(self.loc.t("ui.fish_food_bonus", food=food))
 
-            elif terrain == "wzniesienia":
-                # jeśli jest surowiec kopalniany – trochę rudy
+            elif terrain == "hills":
                 ore_type = cell.get("resource")
                 if ore_type:
                     ore_amt = scaled(50)
                     self.resources[ore_type] = self.resources.get(ore_type, 0) + ore_amt
-                    gains.append(f"{ore_type} +{ore_amt}")
+                    gains.append(self.loc.t("log.gain_resource", res=self.loc.t(RESOURCE_DISPLAY_KEYS.get(ore_type, ore_type)), amount=ore_amt))
                 else:
-                    # jak nie ma konkretnego złoża, to coś symbolicznego
                     food = scaled(50)
-                    self.resources["żywność"] += food
+                    self.resources["food"] += food
                     gains.append(self.loc.t("ui.food_bonus", food=food))
 
             else:
-                # inne tereny – mały uniwersalny bonus
                 food = scaled(50)
-                self.resources["żywność"] += food
+                self.resources["food"] += food
                 gains.append(self.loc.t("ui.food_bonus", food=food))
 
             if gains:
