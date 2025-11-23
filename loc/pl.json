@@ -88,5 +88,73 @@
   "ui.upgrade": "Ulepsz/Zdegraduj",
   "ui.wait_1_day": "Czekaj 1 dzień",
   "ui.wait_3_days": "Czekaj 3 dni",
-  "ui.wait_7_days": "Czekaj 7 dni"
+  "ui.wait_7_days": "Czekaj 7 dni",
+
+  "building.tent.name": "Namiot",
+  "building.tent.upgrade.hut": "Chata",
+  "building.tent.upgrade.house": "Dom",
+  "building.tent.upgrade.manor": "Dworek",
+
+  "building.lumber_camp.name": "Drwalnia",
+  "building.lumber_camp.upgrade.hand_sawmill": "Tartak ręczny",
+  "building.lumber_camp.upgrade.steam_sawmill": "Tartak parowy",
+  "building.lumber_camp.upgrade.industrial_logging_complex": "Przemysłowy kompleks drzewny",
+
+  "building.cropland.name": "Pole uprawne",
+  "building.cropland.upgrade.farm": "Gospodarstwo rolne",
+  "building.cropland.upgrade.grain_plantation": "Plantacja zbożowa",
+  "building.cropland.upgrade.folwark_with_mill": "Folwark z młynem",
+
+  "building.hunting_camp.name": "Obóz myśliwski",
+  "building.hunting_camp.upgrade.shepherd_outpost": "Stanica owiecka",
+  "building.hunting_camp.upgrade.hide_reserve": "Rezerwat skórny",
+  "building.hunting_camp.upgrade.fur_company": "Kompania futrzarska",
+
+  "building.tannery.name": "Garbarnia polowa",
+  "building.tannery.upgrade.tailor_workshop": "Warsztat krawiecki",
+  "building.tannery.upgrade.clothing_manufactory": "Manufaktura odzieżowa",
+  "building.tannery.upgrade.colonial_textile_factory": "Fabryka tekstyliów kolonialnych",
+
+  "building.herb_garden.name": "Ziołorośla",
+  "building.herb_garden.upgrade.botanical_garden": "Ogród botaniczny",
+  "building.herb_garden.upgrade.medicinal_herb_plantation": "Plantacja ziół leczniczych",
+  "building.herb_garden.upgrade.ethnobotany_institute": "Instytut etnobotaniki",
+
+  "building.herbal_clinic.name": "Ziołolecznica",
+  "building.herbal_clinic.upgrade.colonial_pharmacy": "Apteka kolonialna",
+  "building.herbal_clinic.upgrade.pharmaceutical_laboratory": "Laboratorium farmaceutyczne",
+  "building.herbal_clinic.upgrade.tropical_medicine_institute": "Instytut medycyny tropikalnej",
+
+  "building.mine.name": "Kopalnia",
+  "building.mine.upgrade.mining_shaft": "Szyb kopalniany",
+  "building.mine.upgrade.deep_mine": "Kopalnia głębinowa",
+  "building.mine.upgrade.mining_combine": "Kombinat górniczy",
+
+  "building.field_forge.name": "Kuźnia polowa",
+  "building.field_forge.upgrade.pig_iron_smelter": "Huta surówki",
+  "building.field_forge.upgrade.martin_furnace": "Wielki piec martenowski",
+  "building.field_forge.upgrade.siemens_martin_steelworks": "Huta stali Siemens-Martin",
+
+  "building.sugarcane_plantation.name": "Plantacja trzciny",
+  "building.sugarcane_plantation.upgrade.hacienda": "Hacienda trzcinowa",
+  "building.sugarcane_plantation.upgrade.sugar_latifundium": "Latyfundium cukrowe",
+  "building.sugarcane_plantation.upgrade.sugar_corporation": "Korporacja trzcinowa",
+
+  "building.manual_sugar_mill.name": "Cukrownia ręczna",
+  "building.manual_sugar_mill.upgrade.sugar_refinery": "Rafineria cukru",
+  "building.manual_sugar_mill.upgrade.steam_sugar_distillery": "Destylarnia cukru parowa",
+  "building.manual_sugar_mill.upgrade.industrial_sugar_distillery": "Przemysłowa destylarnia cukru",
+
+  "building.tobacco_plantation.name": "Plantacja tytoniu",
+  "building.tobacco_plantation.upgrade.estancia": "Estancia tytoniowa",
+  "building.tobacco_plantation.upgrade.tobacco_latifundium": "Latyfundium tytoniowe",
+  "building.tobacco_plantation.upgrade.tobacco_consortium": "Konsorcjum tytoniowe",
+
+  "building.tobacco_drying_house.name": "Suszenie tytoniu",
+  "building.tobacco_drying_house.upgrade.cigar_manufactory": "Manufaktura cygar",
+  "building.tobacco_drying_house.upgrade.handmade_cigar_factory": "Fabryka cygar ręcznych",
+  "building.tobacco_drying_house.upgrade.premium_cigar_factory": "Fabryka cygar premium",
+
+  "building.harbor.name": "Przystań",
+  "building.district.name": "Dzielnica"
 }

@@ -294,302 +294,452 @@ STATES = {'portugal': {'speed': 1.3,
                  'name_key': 'state.brandenburg.name',
                  'name': 'state.brandenburg.name'}}
 
-BUILDINGS = {'namiot': {'base_cost': {'skóry': 10, 'żelazo': 5},
-            'build_time': 1,
-            'base_workers': 0,
-            'capacity': 4,
-            'allowed_terrain': ['osada', 'dzielnica'],
-            'requires_settlement': True,
-            'upgrades': [{'cost': {'drewno': 40, 'żelazo': 5},
-                          'build_time': 7,
-                          'capacity': 6,
-                          'name_key': 'building.namiot.upgrade.chata'},
-                         {'cost': {'drewno': 80, 'żelazo': 10, 'stal': 5, 'skóry': 5},
-                          'build_time': 21,
-                          'capacity': 10,
-                          'name_key': 'building.namiot.upgrade.dom'},
-                         {'cost': {'drewno': 120, 'żelazo': 15, 'stal': 10, 'ubrania': 10},
-                          'build_time': 60,
-                          'capacity': 15,
-                          'name_key': 'building.namiot.upgrade.dworek'}],
-            'name_key': 'building.namiot.name'},
- 'drwalnia': {'base_cost': {'drewno': 20},
-              'build_time': 5,
-              'base_workers': 2,
-              'allowed_terrain': ['las'],
-              'base_prod': {'drewno': 2},
-              'upgrades': [{'cost': {'drewno': 40, 'żelazo': 10},
-                            'build_time': 14,
-                            'prod': {'drewno': 3},
-                            'workers': 3,
-                            'name_key': 'building.drwalnia.upgrade.tartak_reczny'},
-                           {'cost': {'stal': 30, 'żelazo': 20},
-                            'build_time': 24,
-                            'prod': {'drewno': 4},
-                            'workers': 4,
-                            'name_key': 'building.drwalnia.upgrade.tartak_parowy'},
-                           {'cost': {'stal': 60, 'cukier': 10},
-                            'build_time': 40,
-                            'prod': {'drewno': 5},
-                            'workers': 5,
-                            'name_key': 'building.drwalnia.upgrade.przemysowy_kompleks_drzewny'}],
-              'name_key': 'building.drwalnia.name'},
- 'pole_uprawne': {'base_cost': {'drewno': 15},
-                  'build_time': 4,
-                  'base_workers': 2,
-                  'allowed_terrain': ['pole'],
-                  'base_prod': {'żywność': 1.5},
-                  'upgrades': [{'cost': {'drewno': 30},
-                                'build_time': 15,
-                                'prod': {'żywność': 2},
-                                'workers': 3,
-                                'name_key': 'building.pole_uprawne.upgrade.gospodarstwo_rolne'},
-                               {'cost': {'żelazo': 20, 'stal': 10},
-                                'build_time': 22,
-                                'prod': {'żywność': 2.5},
-                                'workers': 4,
-                                'name_key': 'building.pole_uprawne.upgrade.plantacja_zbozowa'},
-                               {'cost': {'stal': 40, 'cukier': 5},
-                                'build_time': 30,
-                                'prod': {'żywność': 3},
-                                'workers': 5,
-                                'name_key': 'building.pole_uprawne.upgrade.folwark_z_mynem'}],
-                  'name_key': 'building.pole_uprawne.name'},
- 'obóz_myśliwski': {'base_cost': {'drewno': 25},
-                    'build_time': 6,
-                    'base_workers': 2,
-                    'allowed_terrain': ['las', 'pole'],
-                    'base_prod': {'skóry': 1, 'żywność': 1},
-                    'upgrades': [{'cost': {'drewno': 40, 'żelazo': 15},
-                                  'build_time': 10,
-                                  'prod': {'skóry': 1, 'żywność': 1},
-                                  'workers': 3,
-                                  'name_key': 'building.oboz_mysliwski.upgrade.stanica_owiecka'},
-                                 {'cost': {'stal': 30},
-                                  'build_time': 24,
-                                  'prod': {'skóry': 1.5, 'żywność': 1.5},
-                                  'workers': 4,
-                                  'name_key': 'building.oboz_mysliwski.upgrade.rezerwat_skorny'},
-                                 {'cost': {'stal': 50, 'cygara': 5},
-                                  'build_time': 35,
-                                  'prod': {'skóry': 2, 'żywność': 1.5},
-                                  'workers': 5,
-                                  'name_key': 'building.oboz_mysliwski.upgrade.kompania_futrzarska'}],
-                    'name_key': 'building.oboz_mysliwski.name'},
- 'garbarnia_polowa': {'base_cost': {'drewno': 30, 'żelazo': 10},
-                      'build_time': 8,
-                      'base_workers': 2,
-                      'allowed_terrain': ['osada', 'dzielnica'],
-                      'requires_settlement': True,
-                      'consumes': {'skóry': 1},
-                      'base_prod': {'ubrania': 0.5},
-                      'upgrades': [{'cost': {'drewno': 50, 'stal': 15},
-                                    'build_time': 16,
-                                    'prod': {'ubrania': 0.6},
-                                    'workers': 3,
-                                    'name_key': 'building.garbarnia_polowa.upgrade.warsztat_krawiecki'},
-                                   {'cost': {'stal': 40, 'cukier': 10},
-                                    'build_time': 27,
-                                    'prod': {'ubrania': 0.8},
-                                    'workers': 4,
-                                    'name_key': 'building.garbarnia_polowa.upgrade.manufaktura_odziezowa'},
-                                   {'cost': {'stal': 80, 'cygara': 10},
-                                    'build_time': 45,
-                                    'prod': {'ubrania': 1},
-                                    'workers': 5,
-                                    'name_key': 'building.garbarnia_polowa.upgrade.fabryka_tekstyliow_kolonialnych'}],
-                      'name_key': 'building.garbarnia_polowa.name'},
- 'ziołorośla': {'base_cost': {'drewno': 20},
-                'build_time': 5,
-                'base_workers': 2,
-                'allowed_terrain': ['pole', 'las'],
-                'base_prod': {'zioła': 1},
-                'upgrades': [{'cost': {'drewno': 35, 'żelazo': 10},
-                              'build_time': 13,
-                              'prod': {'zioła': 1.2},
-                              'workers': 3,
-                              'name_key': 'building.zioorosla.upgrade.ogrod_botaniczny'},
-                             {'cost': {'stal': 25},
-                              'build_time': 20,
-                              'prod': {'zioła': 1.4},
-                              'workers': 4,
-                              'name_key': 'building.zioorosla.upgrade.plantacja_zio_leczniczych'},
-                             {'cost': {'stal': 50, 'medykamenty': 5},
-                              'build_time': 43,
-                              'prod': {'zioła': 1.6},
-                              'workers': 5,
-                              'name_key': 'building.zioorosla.upgrade.instytut_etnobotaniki'}],
-                'name_key': 'building.zioorosla.name'},
- 'ziołolecznica': {'base_cost': {'drewno': 40, 'żelazo': 15},
-                   'build_time': 10,
-                   'base_workers': 2,
-                   'allowed_terrain': ['osada', 'dzielnica'],
-                   'requires_settlement': True,
-                   'consumes': {'zioła': 1},
-                   'base_prod': {'medykamenty': 0.5},
-                   'upgrades': [{'cost': {'stal': 30},
-                                 'build_time': 14,
-                                 'prod': {'medykamenty': 0.6},
-                                 'workers': 3,
-                                 'name_key': 'building.zioolecznica.upgrade.apteka_kolonialna'},
-                                {'cost': {'stal': 50, 'cukier': 10},
-                                 'build_time': 20,
-                                 'prod': {'medykamenty': 0.8},
-                                 'workers': 4,
-                                 'name_key': 'building.zioolecznica.upgrade.laboratorium_farmaceutyczne'},
-                                {'cost': {'stal': 100, 'cygara': 15},
-                                 'build_time': 32,
-                                 'prod': {'medykamenty': 1},
-                                 'workers': 5,
-                                 'name_key': 'building.zioolecznica.upgrade.instytut_medycyny_tropikalnej'}],
-                   'name_key': 'building.zioolecznica.name'},
- 'kopalnia': {'base_cost': {'drewno': 35, 'żelazo': 15},
-              'build_time': 12,
-              'base_workers': 3,
-              'base_prod': {'trzcina': 1},
-              'allowed_terrain': ['wzniesienia'],
-              'upgrades': [{'cost': {'stal': 30},
-                            'build_time': 16,
-                            'base_prod': {'trzcina': 1.2},
-                            'workers': 4,
-                            'name_key': 'building.kopalnia.upgrade.szyb_kopalniany'},
-                           {'cost': {'stal': 60, 'cukier': 5},
-                            'build_time': 24,
-                            'base_prod': {'trzcina': 1.4},
-                            'workers': 5,
-                            'name_key': 'building.kopalnia.upgrade.kopalnia_gebinowa'},
-                           {'cost': {'stal': 100, 'cygara': 10},
-                            'build_time': 35,
-                            'base_prod': {'trzcina': 1.6},
-                            'workers': 7,
-                            'name_key': 'building.kopalnia.upgrade.kombinat_gorniczy'}],
-              'name_key': 'building.kopalnia.name'},
- 'kuźnia_polowa': {'base_cost': {'drewno': 50, 'żelazo': 20},
-                   'build_time': 14,
-                   'base_workers': 3,
-                   'requires_settlement': True,
-                   'allowed_terrain': ['osada', 'dzielnica'],
-                   'consumes': {'węgiel': 1, 'żelazo': 1},
-                   'base_prod': {'stal': 0.5},
-                   'upgrades': [{'cost': {'stal': 40},
-                                 'build_time': 18,
-                                 'prod': {'stal': 0.6},
-                                 'workers': 4,
-                                 'name_key': 'building.kuznia_polowa.upgrade.huta_surowki'},
-                                {'cost': {'stal': 80, 'cukier': 10},
-                                 'build_time': 25,
-                                 'prod': {'stal': 0.8},
-                                 'workers': 5,
-                                 'name_key': 'building.kuznia_polowa.upgrade.wielki_piec_martenowski'},
-                                {'cost': {'stal': 120, 'cygara': 15},
-                                 'build_time': 38,
-                                 'prod': {'stal': 1},
-                                 'workers': 6,
-                                 'name_key': 'building.kuznia_polowa.upgrade.huta_stali_siemens_martin'}],
-                   'name_key': 'building.kuznia_polowa.name'},
- 'plantacja_trzciny': {'base_cost': {'drewno': 30},
-                       'build_time': 7,
-                       'base_workers': 3,
-                       'allowed_terrain': ['pole'],
-                       'base_prod': {'trzcina': 1},
-                       'upgrades': [{'cost': {'żelazo': 25},
-                                     'build_time': 12,
-                                     'prod': {'trzcina': 1.2},
-                                     'workers': 4,
-                                     'name_key': 'building.plantacja_trzciny.upgrade.hacienda_trzcinowa'},
-                                    {'cost': {'stal': 40},
-                                     'build_time': 20,
-                                     'prod': {'trzcina': 1.4},
-                                     'workers': 5,
-                                     'name_key': 'building.plantacja_trzciny.upgrade.latifundium_cukrowe'},
-                                    {'cost': {'stal': 80, 'cygara': 10},
-                                     'build_time': 30,
-                                     'prod': {'trzcina': 1.6},
-                                     'workers': 6,
-                                     'name_key': 'building.plantacja_trzciny.upgrade.korporacja_trzcinowa'}],
-                       'name_key': 'building.plantacja_trzciny.name'},
- 'cukrownia_ręczna': {'base_cost': {'drewno': 45, 'żelazo': 20},
-                      'build_time': 12,
-                      'base_workers': 3,
-                      'allowed_terrain': ['osada', 'dzielnica'],
-                      'requires_settlement': True,
-                      'consumes': {'trzcina': 2},
-                      'base_prod': {'cukier': 0.5},
-                      'upgrades': [{'cost': {'stal': 40},
-                                    'build_time': 16,
-                                    'prod': {'cukier': 0.6},
-                                    'workers': 4,
-                                    'name_key': 'building.cukrownia_reczna.upgrade.rafineria_cukru'},
-                                   {'cost': {'stal': 70, 'cukier': 10},
-                                    'build_time': 24,
-                                    'prod': {'cukier': 0.7},
-                                    'workers': 5,
-                                    'name_key': 'building.cukrownia_reczna.upgrade.destylarnia_cukru_parowa'},
-                                   {'cost': {'stal': 110, 'cygara': 15},
-                                    'build_time': 36,
-                                    'prod': {'cukier': 0.8},
-                                    'workers': 6,
-                                    'name_key': 'building.cukrownia_reczna.upgrade.przemysowa_destylarnia_cukru'}],
-                      'name_key': 'building.cukrownia_reczna.name'},
- 'plantacja_tytoniu': {'base_cost': {'drewno': 35},
-                       'build_time': 8,
-                       'base_workers': 3,
-                       'allowed_terrain': ['pole'],
-                       'base_prod': {'tytoń': 1},
-                       'upgrades': [{'cost': {'żelazo': 30},
-                                     'build_time': 13,
-                                     'prod': {'tytoń': 1.2},
-                                     'workers': 4,
-                                     'name_key': 'building.plantacja_tytoniu.upgrade.estancia_tytoniowa'},
-                                    {'cost': {'stal': 50},
-                                     'build_time': 20,
-                                     'prod': {'tytoń': 1.4},
-                                     'workers': 5,
-                                     'name_key': 'building.plantacja_tytoniu.upgrade.latifundium_tytoniowe'},
-                                    {'cost': {'stal': 90, 'cygara': 10},
-                                     'build_time': 32,
-                                     'prod': {'tytoń': 1.6},
-                                     'workers': 6,
-                                     'name_key': 'building.plantacja_tytoniu.upgrade.konsorcjum_tytoniowe'}],
-                       'name_key': 'building.plantacja_tytoniu.name'},
- 'suszenie_tytoniu': {'base_cost': {'drewno': 50, 'żelazo': 25},
-                      'build_time': 14,
-                      'base_workers': 3,
-                      'requires_settlement': True,
-                      'consumes': {'tytoń': 1},
-                      'base_prod': {'cygara': 0.5},
-                      'allowed_terrain': ['osada', 'dzielnica'],
-                      'upgrades': [{'cost': {'stal': 45},
-                                    'build_time': 18,
-                                    'prod': {'cygara': 0.6},
-                                    'workers': 4,
-                                    'name_key': 'building.suszenie_tytoniu.upgrade.manufaktura_cygar'},
-                                   {'cost': {'stal': 80, 'cukier': 15},
-                                    'build_time': 26,
-                                    'prod': {'cygara': 0.7},
-                                    'workers': 5,
-                                    'name_key': 'building.suszenie_tytoniu.upgrade.fabryka_cygar_recznych'},
-                                   {'cost': {'stal': 130, 'cygara': 20},
-                                    'build_time': 40,
-                                    'prod': {'cygara': 0.8},
-                                    'workers': 6,
-                                    'name_key': 'building.suszenie_tytoniu.upgrade.fabryka_cygar_premium'}],
-                      'name_key': 'building.suszenie_tytoniu.name'},
- 'przystań': {'base_cost': {'drewno': 60, 'żelazo': 30},
-              'build_time': 16,
-              'base_workers': 2,
-              'base_prod': {'żywność': 2},
-              'requires_adjacent_settlement': True,
-              'allowed_terrain': ['morze'],
-              'upgrades': [],
-              'name_key': 'building.przystan.name'},
- 'dzielnica': {'base_cost': {'drewno': 120, 'żelazo': 60, 'stal': 20},
-               'build_time': 25,
-               'base_workers': 5,
-               'requires_adjacent_settlement': True,
-               'allowed_terrain': ['las', 'pole', 'wzniesienia'],
-               'upgrades': [],
-               'name_key': 'building.dzielnica.name'}}
+BUILDINGS = {
+    'tent': {
+        'base_cost': {'skóry': 10, 'żelazo': 5},
+        'build_time': 1,
+        'base_workers': 0,
+        'capacity': 4,
+        'allowed_terrain': ['osada', 'dzielnica'],
+        'requires_settlement': True,
+        'upgrades': [
+            {
+                'cost': {'drewno': 40, 'żelazo': 5},
+                'build_time': 7,
+                'capacity': 6,
+                'name_key': 'building.tent.upgrade.hut'
+            },
+            {
+                'cost': {'drewno': 80, 'żelazo': 10, 'stal': 5, 'skóry': 5},
+                'build_time': 21,
+                'capacity': 10,
+                'name_key': 'building.tent.upgrade.house'
+            },
+            {
+                'cost': {'drewno': 120, 'żelazo': 15, 'stal': 10, 'ubrania': 10},
+                'build_time': 60,
+                'capacity': 15,
+                'name_key': 'building.tent.upgrade.manor'
+            }
+        ],
+        'name_key': 'building.tent.name'
+    },
+
+    'lumber_camp': {
+        'base_cost': {'drewno': 20},
+        'build_time': 5,
+        'base_workers': 2,
+        'allowed_terrain': ['las'],
+        'base_prod': {'drewno': 2},
+        'upgrades': [
+            {
+                'cost': {'drewno': 40, 'żelazo': 10},
+                'build_time': 14,
+                'prod': {'drewno': 3},
+                'workers': 3,
+                'name_key': 'building.lumber_camp.upgrade.hand_sawmill'
+            },
+            {
+                'cost': {'stal': 30, 'żelazo': 20},
+                'build_time': 24,
+                'prod': {'drewno': 4},
+                'workers': 4,
+                'name_key': 'building.lumber_camp.upgrade.steam_sawmill'
+            },
+            {
+                'cost': {'stal': 60, 'cukier': 10},
+                'build_time': 40,
+                'prod': {'drewno': 5},
+                'workers': 5,
+                'name_key': 'building.lumber_camp.upgrade.industrial_logging_complex'
+            }
+        ],
+        'name_key': 'building.lumber_camp.name'
+    },
+
+    'cropland': {
+        'base_cost': {'drewno': 15},
+        'build_time': 4,
+        'base_workers': 2,
+        'allowed_terrain': ['pole'],
+        'base_prod': {'żywność': 1.5},
+        'upgrades': [
+            {
+                'cost': {'drewno': 30},
+                'build_time': 15,
+                'prod': {'żywność': 2},
+                'workers': 3,
+                'name_key': 'building.cropland.upgrade.farm'
+            },
+            {
+                'cost': {'żelazo': 20, 'stal': 10},
+                'build_time': 22,
+                'prod': {'żywność': 2.5},
+                'workers': 4,
+                'name_key': 'building.cropland.upgrade.grain_plantation'
+            },
+            {
+                'cost': {'stal': 40, 'cukier': 5},
+                'build_time': 30,
+                'prod': {'żywność': 3},
+                'workers': 5,
+                'name_key': 'building.cropland.upgrade.folwark_with_mill'
+            }
+        ],
+        'name_key': 'building.cropland.name'
+    },
+
+    'hunting_camp': {
+        'base_cost': {'drewno': 25},
+        'build_time': 6,
+        'base_workers': 2,
+        'allowed_terrain': ['las', 'pole'],
+        'base_prod': {'skóry': 1, 'żywność': 1},
+        'upgrades': [
+            {
+                'cost': {'drewno': 40, 'żelazo': 15},
+                'build_time': 10,
+                'prod': {'skóry': 1, 'żywność': 1},
+                'workers': 3,
+                'name_key': 'building.hunting_camp.upgrade.shepherd_outpost'
+            },
+            {
+                'cost': {'stal': 30},
+                'build_time': 24,
+                'prod': {'skóry': 1.5, 'żywność': 1.5},
+                'workers': 4,
+                'name_key': 'building.hunting_camp.upgrade.hide_reserve'
+            },
+            {
+                'cost': {'stal': 50, 'cygara': 5},
+                'build_time': 35,
+                'prod': {'skóry': 2, 'żywność': 1.5},
+                'workers': 5,
+                'name_key': 'building.hunting_camp.upgrade.fur_company'
+            }
+        ],
+        'name_key': 'building.hunting_camp.name'
+    },
+
+    'tannery': {
+        'base_cost': {'drewno': 30, 'żelazo': 10},
+        'build_time': 8,
+        'base_workers': 2,
+        'allowed_terrain': ['osada', 'dzielnica'],
+        'requires_settlement': True,
+        'consumes': {'skóry': 1},
+        'base_prod': {'ubrania': 0.5},
+        'upgrades': [
+            {
+                'cost': {'drewno': 50, 'stal': 15},
+                'build_time': 16,
+                'prod': {'ubrania': 0.6},
+                'workers': 3,
+                'name_key': 'building.tannery.upgrade.tailor_workshop'
+            },
+            {
+                'cost': {'stal': 40, 'cukier': 10},
+                'build_time': 27,
+                'prod': {'ubrania': 0.8},
+                'workers': 4,
+                'name_key': 'building.tannery.upgrade.clothing_manufactory'
+            },
+            {
+                'cost': {'stal': 80, 'cygara': 10},
+                'build_time': 45,
+                'prod': {'ubrania': 1},
+                'workers': 5,
+                'name_key': 'building.tannery.upgrade.colonial_textile_factory'
+            }
+        ],
+        'name_key': 'building.tannery.name'
+    },
+
+    'herb_garden': {
+        'base_cost': {'drewno': 20},
+        'build_time': 5,
+        'base_workers': 2,
+        'allowed_terrain': ['pole', 'las'],
+        'base_prod': {'zioła': 1},
+        'upgrades': [
+            {
+                'cost': {'drewno': 35, 'żelazo': 10},
+                'build_time': 13,
+                'prod': {'zioła': 1.2},
+                'workers': 3,
+                'name_key': 'building.herb_garden.upgrade.botanical_garden'
+            },
+            {
+                'cost': {'stal': 25},
+                'build_time': 20,
+                'prod': {'zioła': 1.4},
+                'workers': 4,
+                'name_key': 'building.herb_garden.upgrade.medicinal_herb_plantation'
+            },
+            {
+                'cost': {'stal': 50, 'medykamenty': 5},
+                'build_time': 43,
+                'prod': {'zioła': 1.6},
+                'workers': 5,
+                'name_key': 'building.herb_garden.upgrade.ethnobotany_institute'
+            }
+        ],
+        'name_key': 'building.herb_garden.name'
+    },
+
+    'herbal_clinic': {
+        'base_cost': {'drewno': 40, 'żelazo': 15},
+        'build_time': 10,
+        'base_workers': 2,
+        'allowed_terrain': ['osada', 'dzielnica'],
+        'requires_settlement': True,
+        'consumes': {'zioła': 1},
+        'base_prod': {'medykamenty': 0.5},
+        'upgrades': [
+            {
+                'cost': {'stal': 30},
+                'build_time': 14,
+                'prod': {'medykamenty': 0.6},
+                'workers': 3,
+                'name_key': 'building.herbal_clinic.upgrade.colonial_pharmacy'
+            },
+            {
+                'cost': {'stal': 50, 'cukier': 10},
+                'build_time': 20,
+                'prod': {'medykamenty': 0.8},
+                'workers': 4,
+                'name_key': 'building.herbal_clinic.upgrade.pharmaceutical_laboratory'
+            },
+            {
+                'cost': {'stal': 100, 'cygara': 15},
+                'build_time': 32,
+                'prod': {'medykamenty': 1},
+                'workers': 5,
+                'name_key': 'building.herbal_clinic.upgrade.tropical_medicine_institute'
+            }
+        ],
+        'name_key': 'building.herbal_clinic.name'
+    },
+
+    'mine': {
+        'base_cost': {'drewno': 35, 'żelazo': 15},
+        'build_time': 12,
+        'base_workers': 3,
+        'base_prod': {'trzcina': 1},
+        'allowed_terrain': ['wzniesienia'],
+        'upgrades': [
+            {
+                'cost': {'stal': 30},
+                'build_time': 16,
+                'base_prod': {'trzcina': 1.2},
+                'workers': 4,
+                'name_key': 'building.mine.upgrade.mining_shaft'
+            },
+            {
+                'cost': {'stal': 60, 'cukier': 5},
+                'build_time': 24,
+                'base_prod': {'trzcina': 1.4},
+                'workers': 5,
+                'name_key': 'building.mine.upgrade.deep_mine'
+            },
+            {
+                'cost': {'stal': 100, 'cygara': 10},
+                'build_time': 35,
+                'base_prod': {'trzcina': 1.6},
+                'workers': 7,
+                'name_key': 'building.mine.upgrade.mining_combine'
+            }
+        ],
+        'name_key': 'building.mine.name'
+    },
+
+    'field_forge': {
+        'base_cost': {'drewno': 50, 'żelazo': 20},
+        'build_time': 14,
+        'base_workers': 3,
+        'requires_settlement': True,
+        'allowed_terrain': ['osada', 'dzielnica'],
+        'consumes': {'węgiel': 1, 'żelazo': 1},
+        'base_prod': {'stal': 0.5},
+        'upgrades': [
+            {
+                'cost': {'stal': 40},
+                'build_time': 18,
+                'prod': {'stal': 0.6},
+                'workers': 4,
+                'name_key': 'building.field_forge.upgrade.pig_iron_smelter'
+            },
+            {
+                'cost': {'stal': 80, 'cukier': 10},
+                'build_time': 25,
+                'prod': {'stal': 0.8},
+                'workers': 5,
+                'name_key': 'building.field_forge.upgrade.martin_furnace'
+            },
+            {
+                'cost': {'stal': 120, 'cygara': 15},
+                'build_time': 38,
+                'prod': {'stal': 1},
+                'workers': 6,
+                'name_key': 'building.field_forge.upgrade.siemens_martin_steelworks'
+            }
+        ],
+        'name_key': 'building.field_forge.name'
+    },
+
+    'sugarcane_plantation': {
+        'base_cost': {'drewno': 30},
+        'build_time': 7,
+        'base_workers': 3,
+        'allowed_terrain': ['pole'],
+        'base_prod': {'trzcina': 1},
+        'upgrades': [
+            {
+                'cost': {'żelazo': 25},
+                'build_time': 12,
+                'prod': {'trzcina': 1.2},
+                'workers': 4,
+                'name_key': 'building.sugarcane_plantation.upgrade.hacienda'
+            },
+            {
+                'cost': {'stal': 40},
+                'build_time': 20,
+                'prod': {'trzcina': 1.4},
+                'workers': 5,
+                'name_key': 'building.sugarcane_plantation.upgrade.sugar_latifundium'
+            },
+            {
+                'cost': {'stal': 80, 'cygara': 10},
+                'build_time': 30,
+                'prod': {'trzcina': 1.6},
+                'workers': 6,
+                'name_key': 'building.sugarcane_plantation.upgrade.sugar_corporation'
+            }
+        ],
+        'name_key': 'building.sugarcane_plantation.name'
+    },
+
+    'manual_sugar_mill': {
+        'base_cost': {'drewno': 45, 'żelazo': 20},
+        'build_time': 12,
+        'base_workers': 3,
+        'allowed_terrain': ['osada', 'dzielnica'],
+        'requires_settlement': True,
+        'consumes': {'trzcina': 2},
+        'base_prod': {'cukier': 0.5},
+        'upgrades': [
+            {
+                'cost': {'stal': 40},
+                'build_time': 16,
+                'prod': {'cukier': 0.6},
+                'workers': 4,
+                'name_key': 'building.manual_sugar_mill.upgrade.sugar_refinery'
+            },
+            {
+                'cost': {'stal': 70, 'cukier': 10},
+                'build_time': 24,
+                'prod': {'cukier': 0.7},
+                'workers': 5,
+                'name_key': 'building.manual_sugar_mill.upgrade.steam_sugar_distillery'
+            },
+            {
+                'cost': {'stal': 110, 'cygara': 15},
+                'build_time': 36,
+                'prod': {'cukier': 0.8},
+                'workers': 6,
+                'name_key': 'building.manual_sugar_mill.upgrade.industrial_sugar_distillery'
+            }
+        ],
+        'name_key': 'building.manual_sugar_mill.name'
+    },
+
+    'tobacco_plantation': {
+        'base_cost': {'drewno': 35},
+        'build_time': 8,
+        'base_workers': 3,
+        'allowed_terrain': ['pole'],
+        'base_prod': {'tytoń': 1},
+        'upgrades': [
+            {
+                'cost': {'żelazo': 30},
+                'build_time': 13,
+                'prod': {'tytoń': 1.2},
+                'workers': 4,
+                'name_key': 'building.tobacco_plantation.upgrade.estancia'
+            },
+            {
+                'cost': {'stal': 50},
+                'build_time': 20,
+                'prod': {'tytoń': 1.4},
+                'workers': 5,
+                'name_key': 'building.tobacco_plantation.upgrade.tobacco_latifundium'
+            },
+            {
+                'cost': {'stal': 90, 'cygara': 10},
+                'build_time': 32,
+                'prod': {'tytoń': 1.6},
+                'workers': 6,
+                'name_key': 'building.tobacco_plantation.upgrade.tobacco_consortium'
+            }
+        ],
+        'name_key': 'building.tobacco_plantation.name'
+    },
+
+    'tobacco_drying_house': {
+        'base_cost': {'drewno': 50, 'żelazo': 25},
+        'build_time': 14,
+        'base_workers': 3,
+        'requires_settlement': True,
+        'consumes': {'tytoń': 1},
+        'base_prod': {'cygara': 0.5},
+        'allowed_terrain': ['osada', 'dzielnica'],
+        'upgrades': [
+            {
+                'cost': {'stal': 45},
+                'build_time': 18,
+                'prod': {'cygara': 0.6},
+                'workers': 4,
+                'name_key': 'building.tobacco_drying_house.upgrade.cigar_manufactory'
+            },
+            {
+                'cost': {'stal': 80, 'cukier': 15},
+                'build_time': 26,
+                'prod': {'cygara': 0.7},
+                'workers': 5,
+                'name_key': 'building.tobacco_drying_house.upgrade.handmade_cigar_factory'
+            },
+            {
+                'cost': {'stal': 130, 'cygara': 20},
+                'build_time': 40,
+                'prod': {'cygara': 0.8},
+                'workers': 6,
+                'name_key': 'building.tobacco_drying_house.upgrade.premium_cigar_factory'
+            }
+        ],
+        'name_key': 'building.tobacco_drying_house.name'
+    },
+
+    'harbor': {
+        'base_cost': {'drewno': 60, 'żelazo': 30},
+        'build_time': 16,
+        'base_workers': 2,
+        'base_prod': {'żywność': 2},
+        'requires_adjacent_settlement': True,
+        'allowed_terrain': ['morze'],
+        'upgrades': [],
+        'name_key': 'building.harbor.name'
+    },
+
+    'district': {
+        'base_cost': {'drewno': 120, 'żelazo': 60, 'stal': 20},
+        'build_time': 25,
+        'base_workers': 5,
+        'requires_adjacent_settlement': True,
+        'allowed_terrain': ['las', 'pole', 'wzniesienia'],
+        'upgrades': [],
+        'name_key': 'building.district.name'
+    }
+}
 
 RESOURCES = ["żywność", "drewno", "skóry", "ubrania", "zioła", "medykamenty", "żelazo", "stal", "trzcina", "cukier", "tytoń", "cygara", "węgiel", "srebro", "złoto", "dukaty"]
 MINE_RESOURCES = ["węgiel", "żelazo", "srebro", "złoto"]
