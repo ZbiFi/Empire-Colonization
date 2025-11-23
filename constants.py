@@ -303,7 +303,7 @@ BUILDINGS = {
         "build_time": 1,
         "base_workers": 0,
         "capacity": 4,
-        "allowed_terrain": ["osada", "dzielnica"],
+        "allowed_terrain": ["settlement", "district"],
         "requires_settlement": True,
         "upgrades": [
             {
@@ -332,7 +332,7 @@ BUILDINGS = {
         "base_cost": {"wood": 20},
         "build_time": 5,
         "base_workers": 2,
-        "allowed_terrain": ["las"],
+        "allowed_terrain": ["forest"],
         "base_prod": {"wood": 2},
         "upgrades": [
             {
@@ -364,7 +364,7 @@ BUILDINGS = {
         "base_cost": {"wood": 15},
         "build_time": 4,
         "base_workers": 2,
-        "allowed_terrain": ["pole"],
+        "allowed_terrain": ["field"],
         "base_prod": {"food": 1.5},
         "upgrades": [
             {
@@ -396,7 +396,7 @@ BUILDINGS = {
         "base_cost": {"wood": 25},
         "build_time": 6,
         "base_workers": 2,
-        "allowed_terrain": ["las", "pole"],
+        "allowed_terrain": ["forest", "field"],
         "base_prod": {"skins": 1, "food": 1},
         "upgrades": [
             {
@@ -428,7 +428,7 @@ BUILDINGS = {
         "base_cost": {"wood": 30, "iron": 10},
         "build_time": 8,
         "base_workers": 2,
-        "allowed_terrain": ["osada", "dzielnica"],
+        "allowed_terrain": ["settlement", "district"],
         "requires_settlement": True,
         "consumes": {"skins": 1},
         "base_prod": {"clothes": 0.5},
@@ -462,7 +462,7 @@ BUILDINGS = {
         "base_cost": {"wood": 20},
         "build_time": 5,
         "base_workers": 2,
-        "allowed_terrain": ["pole", "las"],
+        "allowed_terrain": ["field", "forest"],
         "base_prod": {"herbs": 1},
         "upgrades": [
             {
@@ -494,7 +494,7 @@ BUILDINGS = {
         "base_cost": {"wood": 40, "iron": 15},
         "build_time": 10,
         "base_workers": 2,
-        "allowed_terrain": ["osada", "dzielnica"],
+        "allowed_terrain": ["settlement", "district"],
         "requires_settlement": True,
         "consumes": {"herbs": 1},
         "base_prod": {"meds": 0.5},
@@ -529,7 +529,7 @@ BUILDINGS = {
         "build_time": 12,
         "base_workers": 3,
         "base_prod": {"cane": 1},
-        "allowed_terrain": ["wzniesienia"],
+        "allowed_terrain": ["hills"],
         "upgrades": [
             {
                 "cost": {"steel": 30},
@@ -561,7 +561,7 @@ BUILDINGS = {
         "build_time": 14,
         "base_workers": 3,
         "requires_settlement": True,
-        "allowed_terrain": ["osada", "dzielnica"],
+        "allowed_terrain": ["settlement", "district"],
         "consumes": {"coal": 1, "iron": 1},
         "base_prod": {"steel": 0.5},
         "upgrades": [
@@ -594,7 +594,7 @@ BUILDINGS = {
         "base_cost": {"wood": 30},
         "build_time": 7,
         "base_workers": 3,
-        "allowed_terrain": ["pole"],
+        "allowed_terrain": ["field"],
         "base_prod": {"cane": 1},
         "upgrades": [
             {
@@ -626,7 +626,7 @@ BUILDINGS = {
         "base_cost": {"wood": 45, "iron": 20},
         "build_time": 12,
         "base_workers": 3,
-        "allowed_terrain": ["osada", "dzielnica"],
+        "allowed_terrain": ["settlement", "district"],
         "requires_settlement": True,
         "consumes": {"cane": 2},
         "base_prod": {"sugar": 0.5},
@@ -660,7 +660,7 @@ BUILDINGS = {
         "base_cost": {"wood": 35},
         "build_time": 8,
         "base_workers": 3,
-        "allowed_terrain": ["pole"],
+        "allowed_terrain": ["field"],
         "base_prod": {"tobacco": 1},
         "upgrades": [
             {
@@ -695,7 +695,7 @@ BUILDINGS = {
         "requires_settlement": True,
         "consumes": {"tobacco": 1},
         "base_prod": {"cigars": 0.5},
-        "allowed_terrain": ["osada", "dzielnica"],
+        "allowed_terrain": ["settlement", "district"],
         "upgrades": [
             {
                 "cost": {"steel": 45},
@@ -728,7 +728,7 @@ BUILDINGS = {
         "base_workers": 2,
         "base_prod": {"food": 2},
         "requires_adjacent_settlement": True,
-        "allowed_terrain": ["morze"],
+        "allowed_terrain": ["sea"],
         "upgrades": [],
         "name_key": "building.harbor.name",
     },
@@ -738,7 +738,7 @@ BUILDINGS = {
         "build_time": 25,
         "base_workers": 5,
         "requires_adjacent_settlement": True,
-        "allowed_terrain": ["las", "pole", "wzniesienia"],
+        "allowed_terrain": ["forest", "field", "hills"],
         "upgrades": [],
         "name_key": "building.district.name",
     },

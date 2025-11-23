@@ -1,11 +1,11 @@
 # map_generator.py
 import random
 
-from constants import MAP_SIZE
+from constants import MAP_SIZE, MINE_RESOURCES
 
-MINE_RESOURCES = ["węgiel", "żelazo", "srebro", "złoto"]
-BASE_COLORS = {"morze": "#0066CC", "pole": "#CCCC99", "las": "#228B22", "wzniesienia": "#8B4513", "osada": "#000000"}
-FERTILITY = {"nieurodzaj": 0.7, "średni": 1.0, "płodny": 1.3}
+# MINE_RESOURCES = ["węgiel", "żelazo", "srebro", "złoto"]
+# BASE_COLORS = {"morze": "#0066CC", "pole": "#CCCC99", "las": "#228B22", "wzniesienia": "#8B4513", "osada": "#000000"}
+# FERTILITY = {"nieurodzaj": 0.7, "średni": 1.0, "płodny": 1.3}
 
 
 def is_edge(y, x, size):
@@ -51,7 +51,7 @@ def generate_map(size: int = MAP_SIZE):
 
     water_cells.append(start)
     grid[start[0]][start[1]] = {
-        "terrain": "morze",
+        "terrain": "sea",
         "fertility": "średni",
         "building": [],
         "discovered": True,
@@ -90,7 +90,7 @@ def generate_map(size: int = MAP_SIZE):
         if chosen:
             water_cells.append(chosen)
             grid[chosen[0]][chosen[1]] = {
-                "terrain": "morze",
+                "terrain": "sea",
                 "fertility": "średni",
                 "building": [],
                 "discovered": True,
@@ -102,9 +102,9 @@ def generate_map(size: int = MAP_SIZE):
     for y in range(size):
         for x in range(size):
             if grid[y][x] is None:
-                terrain = random.choices(["pole", "las", "wzniesienia"], weights=[50, 30, 20])[0]
+                terrain = random.choices(["field", "forest", "hills"], weights=[50, 30, 20])[0]
                 fertility = random.choices(["nieurodzaj", "średni", "płodny"], weights=[20, 60, 20])[0]
-                resource = random.choice(MINE_RESOURCES) if terrain == "wzniesienia" else None
+                resource = random.choice(MINE_RESOURCES) if terrain == "hills" else None
                 grid[y][x] = {
                     "terrain": terrain,
                     "fertility": fertility,
@@ -118,13 +118,13 @@ def generate_map(size: int = MAP_SIZE):
     possible_settlement = []
     for y in range(1, size - 1):
         for x in range(1, size - 1):
-            if grid[y][x]["terrain"] == "morze":
+            if grid[y][x]["terrain"] == "sea":
                 continue
             neighbors = get_neighbors(y, x, size)
-            has_water = any(grid[ny][nx]["terrain"] == "morze" for ny, nx in neighbors)
+            has_water = any(grid[ny][nx]["terrain"] == "sea" for ny, nx in neighbors)
             if has_water:
                 # Sprawdź, czy da się umieścić 1 pole, 1 las, 1 wzniesienie (oprócz wody)
-                land_neighbors = [(ny, nx) for ny, nx in neighbors if grid[ny][nx]["terrain"] != "morze"]
+                land_neighbors = [(ny, nx) for ny, nx in neighbors if grid[ny][nx]["terrain"] != "sea"]
                 if len(land_neighbors) >= 3:  # potrzebujemy co najmniej 3 pola lądu na różne tereny
                     possible_settlement.append((y, x))
 
@@ -132,22 +132,22 @@ def generate_map(size: int = MAP_SIZE):
         # Fallback: wybierz dowolną nie-krawędziową komórkę z woda w sąsiedztwie
         for y in range(1, size - 1):
             for x in range(1, size - 1):
-                if grid[y][x]["terrain"] != "morze":
-                    if any(grid[ny][nx]["terrain"] == "morze" for ny, nx in get_neighbors(y, x, size)):
+                if grid[y][x]["terrain"] != "sea":
+                    if any(grid[ny][nx]["terrain"] == "sea" for ny, nx in get_neighbors(y, x, size)):
                         possible_settlement.append((y, x))
                         break
             if possible_settlement:
                 break
 
     sy, sx = random.choice(possible_settlement)
-    grid[sy][sx]["terrain"] = "osada"
+    grid[sy][sx]["terrain"] = "settlement"
     grid[sy][sx]["building"] = []
     grid[sy][sx]["discovered"] = True
     grid[sy][sx]["quality_known"] = True
 
     # === 4. Gwarancja: wokół osady dokładnie 1 morze, 1 pole, 1 las, 1 wzniesienie ===
     neighbors = get_neighbors(sy, sx, size)
-    required = {"pole", "las", "wzniesienia"}
+    required = {"field", "forest", "hills"}
     placed = set()
 
     # Najpierw sprawdź, co już jest
@@ -157,23 +157,23 @@ def generate_map(size: int = MAP_SIZE):
             placed.add(terrain)
 
     # Woda musi być — już sprawdziliśmy, że jest
-    water_count = sum(1 for ny, nx in neighbors if grid[ny][nx]["terrain"] == "morze")
+    water_count = sum(1 for ny, nx in neighbors if grid[ny][nx]["terrain"] == "sea")
     if water_count == 0:
         # Siłowo dodaj wodę w losowym sąsiedzie (jeśli coś pójdzie nie tak)
-        land_n = [(ny, nx) for ny, nx in neighbors if grid[ny][nx]["terrain"] != "morze"]
+        land_n = [(ny, nx) for ny, nx in neighbors if grid[ny][nx]["terrain"] != "sea"]
         if land_n:
             wy, wx = random.choice(land_n)
-            grid[wy][wx]["terrain"] = "morze"
+            grid[wy][wx]["terrain"] = "sea"
             grid[wy][wx]["resource"] = None
             water_cells.append((wy, wx))
 
     # Ustaw brakujące tereny
     for terrain in required - placed:
-        candidates = [(ny, nx) for ny, nx in neighbors if grid[ny][nx]["terrain"] not in ["morze", "osada"]]
+        candidates = [(ny, nx) for ny, nx in neighbors if grid[ny][nx]["terrain"] not in ["sea", "settlement"]]
         if candidates:
             ny, nx = random.choice(candidates)
             grid[ny][nx]["terrain"] = terrain
-            grid[ny][nx]["resource"] = random.choice(MINE_RESOURCES) if terrain == "wzniesienia" else None
+            grid[ny][nx]["resource"] = random.choice(MINE_RESOURCES) if terrain == "hills" else None
 
     # === 5. Odkryj osadę i wszystkich jej sąsiadów ===
     grid[sy][sx]["discovered"] = True
