@@ -989,12 +989,12 @@ RESOURCE_DISPLAY_KEYS = {
 
 # Mapping tribe internal names to localization keys
 TRIBE_DISPLAY_KEYS = {
-    'Apaches': 'tribe.apache',
-    'Cherokees': 'tribe.cherokee',
-    'Hurons': 'tribe.huron',
-    'Iroquois': 'tribe.iroquois',
-    'Creeks': 'tribe.creek',
-    'Sioux': 'tribe.sioux'
+    'apaches': 'tribe.apache',
+    'cherokees': 'tribe.cherokee',
+    'hurons': 'tribe.huron',
+    'iroquois': 'tribe.iroquois',
+    'creeks': 'tribe.creek',
+    'sioux': 'tribe.sioux'
 }
 
 SHIP_STATUS_IN_PORT = "in_port"

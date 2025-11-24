@@ -37,6 +37,9 @@ class MissionsMixin:
             resources=resources_txt,
             date=end_date.strftime("%d %b %Y")
         )
+
+        # (end_date, required, sent, difficulty, mission_text, mission_idx)
+        self.current_mission = (end_date, required.copy(), {}, difficulty, mission_text, mission_idx)
         self.log(mission_text, "purple")
         self.play_sound("new_mission")
 

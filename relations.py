@@ -9,7 +9,7 @@ from constants import (
     STATES,
     NATIVE_MISSIONS_DETAILS,
     BLOCK_NATIVE_BUY,
-    BLOCK_EUROPE_BUY,
+    BLOCK_EUROPE_BUY, TRIBE_DISPLAY_KEYS, RESOURCE_DISPLAY_KEYS,
 )
 
 
@@ -20,6 +20,10 @@ class RelationsMixin:
             return int(var.get())
         except Exception:
             return 0
+
+    def res_name(self, res_id: str) -> str:
+        key = RESOURCE_DISPLAY_KEYS.get(res_id, res_id)
+        return self.loc.t(key, default=res_id)
 
     # === WSPÓLNY HELPER DO WIERSZY HANDLU (spinbox + pionowe przyciski) ===
     def _create_trade_row(self, parent, res_name, max_q, unit_price,
@@ -32,7 +36,10 @@ class RelationsMixin:
         frame = ttk.Frame(parent)
         frame.pack(fill="x", pady=1)
 
-        label_text = res_name if not stock_info else f"{res_name} ({stock_info})"
+        res_key = RESOURCE_DISPLAY_KEYS.get(res_name, res_name)
+        nice_name = self.loc.t(res_key, default=res_name)
+
+        label_text = nice_name if not stock_info else f"{nice_name } ({stock_info})"
         ttk.Label(frame, text=label_text, width=28 if stock_info else 15).pack(side="left")
 
         var = tk.IntVar(value=0)
@@ -85,6 +92,11 @@ class RelationsMixin:
 
         return var
 
+    def tribe_name(self, tribe: str) -> str:
+        """Zwraca zlokalizowaną nazwę plemienia dla UI."""
+        key = TRIBE_DISPLAY_KEYS.get(tribe)
+        return self.loc.t(key, default=tribe) if key else tribe
+
     # === Relacje z Indianami ===
     def native_menu(self):
         win = self.create_window(self.loc.t("screen.native_menu.title"))
@@ -93,7 +105,7 @@ class RelationsMixin:
             frame = ttk.Frame(win)
             frame.pack(fill="x", padx=20, pady=3)
 
-            ttk.Label(frame, text=f"{tribe}: {rel}/100", width=25).pack(side="left")
+            ttk.Label(frame, text=f"{self.tribe_name(tribe)}: {rel}/100", width=25).pack(side="left")
 
             ttk.Button(
                 frame,
@@ -118,7 +130,7 @@ class RelationsMixin:
 
         if current_rel < 80:
             self.log(
-                self.loc.t("log.integrate_not_enough_rep_min", tribe=tribe),
+                self.loc.t("log.integrate_not_enough_rep_min", tribe=self.tribe_name(tribe)),
                 "red"
             )
             return
@@ -127,19 +139,19 @@ class RelationsMixin:
 
         if max_people <= 0:
             self.log(
-                self.loc.t("log.integrate_no_rep", tribe=tribe),
+                self.loc.t("log.integrate_no_rep", tribe=self.tribe_name(tribe)),
                 "red"
             )
             return
 
-        win = self.create_window(self.loc.t("screen.integrate_native.title", tribe=tribe))
+        win = self.create_window(self.loc.t("screen.integrate_native.title", tribe=self.tribe_name(tribe)))
 
         win.geometry("460x320")
         win.resizable(False, False)
 
         ttk.Label(
             win,
-            text=self.loc.t("screen.integrate_native.header", tribe=tribe),
+            text=self.loc.t("screen.integrate_native.header", tribe=self.tribe_name(tribe)),
             font=("Arial", 14, "bold")
         ).pack(pady=10)
 
@@ -203,7 +215,7 @@ class RelationsMixin:
             have = self.native_relations.get(tribe, 0)
             if have < cost:
                 self.log(
-                    self.loc.t("log.integrate_not_enough_rep_cost", tribe=tribe, cost=cost, have=have),
+                    self.loc.t("log.integrate_not_enough_rep_cost", tribe=self.tribe_name(tribe), cost=cost, have=have),
                     "red"
                 )
                 return
@@ -212,7 +224,7 @@ class RelationsMixin:
             self.people += n
 
             self.log(
-                self.loc.t("log.integrate_done", n=n, tribe=tribe, cost=cost),
+                self.loc.t("log.integrate_done", n=n, tribe=self.tribe_name(tribe), cost=cost),
                 "purple"
             )
 
@@ -230,7 +242,7 @@ class RelationsMixin:
         buy_mod = 2.0 - rel_norm
         if rel == 100:
             sell_mod, buy_mod = 1.5, 0.5
-        if self.state == "Anglia":
+        if self.state == "england":
             sell_mod += STATES[self.state]["trade"]
             buy_mod -= STATES[self.state]["trade"]
         return sell_mod, buy_mod
@@ -248,15 +260,17 @@ class RelationsMixin:
 
         rel = self.native_relations[tribe]
         sell_mod, buy_mod = self.get_native_price_modifier(rel)
-        if self.state == "Anglia":
+        if self.state == "england":
             sell_mod += STATES[self.state]["trade"]
             buy_mod -= STATES[self.state]["trade"]
 
+        blocked_txt = (self.res_name(r) for r in sorted(BLOCK_NATIVE_BUY))
+
         info_text = (
-                self.loc.t("screen.native_trade.relations_line", tribe=tribe, rel=rel) + "\n" +
+                self.loc.t("screen.native_trade.relations_line", tribe=self.tribe_name(tribe), rel=rel) + "\n" +
                 self.loc.t("screen.native_trade.prices_line", sell_mod=sell_mod, buy_mod=buy_mod) + "\n" +
                 self.loc.t("screen.native_trade.blocked_buy_line",
-                           blocked=", ".join(sorted(BLOCK_NATIVE_BUY)))
+                           blocked=", ".join(blocked_txt))
         )
 
         ttk.Label(trade_win, text=info_text, justify="center").pack(pady=5)
@@ -403,7 +417,7 @@ class RelationsMixin:
             )
             self.log(
                 self.loc.t("log.native_trade_result",
-                           tribe=tribe, net_word=net_word, amount=int(net)),
+                           tribe=self.tribe_name(tribe), net_word=net_word, amount=int(net)),
                 "green" if net > 0 else "gray"
             )
 
@@ -430,7 +444,7 @@ class RelationsMixin:
                 new_rel = min(100, old_rel + rep_change)
                 self.native_relations[tribe] = new_rel
                 self.log(
-                    self.loc.t("log.native_rel_change", tribe=tribe, rep_change=rep_change, new_rel=new_rel),
+                    self.loc.t("log.native_rel_change", tribe=self.tribe_name(tribe), rep_change=rep_change, new_rel=new_rel),
                     "purple"
                 )
 
@@ -500,7 +514,7 @@ class RelationsMixin:
         """
         trade_win = self.create_window(self.loc.t("screen.europe_trade.title", state=state))
 
-        trade_win.geometry("500x1100")  # stały rozmiar
+        trade_win.geometry("500x1350")  # stały rozmiar
         trade_win.resizable(False, False)
 
         def get_margins():
@@ -513,12 +527,14 @@ class RelationsMixin:
         rel = self.europe_relations[state]
         sell_mult, buy_mult = get_margins()
 
+        blocked_txt = (self.res_name(r) for r in sorted(BLOCK_EUROPE_BUY))
+
         info_text = (
                 self.loc.t("screen.europe_trade.relations_line", state=state, rel=rel) + "\n" +
                 self.loc.t("screen.europe_trade.prices_line",
                            sell_pct=(sell_mult * 100), buy_pct=(buy_mult * 100)) + "\n" +
                 self.loc.t("screen.europe_trade.blocked_buy_line",
-                           blocked=", ".join(sorted(BLOCK_EUROPE_BUY)))
+                           blocked=", ".join(blocked_txt))
         )
         ttk.Label(trade_win, text=info_text, justify="center").pack(pady=5)
 
@@ -714,7 +730,7 @@ class RelationsMixin:
                         0, self.native_relations[tribe] - 15
                     )
                     self.log(
-                        self.loc.t("log.native_mission_expired", tribe=tribe),
+                        self.loc.t("log.native_mission_expired", tribe=self.tribe_name(tribe)),
                         "red"
                     )
                     self.native_missions_active[tribe] = None
@@ -779,7 +795,7 @@ class RelationsMixin:
         self.log(
             self.loc.t(
                 "log.native_mission_new",
-                tribe=tribe,
+                tribe=self.tribe_name(tribe),
                 name=mission_name,
                 months=months
             ),
@@ -792,7 +808,7 @@ class RelationsMixin:
 
         mission = self.native_missions_active.get(tribe)
         if not mission:
-            self.log(self.loc.t("log.native_mission_none", tribe=tribe), "gray")
+            self.log(self.loc.t("log.native_mission_none", tribe=self.tribe_name(tribe)), "gray")
             return False
 
         req = mission["required"]
@@ -818,7 +834,7 @@ class RelationsMixin:
                 100, self.native_relations[tribe] + reward
             )
             self.log(
-                self.loc.t("log.native_mission_done", tribe=tribe, reward=reward),
+                self.loc.t("log.native_mission_done", tribe=self.tribe_name(tribe), reward=reward),
                 "green"
             )
 
