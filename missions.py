@@ -23,7 +23,7 @@ class MissionsMixin:
         difficulty = int(self.mission_multiplier * 1.5)  # <-- jak wcześniej
 
         required = {}
-        missionName = mission["name"]
+        mission_name = self.loc.t(mission["name_key"], default=mission["name_key"])
         for res, base_amt in mission["base"].items():
             required[res] = max(1, int(base_amt * self.mission_multiplier))
 
@@ -33,7 +33,7 @@ class MissionsMixin:
         mission_text = self.loc.t(
             "mission.royal.request",
             monarch=monarch,
-            missionName=missionName,
+            missionName=mission_name,
             resources=resources_txt,
             date=end_date.strftime("%d %b %Y")
         )
@@ -138,11 +138,14 @@ class MissionsMixin:
             # --- PRZYWRÓCONE: name na górze + desc poniżej ---
             try:
                 mission_def = ROYAL_MISSIONS[idx]
-                mname = mission_def.get(
-                    "name",
-                    self.loc.t("mission.royal.default_name")
+                mname = self.loc.t(
+                    mission_def.get("name_key", "mission.royal.default_name"),
+                    default=self.loc.t("mission.royal.default_name")
                 )
-                mdesc = mission_def.get("desc", text)
+                mdesc = self.loc.t(
+                    mission_def.get("desc_key", ""),
+                    default=text
+                )
             except Exception:
                 mname = self.loc.t("mission.royal.default_name")
                 mdesc = text
@@ -317,7 +320,11 @@ class MissionsMixin:
 
             ttk.Label(
                 mframe,
-                text=f"{tribe}: {mission['name']}",
+                text=self.loc.t(
+                    "screen.missions.item_line",
+                    tribe=tribe,
+                    name=self.loc.t(mission["name_key"], default=mission["name_key"])
+                ),
                 font=bold_info_font,
                 anchor="center",
                 justify="center"
@@ -325,7 +332,7 @@ class MissionsMixin:
 
             ttk.Label(
                 mframe,
-                text=mission.get("desc", ""),
+                text=self.loc.t(mission.get("desc_key", ""), default=""),
                 wraplength=600,
                 justify="center",
                 font=top_info_font,

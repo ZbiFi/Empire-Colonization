@@ -73,7 +73,7 @@ class RelationsMixin:
         if with_max:
             ttk.Button(
                 btn_col,
-                text="Max",
+                text=self.loc.t("ui.max_btn"),
                 width=4,
                 command=lambda v=var, m=max_q: (v.set(m), on_change())
             ).pack(side="left", padx=(4, 0), pady=(2, 0))
@@ -87,7 +87,7 @@ class RelationsMixin:
 
     # === Relacje z Indianami ===
     def native_menu(self):
-        win = self.create_window(f"Handel z Indianami")
+        win = self.create_window(self.loc.t("screen.native_menu.title"))
         for tribe in self.native_relations:
             rel = self.native_relations[tribe]
             frame = ttk.Frame(win)
@@ -97,17 +97,17 @@ class RelationsMixin:
 
             ttk.Button(
                 frame,
-                text="Integracja",
+                text=self.loc.t("ui.integrate_btn"),
                 command=lambda t=tribe: self.integrate_natives(t)
             ).pack(side="right", padx=5)
 
             ttk.Button(
                 frame,
-                text="Handel",
+                text=self.loc.t("ui.trade_btn"),
                 command=lambda t=tribe: self.open_native_trade(t, win)
             ).pack(side="right", padx=5)
 
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
+        ttk.Button(win, text=self.loc.t("ui.close"), command=win.destroy).pack(pady=10)
 
         # wyśrodkuj okno handlu z Indianami (lista plemion)
         self.center_window(win)
@@ -117,31 +117,38 @@ class RelationsMixin:
         current_rel = self.native_relations.get(tribe, 0)
 
         if current_rel < 80:
-            self.log(f"Za mało reputacji u {tribe}, aby prowadzić integrację (min. 80).", "red")
+            self.log(
+                self.loc.t("log.integrate_not_enough_rep_min", tribe=tribe),
+                "red"
+            )
             return
 
         max_people = current_rel // 10
+
         if max_people <= 0:
-            self.log(f"Brak reputacji na integrację z {tribe}.", "red")
+            self.log(
+                self.loc.t("log.integrate_no_rep", tribe=tribe),
+                "red"
+            )
             return
 
-        win = self.create_window(f"Integracja z {tribe}")
+        win = self.create_window(self.loc.t("screen.integrate_native.title", tribe=tribe))
 
         win.geometry("460x320")
         win.resizable(False, False)
 
         ttk.Label(
             win,
-            text=f"Integracja z {tribe}",
+            text=self.loc.t("screen.integrate_native.header", tribe=tribe),
             font=("Arial", 14, "bold")
         ).pack(pady=10)
 
         ttk.Label(
             win,
-            text=(
-                f"Reputacja z tym plemieniem: {current_rel}/100\n"
-                f"Koszt: 10 reputacji za 1 osobę.\n"
-                f"Maksymalnie możesz zintegrować: {max_people} osób."
+            text=self.loc.t(
+                "screen.integrate_native.info",
+                rel=current_rel,
+                max_people=max_people
             ),
             justify="center"
         ).pack(pady=5)
@@ -149,7 +156,11 @@ class RelationsMixin:
         amount_frame = ttk.Frame(win)
         amount_frame.pack(pady=10, fill="x", padx=20)
 
-        ttk.Label(amount_frame, text="Liczba osób do integracji:", font=("Arial", 10)).pack(anchor="w")
+        ttk.Label(
+            amount_frame,
+            text=self.loc.t("screen.integrate_native.amount_label"),
+            font=("Arial", 10)
+        ).pack(anchor="w")
 
         amount_var = tk.IntVar(value=1)
         slider = tk.Scale(
@@ -164,7 +175,7 @@ class RelationsMixin:
 
         amount_lbl = ttk.Label(
             amount_frame,
-            text=f"1 (koszt: 10 reputacji)",
+            text=self.loc.t("screen.integrate_native.amount_cost_one"),
             foreground="blue",
             font=("Arial", 11, "bold")
         )
@@ -172,7 +183,13 @@ class RelationsMixin:
 
         def update_amount_label(*_):
             n = amount_var.get()
-            amount_lbl.config(text=f"{n} (koszt: {n * 10} reputacji)")
+            amount_lbl.config(
+                text=self.loc.t(
+                    "screen.integrate_native.amount_cost_n",
+                    n=n,
+                    cost=n * 10
+                )
+            )
 
         amount_var.trace_add("write", update_amount_label)
 
@@ -183,9 +200,10 @@ class RelationsMixin:
             n = amount_var.get()
             cost = n * 10
 
-            if self.native_relations.get(tribe, 0) < cost:
+            have = self.native_relations.get(tribe, 0)
+            if have < cost:
                 self.log(
-                    f"Za mało reputacji u {tribe}! Potrzeba {cost}, masz {self.native_relations.get(tribe, 0)}.",
+                    self.loc.t("log.integrate_not_enough_rep_cost", tribe=tribe, cost=cost, have=have),
                     "red"
                 )
                 return
@@ -194,15 +212,14 @@ class RelationsMixin:
             self.people += n
 
             self.log(
-                f"Zintegrowano {n} osób z plemienia {tribe}. "
-                f"Kosztowało to {cost} reputacji z tym plemieniem.",
+                self.loc.t("log.integrate_done", n=n, tribe=tribe, cost=cost),
                 "purple"
             )
 
             win.destroy()
 
-        ttk.Button(btn_frame, text="Integruj", command=confirm_integration).pack(side="left", padx=8)
-        ttk.Button(btn_frame, text="Anuluj", command=win.destroy).pack(side="left", padx=8)
+        ttk.Button(btn_frame, text=self.loc.t("ui.integrate"), command=confirm_integration).pack(side="left", padx=8)
+        ttk.Button(btn_frame, text=self.loc.t("ui.cancel"), command=win.destroy).pack(side="left", padx=8)
 
         # wyśrodkuj okno integracji
         self.center_window(win)
@@ -222,8 +239,10 @@ class RelationsMixin:
         """Handel z Indianami — UI takie jak handel z państwami,
         ale zamiast dukatów jest bilans ilościowy (value units)."""
 
-        trade_win = self.create_window(f"Handel z {tribe}")
-        trade_win.geometry("500x1100")  # stały rozmiar
+        trade_win = self.create_window(
+            self.loc.t("screen.native_trade.title", tribe=tribe)
+        )
+        trade_win.geometry("500x1200")  # stały rozmiar
         trade_win.resizable(False, False)
 
 
@@ -233,21 +252,20 @@ class RelationsMixin:
             sell_mod += STATES[self.state]["trade"]
             buy_mod -= STATES[self.state]["trade"]
 
-        ttk.Label(
-            trade_win,
-            text=(
-                f"Relacje z {tribe}: {rel}/100\n"
-                f"Ceny zależą od reputacji (sprzedaż x{sell_mod:.2f}, kupno x{buy_mod:.2f}).\n"
-                f"U Indian nie kupisz: {', '.join(sorted(BLOCK_NATIVE_BUY))}"
-            ),
-            justify="center"
-        ).pack(pady=5)
+        info_text = (
+                self.loc.t("screen.native_trade.relations_line", tribe=tribe, rel=rel) + "\n" +
+                self.loc.t("screen.native_trade.prices_line", sell_mod=sell_mod, buy_mod=buy_mod) + "\n" +
+                self.loc.t("screen.native_trade.blocked_buy_line",
+                           blocked=", ".join(sorted(BLOCK_NATIVE_BUY)))
+        )
+
+        ttk.Label(trade_win, text=info_text, justify="center").pack(pady=5)
 
         # --- SEKCJE (tak jak u Europejczyków) ---
-        sell_frame = ttk.LabelFrame(trade_win, text="Sprzedajesz (otrzymujesz wartość)")
+        sell_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.native_trade.sell_frame"))
         sell_frame.pack(fill="x", padx=15, pady=5)
 
-        buy_frame = ttk.LabelFrame(trade_win, text="Kupujesz (oddajesz wartość)")
+        buy_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.native_trade.buy_frame"))
         buy_frame.pack(fill="x", padx=15, pady=5)
 
         sell_vars = {}
@@ -272,18 +290,24 @@ class RelationsMixin:
 
             net = total_gain - total_cost
 
-            self.sell_sum_lbl.config(text=f"Sprzedaż: +{int(total_gain)}")
-            self.buy_sum_lbl.config(text=f"Kupno: -{int(total_cost)}")
+            self.sell_sum_lbl.config(
+                text=self.loc.t("screen.trade.summary_sell_value", gain=int(total_gain))
+            )
+            self.buy_sum_lbl.config(
+                text=self.loc.t("screen.trade.summary_buy_value", cost=int(total_cost))
+            )
             self.net_sum_lbl.config(
-                text=f"Bilans: {'+' if net >= 0 else ''}{int(net)}"
+                text=self.loc.t("screen.trade.summary_net_value",
+                                sign="+" if net >= 0 else "",
+                                net=int(net))
             )
 
         sum_frame = ttk.Frame(trade_win)
         sum_frame.pack(pady=8)
 
-        self.sell_sum_lbl = ttk.Label(sum_frame, text="Sprzedaż: +0", foreground="green")
-        self.buy_sum_lbl = ttk.Label(sum_frame, text="Kupno: -0", foreground="red")
-        self.net_sum_lbl = ttk.Label(sum_frame, text="Bilans: 0", foreground="blue")
+        self.sell_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_sell_value", gain=0))
+        self.buy_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_buy_value", cost=0))
+        self.net_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_net_value", sign="", net=0))
 
         self.sell_sum_lbl.pack(side="left", padx=10)
         self.buy_sum_lbl.pack(side="left", padx=10)
@@ -314,7 +338,11 @@ class RelationsMixin:
                 native_stock = self.native_stock.get(tribe, {}).get(res, 0)
                 max_q_buy = int(native_stock)
                 debug_prod = self.native_prod.get(tribe, {}).get(res, 0)
-                stock_info = f"stan {max_q_buy}, prod {debug_prod:.1f}/d"
+                stock_info = self.loc.t(
+                    "debug.native_stock_info",
+                    stock=max_q_buy,
+                    prod=f"{debug_prod:.1f}"
+                )
                 var_b = self._create_trade_row(
                     parent=buy_frame,
                     res_name=res,
@@ -335,7 +363,7 @@ class RelationsMixin:
             buy = {r: self.safe_int(v) for r, v in buy_vars.items() if self.safe_int(v) > 0}
 
             if not sell and not buy:
-                self.log("Brak transakcji!", "red")
+                self.log(self.loc.t("log.trade_no_transaction"), "red")
                 return
 
             total_gain = sum(sell.get(r, 0) * NATIVE_PRICES[r] * sell_mod for r in sell)
@@ -344,13 +372,13 @@ class RelationsMixin:
             # Zasoby wystarczą?
             for r, a in sell.items():
                 if self.resources[r] < a:
-                    self.log(f"Za mało {r}!", "red")
+                    self.log(self.loc.t("log.trade_not_enough_to_sell", res=r), "red")
                     return
 
             net = total_gain - total_cost
             if net < 0:
                 # u Indian nie ma dukatów → bilans musi być >= 0
-                self.log("Bilans ujemny! Nie masz wystarczającej wartości towarów.", "red")
+                self.log(self.loc.t("log.native_trade_negative_balance"), "red")
                 return
 
             # wykonanie handlu
@@ -369,9 +397,13 @@ class RelationsMixin:
                     cur = self.native_stock[tribe].get(r, 0)
                     self.native_stock[tribe][r] = max(0, cur - a)
 
+            net_word = (
+                self.loc.t("screen.trade.net_gain") if net > 0
+                else self.loc.t("screen.trade.net_zero")
+            )
             self.log(
-                f"Handel z {tribe}: "
-                f"{'zysk' if net > 0 else 'na zero'} {int(net)} jednostek wartości.",
+                self.loc.t("log.native_trade_result",
+                           tribe=tribe, net_word=net_word, amount=int(net)),
                 "green" if net > 0 else "gray"
             )
 
@@ -398,21 +430,21 @@ class RelationsMixin:
                 new_rel = min(100, old_rel + rep_change)
                 self.native_relations[tribe] = new_rel
                 self.log(
-                    f"Relacje z {tribe}: +{rep_change} (nowe: {new_rel}/100).",
+                    self.loc.t("log.native_rel_change", tribe=tribe, rep_change=rep_change, new_rel=new_rel),
                     "purple"
                 )
 
             trade_win.destroy()
 
-        ttk.Button(trade_win, text="Wykonaj handel", command=execute_trade).pack(pady=10)
-        ttk.Button(trade_win, text="Anuluj", command=trade_win.destroy).pack(pady=5)
+        ttk.Button(trade_win, text=self.loc.t("ui.execute_trade"), command=execute_trade).pack(pady=10)
+        ttk.Button(trade_win, text=self.loc.t("ui.cancel"), command=trade_win.destroy).pack(pady=5)
 
         # wyśrodkuj okno integracji
         self.center_window(trade_win)
 
     # === Dyplomacja z państwami europejskimi ===
     def diplomacy_menu(self):
-        win = self.create_window("Dyplomacja")
+        win = self.create_window(self.loc.t("screen.diplomacy.title"))
 
         for state, rel in self.europe_relations.items():
             frame = ttk.Frame(win)
@@ -423,34 +455,38 @@ class RelationsMixin:
             if state == self.state:
                 ttk.Button(
                     frame,
-                    text="Zamówienie",
+                    text=self.loc.t("screen.diplomacy.order_button"),
                     command=lambda s=state: self.order_colonists(s)
                 ).pack(side="right")
 
                 ttk.Button(
                     frame,
-                    text="Dar (+5)",
+                    text=self.loc.t("screen.diplomacy.gift_button"),
                     command=lambda s=state: self.send_diplomatic_gift(s)
                 ).pack(side="right", padx=5)
             else:
                 ttk.Button(
                     frame,
-                    text="Handel",
+                    text=self.loc.t("ui.trade_btn"),
                     command=lambda s=state: self.open_europe_trade(s, win)
                 ).pack(side="right")
 
                 ttk.Button(
                     frame,
-                    text="Dar (+5)",
+                    text=self.loc.t("ui.gift_btn_short"),
                     command=lambda s=state: self.send_diplomatic_gift(s)
                 ).pack(side="right", padx=5)
 
         ttk.Label(
             win,
-            text=self.loc.t("ui.gift_cost", default="Dar: koszt 10 złota + 250 żywności + 20 srebra + 15 stali")
+            text=self.loc.t("ui.gift_cost_line")
         ).pack(pady=10)
 
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
+        ttk.Button(
+            win,
+            text=self.loc.t("ui.close_btn"),
+            command=win.destroy
+        ).pack(pady=10)
 
         # wyśrodkuj okno handlu z Indianami (lista plemion)
         self.center_window(win)
@@ -462,7 +498,8 @@ class RelationsMixin:
         - przy reputacji 100: sprzedaż 0.9x, kupno 1.1x
         Reputacja rośnie jak u Indian (progi 1000 + bonus za bardzo korzystny handel dla nich).
         """
-        trade_win = self.create_window(f"Handel z {state}")
+        trade_win = self.create_window(self.loc.t("screen.europe_trade.title", state=state))
+
         trade_win.geometry("500x1100")  # stały rozmiar
         trade_win.resizable(False, False)
 
@@ -476,21 +513,19 @@ class RelationsMixin:
         rel = self.europe_relations[state]
         sell_mult, buy_mult = get_margins()
 
-        ttk.Label(
-            trade_win,
-            text=(
-                f"Relacje z {state}: {rel}/100\n"
-                f"Ceny zależą od reputacji (sprzedaż: {(sell_mult * 100):.0f}% ceny, "
-                f"kupno: {(buy_mult * 100):.0f}% ceny).\n"
-                f"We europejskich krajach nie kupisz: {', '.join(sorted(BLOCK_EUROPE_BUY))}"
-            ),
-            justify="center"
-        ).pack(pady=5)
+        info_text = (
+                self.loc.t("screen.europe_trade.relations_line", state=state, rel=rel) + "\n" +
+                self.loc.t("screen.europe_trade.prices_line",
+                           sell_pct=(sell_mult * 100), buy_pct=(buy_mult * 100)) + "\n" +
+                self.loc.t("screen.europe_trade.blocked_buy_line",
+                           blocked=", ".join(sorted(BLOCK_EUROPE_BUY)))
+        )
+        ttk.Label(trade_win, text=info_text, justify="center").pack(pady=5)
 
-        sell_frame = ttk.LabelFrame(trade_win, text="Sprzedajesz (otrzymujesz dukaty)")
+        sell_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.europe_trade.sell_frame"))
         sell_frame.pack(fill="x", padx=15, pady=5)
 
-        buy_frame = ttk.LabelFrame(trade_win, text="Kupujesz (płacisz dukaty)")
+        buy_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.europe_trade.buy_frame"))
         buy_frame.pack(fill="x", padx=15, pady=5)
 
         sell_vars = {}
@@ -513,19 +548,25 @@ class RelationsMixin:
                     price = EUROPE_PRICES.get(r, 0) * buy_mult
                     total_cost += qty * price
 
-            self.sell_sum_lbl.config(text=f"Sprzedaż: +{int(total_gain)} dukatów")
-            self.buy_sum_lbl.config(text=f"Kupno: -{int(total_cost)} dukatów")
+            self.sell_sum_lbl.config(
+                text=self.loc.t("screen.trade.summary_sell_ducats", gain=int(total_gain))
+            )
+            self.buy_sum_lbl.config(
+                text=self.loc.t("screen.trade.summary_buy_ducats", cost=int(total_cost))
+            )
             net = total_gain - total_cost
             self.net_sum_lbl.config(
-                text=f"Bilans: {'+' if net >= 0 else ''}{int(net)} dukatów"
+                text=self.loc.t("screen.trade.summary_net_ducats",
+                                sign="+" if net >= 0 else "",
+                                net=int(net))
             )
 
         sum_frame = ttk.Frame(trade_win)
         sum_frame.pack(pady=8)
 
-        self.sell_sum_lbl = ttk.Label(sum_frame, text="Sprzedaż: +0 dukatów", foreground="green")
-        self.buy_sum_lbl = ttk.Label(sum_frame, text="Kupno: -0 dukatów", foreground="red")
-        self.net_sum_lbl = ttk.Label(sum_frame, text="Bilans: 0 dukatów", foreground="blue")
+        self.sell_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_sell_ducats", gain=0))
+        self.buy_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_buy_ducats", cost=0))
+        self.net_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_net_ducats", sign="", net=0))
 
         self.sell_sum_lbl.pack(side="left", padx=10)
         self.buy_sum_lbl.pack(side="left", padx=10)
@@ -572,7 +613,7 @@ class RelationsMixin:
             buy = {r: self.safe_int(v) for r, v in buy_vars.items() if self.safe_int(v) > 0}
 
             if not sell and not buy:
-                self.log("Brak transakcji!", "red")
+                self.log(self.loc.t("log.trade_no_transaction"), "red")
                 return
 
             sell_mult, buy_mult = get_margins()
@@ -584,11 +625,11 @@ class RelationsMixin:
 
             for r, a in sell.items():
                 if self.resources.get(r, 0) < a:
-                    self.log(f"Za mało {r}, aby sprzedać!", "red")
+                    self.log(self.loc.t("log.trade_not_enough_resource_generic", res=r), "red")
                     return
 
-            if self.resources["dukaty"] + net < 0:
-                self.log("Za mało dukatów na tę transakcję!", "red")
+            if self.resources["ducats"] + net < 0:
+                self.log(self.loc.t("log.trade_not_enough_ducats"), "red")
                 return
 
             for r, a in sell.items():
@@ -596,12 +637,17 @@ class RelationsMixin:
             for r, a in buy.items():
                 self.resources[r] = self.resources.get(r, 0) + a
 
-            self.resources["dukaty"] += net
+            self.resources["ducats"] += net
+
+            net_word = (
+                self.loc.t("screen.trade.net_gain") if net > 0
+                else self.loc.t("screen.trade.net_loss") if net < 0
+                else self.loc.t("screen.trade.net_zero")
+            )
 
             self.log(
-                f"Handel z {state}: "
-                f"{'zysk' if net > 0 else 'strata' if net < 0 else 'na zero'} "
-                f"{abs(int(net))} dukatów.",
+                self.loc.t("log.europe_trade_result",
+                           state=state, net_word=net_word, amount=abs(int(net))),
                 "green" if net > 0 else "orange" if net < 0 else "gray"
             )
 
@@ -627,27 +673,28 @@ class RelationsMixin:
                 new_rel = min(100, old_rel + rep_change)
                 self.europe_relations[state] = new_rel
                 self.log(
-                    f"Relacje z {state}: +{rep_change} (nowe: {new_rel}/100).",
+                    self.loc.t("log.europe_relations_change",
+                               state=state, rep_change=rep_change, new_rel=new_rel),
                     "purple"
                 )
 
             trade_win.destroy()
 
-        ttk.Button(trade_win, text="Wykonaj handel", command=execute_trade).pack(pady=10)
-        ttk.Button(trade_win, text="Anuluj", command=trade_win.destroy).pack(pady=5)
+        ttk.Button(trade_win, text=self.loc.t("ui.execute_trade"), command=execute_trade).pack(pady=10)
+        ttk.Button(trade_win, text=self.loc.t("ui.cancel"), command=trade_win.destroy).pack(pady=5)
 
         # wyśrodkuj okno integracji
         self.center_window(trade_win)
 
     def send_diplomatic_gift(self, state):
 
-        cost = {"złoto": 10, "żywność": 250, "srebro": 20, "stal": 15}
+        cost = {"gold": 10, "food": 250, "silver": 20, "steel": 15}
         if not self.can_afford(cost):
-            self.log(f"Za mało na dar dla {state}!", "red")
+            self.log(self.loc.t("log.gift_not_enough", state=state), "red")
             return
         self.spend_resources(cost)
         self.europe_relations[state] = min(100, self.europe_relations[state] + 5)
-        self.log(f"Dar do {state}: +5 relacji", "purple")
+        self.log(self.loc.t("log.gift_sent", state=state), "purple")
 
     def try_generate_native_missions(self):
         """Co dzień wywoływane: sprawdza, czy jakieś plemię powinno dostać misję."""
@@ -667,7 +714,7 @@ class RelationsMixin:
                         0, self.native_relations[tribe] - 15
                     )
                     self.log(
-                        f"Misja od {tribe} wygasła! Kara -15 reputacji.",
+                        self.loc.t("log.native_mission_expired", tribe=tribe),
                         "red"
                     )
                     self.native_missions_active[tribe] = None
@@ -717,8 +764,8 @@ class RelationsMixin:
 
         mission = {
             "tribe": tribe,
-            "name": data["name"],
-            "desc": data.get("desc", ""),
+            "name_key": data["name_key"],
+            "desc_key": data.get("desc_key", ""),
             "required": required,
             "sent": {},
             "end": end_date,
@@ -727,9 +774,15 @@ class RelationsMixin:
         }
 
         self.native_missions_active[tribe] = mission
+
+        mission_name = self.loc.t(data["name_key"], default=data["name_key"])
         self.log(
-            f"Nowa misja od plemienia {tribe}: {data['name']}. "
-            f"Czas: {months} miesięcy.",
+            self.loc.t(
+                "log.native_mission_new",
+                tribe=tribe,
+                name=mission_name,
+                months=months
+            ),
             "purple"
         )
         self.play_sound("new_mission")
@@ -739,7 +792,7 @@ class RelationsMixin:
 
         mission = self.native_missions_active.get(tribe)
         if not mission:
-            self.log(f"{tribe} nie ma aktywnej misji.", "gray")
+            self.log(self.loc.t("log.native_mission_none", tribe=tribe), "gray")
             return False
 
         req = mission["required"]
@@ -765,7 +818,7 @@ class RelationsMixin:
                 100, self.native_relations[tribe] + reward
             )
             self.log(
-                f"Misja od {tribe} wykonana! Nagroda: +{reward} reputacji.",
+                self.loc.t("log.native_mission_done", tribe=tribe, reward=reward),
                 "green"
             )
 
