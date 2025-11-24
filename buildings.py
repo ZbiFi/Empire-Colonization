@@ -56,10 +56,16 @@ class BuildingsMixin:
     def get_building_display_name(self, b):
         base_data = BUILDINGS[b["base"]]
         level = b.get("level", 0)
-        if level > 0 and level <= len(base_data["upgrades"]):
-            return base_data["upgrades"][level - 1].get("name", b["base"])
-        # dla poziomu 0 używamy przyjaznej nazwy z constants.py
-        return base_data.get("name", b["base"])
+
+        # --- nazwa z upgrade'u (poziom 1+) ---
+        if level > 0 and level <= len(base_data.get("upgrades", [])):
+            up = base_data["upgrades"][level - 1]
+            raw = up.get("name") or up.get("name_key") or f"building.{b['base']}.upgrade.level_{level}"
+            return self.loc.t(raw, default=b["base"])
+
+        # --- nazwa bazowa (poziom 0) ---
+        raw = base_data.get("name") or base_data.get("name_key") or f"building.{b['base']}.name"
+        return self.loc.t(raw, default=b["base"])
 
     # === Pojemność populacji (z budynków mieszkalnych) ===
     def calculate_population_capacity(self):
@@ -451,10 +457,14 @@ class BuildingsMixin:
             if level < len(upgrades) and not in_progress:
                 has_any = True
                 next_up = upgrades[level]
-                up_name = next_up.get(
-                    "name",
-                    self.loc.t("ui.level_fallback", level=level + 1)
-                )
+                raw_up_name = next_up.get("name") or next_up.get("name_key")
+                up_name = None
+                if raw_up_name:
+                    up_name = self.loc.t(raw_up_name, default=None)
+
+                if not up_name:
+                    # fallback na standardowy klucz upgrade jeśli nie ma name/name_key
+                    up_name = self.loc.t("ui.level_fallback", level=level + 1)
                 cost_str = ", ".join(f"{k}: {v}" for k, v in next_up.get("cost", {}).items()) \
                            or self.loc.t("ui.none")
                 time = next_up.get("build_time", 7)
@@ -474,9 +484,13 @@ class BuildingsMixin:
             # --- przycisk ZDEGRADUJ/ZBURZ (zawsze dostępny) ---
             if level > 0:
                 if level == 1:
-                    prev_name = b["base"]
+                    prev_key = f"building.{b['base']}.name"
                 else:
-                    prev_name = upgrades[level - 2].get("name", b["base"])
+                    prev_raw = upgrades[level - 2].get("name") or upgrades[level - 2].get("name_key")
+                    prev_key = prev_raw or f"building.{b['base']}.name"
+
+                prev_name = self.loc.t(prev_key, default=b["base"])
+
                 text = self.loc.t(
                     "ui.downgrade_to_with_refund_note",
                     prev=prev_name
@@ -532,7 +546,9 @@ class BuildingsMixin:
             row = ttk.Frame(win)
             row.pack(fill="x", padx=20, pady=3)
 
-            display_name = data.get("name", name)
+            name_key = data.get("name_key") or f"building.{name}.name"
+
+            display_name = self.loc.t(name_key, default=name)
 
             # 1) Przycisk z nazwą budynku (po lewej)
             btn = ttk.Button(

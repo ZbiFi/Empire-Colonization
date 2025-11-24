@@ -1091,7 +1091,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.map_grid[y][x]["building"].append(new_b)
 
             nice_name = self.get_building_display_name(new_b)
-            self.log(self.loc.t("log.completed_generic"), "green")
+            self.log(self.loc.t("log.completed_generic", nice_name=nice_name), "green")
             self.play_sound("building_done")
 
         finished_upgrades = [u for u in self.upgrades_in_progress if u[0] <= self.current_date]
