@@ -633,5 +633,9 @@
   "debug.native_stock_info": "stock {stock}, prod {prod}/d",
   "screen.missions.item_line": "{tribe}: {name}",
   "screen.diplomacy.rep_cost": "Reputation cost: {rep_cost}",
-  "screen.diplomacy.gold_cost": "Ducat cost: {gold_cost}"
+  "screen.diplomacy.gold_cost": "Ducat cost: {gold_cost}",
+  "screen.death.title": "GAME OVER",
+  "screen.death.banner": "☠ ALL COLONISTS HAVE PERISHED ☠",
+  "screen.death.text": "Your colony has fallen.\nDays survived: {days}\nRoyal missions completed: {completed} / {to_win}",
+  "screen.death.quit_button": "Quit game"
 }

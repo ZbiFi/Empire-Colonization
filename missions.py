@@ -504,6 +504,34 @@ class MissionsMixin:
         if self.completed_missions >= self.missions_to_win:
             self.win_game()
 
+    def death_game(self):
+        win = self.create_window(self.loc.t("screen.death.title"))
+
+        ttk.Label(
+            win,
+            text=self.loc.t("screen.death.banner"),
+            font=("Arial", 22, "bold"),
+            foreground="red"
+        ).pack(pady=20)
+
+        ttk.Label(
+            win,
+            text=self.loc.t(
+                "screen.death.text",
+                days=self.days_passed,  # jeśli masz licznik dni; jak nie, usuń placeholder
+                completed=self.completed_missions,
+                to_win=self.missions_to_win
+            ),
+            font=("Arial", 12),
+            justify="center"
+        ).pack(pady=10)
+
+        (ttk.Button(
+            win,
+            text=self.loc.t("screen.death.quit_button"),
+            command=self.root.quit)
+         .pack(pady=15))
+
     def win_game(self):
 
         win = self.create_window(self.loc.t("screen.victory.title"))

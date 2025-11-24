@@ -736,6 +736,11 @@
   "screen.missions.item_line": "{tribe}: {name}",
 
   "screen.diplomacy.rep_cost": "Koszt reputacji: {rep_cost}",
-  "screen.diplomacy.gold_cost": "Koszt dukatów: {gold_cost}"
+  "screen.diplomacy.gold_cost": "Koszt dukatów: {gold_cost}",
+
+  "screen.death.title": "KONIEC GRY",
+  "screen.death.banner": "☠ WSZYSCY KOLONIŚCI ZGINĘLI ☠",
+  "screen.death.text": "Twoja kolonia upadła.\nPrzetrwano dni: {days}\nUkończone misje królewskie: {completed} / {to_win}",
+  "screen.death.quit_button": "Zakończ grę"
 
 }

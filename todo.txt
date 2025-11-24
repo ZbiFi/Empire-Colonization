@@ -26,7 +26,7 @@ drogi? -> bonus do produkcji.
 
 <SAVE/LOAD>
 2.save/load
-3.settings
+1.settings
                     DONE !!!!! 1.localization
 
 <MAPA>
@@ -40,14 +40,14 @@ tile dla przystani
                     DONE !!! NIE DZIAŁAJA QUESTY JAK POWINNY!!!!!!
                     DONE !!!! handel z limitami i produkcją u indian
 automatyczny handel
-endgame screen, jak się przegra
-eventy losowe - plaga, pozar, wypadki whatever, piractwo
+                    DONE!!!!! endgame screen, jak się przegra
+3a) eventy losowe - plaga, pozar, wypadki whatever, piractwo
 ?budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
 ?magazyn -> podobnie ale z surowcami
                     DONE !!! BUG z przesuwaniem dni - nadto jest liczona produkcja
 
 <EVENTY>
-4. po eksloracji -> znalazles idola indian co robisz 1) zabierasz +10 gold +20 silver (50/50 że indianie odkryją -25 relacji) 2) zostawiasz hołd (-50 żywność) +5 relacji do losowej grupy  3) zostawiasz (nic)
+3b). po eksloracji -> znalazles idola indian co robisz 1) zabierasz +10 gold +20 silver (50/50 że indianie odkryją -25 relacji) 2) zostawiasz hołd (-50 żywność) +5 relacji do losowej grupy  3) zostawiasz (nic)
 
 
 TO EXE

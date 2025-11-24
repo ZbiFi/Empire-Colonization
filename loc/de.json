@@ -633,5 +633,9 @@
   "debug.native_stock_info": "Bestand {stock}, Prod {prod}/T",
   "screen.missions.item_line": "{tribe}: {name}",
   "screen.diplomacy.rep_cost": "Reputationskosten: {rep_cost}",
-  "screen.diplomacy.gold_cost": "Dukatenkosten: {gold_cost}"
+  "screen.diplomacy.gold_cost": "Dukatenkosten: {gold_cost}",
+  "screen.death.title": "SPIEL ENDE",
+  "screen.death.banner": "☠ ALLE KOLONISTEN SIND UMS GEKOMMEN ☠",
+  "screen.death.text": "Deine Kolonie ist gefallen.\nÜberlebte Tage: {days}\nErfüllte königliche Missionen: {completed} / {to_win}",
+  "screen.death.quit_button": "Spiel beenden"
 }

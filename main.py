@@ -94,6 +94,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.current_date = None
         self.people = 10
         self.busy_people = 0
+        self.days_passed = 0
 
         # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
         self.resources = {r: 0 for r in RESOURCES}
@@ -421,12 +422,12 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.game_length_var = tk.StringVar(value="normal")
 
         lengths = [
-            (self.loc.t("difficulty.length.flash"), 15),
-            (self.loc.t("difficulty.length.fast"), 30),
-            (self.loc.t("difficulty.length.normal"), 50),
-            (self.loc.t("difficulty.length.long"), 70),
-            (self.loc.t("difficulty.length.marathon"), 100),
-            (self.loc.t("difficulty.length.epic"), 150),
+            (self.loc.t("difficulty.length.flash"), "flash"),
+            (self.loc.t("difficulty.length.fast"), "fast"),
+            (self.loc.t("difficulty.length.normal"), "normal"),
+            (self.loc.t("difficulty.length.long"), "long"),
+            (self.loc.t("difficulty.length.marathon"), "marathon"),
+            (self.loc.t("difficulty.length.epic"), "epic"),
         ]
 
         length_frame = ttk.Frame(frame)
@@ -458,7 +459,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         length_key = getattr(self, "game_length_var", None).get() if hasattr(self, "game_length_var") else "normal"
 
         length_map = {
-            "flash": 15,
+            "flash": 1,
             "fast": 30,
             "normal": 50,
             "long": 70,
@@ -863,6 +864,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         max_excess = 0  # do logowania przeludnienia
 
         for _ in range(days):
+            self.days_passed += days
             cap = self.calculate_population_capacity()
 
             if self.people > cap:
@@ -1145,6 +1147,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         for e in exp_done:
             self.expeditions.remove(e)
             self.finish_expedition(e)
+
+        if self.people <= 0 and not getattr(self, "game_over", False):
+            self.game_over = True
+            self.death_game()
+            return
 
     def explore(self):
         if self.free_workers() < 3: self.log(self.loc.t("ui.not_enough_people"), "red"); return
