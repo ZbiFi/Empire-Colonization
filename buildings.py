@@ -188,7 +188,14 @@ class BuildingsMixin:
         cell = self.map_grid[y][x]
 
         if cell["terrain"] not in data.get("allowed_terrain", []):
-            self.log(f"{name} nie może być budowany na {cell['terrain']}!", "red")
+            self.log(
+                self.loc.t(
+                    "log.cannot_build_here",
+                    building=self.loc.t(f"building.{name}.name", default=name),
+                    terrain=self.loc.t(f"terrain.{cell['terrain']}.name", default=cell["terrain"])
+                ),
+                "red"
+            )
             return
 
         if data.get("requires_settlement"):
@@ -238,7 +245,14 @@ class BuildingsMixin:
         self.constructions.append((end_date, new_b, data["base_workers"], start_date))
         self.busy_people += data["base_workers"]
         name = self.get_building_display_name(new_b)
-        self.log(f"Budowa: {name} → {end_date.strftime('%d %b %Y')}", "blue")
+        self.log(
+            self.loc.t(
+                "log.construction_started",
+                building=name,
+                date=end_date.strftime('%d %b %Y')
+            ),
+            "blue"
+        )
 
     # === Ulepszenia (w górę) ===
     def start_upgrade(self, building_idx):
@@ -280,8 +294,12 @@ class BuildingsMixin:
         self.busy_people += workers_needed
 
         self.log(
-            f"Ulepszanie: {self.get_building_display_name(b)} → poziom {current_level + 1} "
-            f"→ {end_date.strftime('%d %b %Y')}",
+            self.loc.t(
+                "log.upgrading_started",
+                building=self.get_building_display_name(b),
+                level=current_level + 1,
+                date=end_date.strftime('%d %b %Y')
+            ),
             "purple",
         )
 
@@ -327,8 +345,11 @@ class BuildingsMixin:
 
             current_name = self.get_building_display_name(b)
             self.log(
-                f"Zdegradowano budynek do poziomu {new_level}: {current_name} "
-                f"(zwrot 50% kosztu ulepszenia).",
+                self.loc.t(
+                    "log.building_downgraded",
+                    level=new_level,
+                    building=current_name
+                ),
                 "orange",
             )
             return
@@ -421,7 +442,7 @@ class BuildingsMixin:
             if in_progress:
                 cancel_btn = ttk.Button(
                     frame,
-                    text="Zatrzymaj ulepszenie",
+                    text=self.loc.t("ui.cancel_upgrade"),
                     command=lambda idx=i: [self.cancel_upgrade(idx), win.destroy()],
                 )
                 cancel_btn.pack(side="right", padx=5)
@@ -430,8 +451,12 @@ class BuildingsMixin:
             if level < len(upgrades) and not in_progress:
                 has_any = True
                 next_up = upgrades[level]
-                up_name = next_up.get("name", f"Poziom {level + 1}")
-                cost_str = ", ".join(f"{k}: {v}" for k, v in next_up.get("cost", {}).items()) or "brak"
+                up_name = next_up.get(
+                    "name",
+                    self.loc.t("ui.level_fallback", level=level + 1)
+                )
+                cost_str = ", ".join(f"{k}: {v}" for k, v in next_up.get("cost", {}).items()) \
+                           or self.loc.t("ui.none")
                 time = next_up.get("build_time", 7)
 
                 up_btn = ttk.Button(
@@ -474,7 +499,7 @@ class BuildingsMixin:
                 foreground="gray",
             ).pack(pady=20)
 
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=10)
+        ttk.Button(win, text=self.loc.t("ui.close"), command=win.destroy).pack(pady=10)
 
         # wyśrodkuj okno statków
         self.center_window(win)
@@ -483,7 +508,7 @@ class BuildingsMixin:
 
     def build_menu(self):
 
-        win = self.create_window(f"Buduj")
+        win = self.create_window(self.loc.t("screen.build_menu.title"))
 
         # styl dla budynków, na które gracza nie stać
         if not hasattr(self, "_cant_afford_building_style"):
@@ -498,7 +523,7 @@ class BuildingsMixin:
                 mult = STATES[self.state]["build_cost"]  # np. 0.8
                 display_cost = {k: int(v * mult) for k, v in display_cost.items()}
 
-            cost_str = ", ".join(f"{k}: {v}" for k, v in display_cost.items()) or "brak"
+            cost_str = ", ".join(f"{k}: {v}" for k, v in display_cost.items()) or self.loc.t("ui.none")
             build_time = data.get("build_time", 0)
             base_workers = data.get("base_workers", 0)
             desc = data.get("desc") or data.get("description", "")
@@ -535,10 +560,10 @@ class BuildingsMixin:
 
             info_parts = []
             if build_time:
-                info_parts.append(f"Czas budowy: {build_time} dni")
+                info_parts.append(self.loc.t("ui.build_time_days", days=build_time))
             if base_workers:
-                info_parts.append(f"Miejsca pracy: {base_workers}")
-            info_parts.append(f"Koszt: {cost_str}")
+                info_parts.append(self.loc.t("ui.work_places", workers=base_workers))
+            info_parts.append(self.loc.t("ui.cost_prefix", cost=cost_str))
             if desc:
                 info_parts.append(desc)
 
@@ -552,7 +577,7 @@ class BuildingsMixin:
                 wraplength=600,
             ).pack(fill="x")
 
-        ttk.Button(win, text="Anuluj", command=win.destroy).pack(pady=10)
+        ttk.Button(win, text=self.loc.t("ui.cancel"), command=win.destroy).pack(pady=10)
 
         # wyśrodkuj okno
         self.center_window(win)
@@ -570,11 +595,11 @@ class BuildingsMixin:
         # === NAMIOT ===
         if name == "tent":
             cap = data.get("capacity", 0)
-            return f"+{cap} mieszkań"
+            return self.loc.t("tooltip.tent_capacity", cap=cap)
 
         # === DZIELNICA ===
         if name == "district":
-            return "+5 nowych miejsc na budowle"
+            return self.loc.t("tooltip.district_slots")
 
         # === BUDYNKI PRODUKCYJNE I KOPALNIA ===
 
@@ -594,7 +619,7 @@ class BuildingsMixin:
 
                 # kopalnia: „trzcina” → prawdziwy surowiec ('węgiel', 'żelazo', 'srebro', 'złoto')
                 if name == "mine":
-                    display_res = "surowiec ze złoża"
+                    display_res = self.loc.t("tooltip.mine_resource_placeholder")
 
                 # premie państw
                 bonus = 1.0
@@ -608,7 +633,12 @@ class BuildingsMixin:
                     bonus *= STATES[self.state].get("mine", 1.0)
 
                 real_amount = amount * bonus
-                lines.append(f"Poziom 0: +{real_amount:g} {display_res} / pracownik")
+                lines.append(self.loc.t(
+                    "tooltip.production_line",
+                    level=0,
+                    amount=f"{real_amount:g}",
+                    res=display_res
+                ))
 
         # === produkcja z ulepszeń ===
         for idx, up in enumerate(upgrades, start=1):
@@ -616,7 +646,7 @@ class BuildingsMixin:
             for res, amount in up_prod.items():
                 display_res = res
                 if name == "mine":
-                    display_res = "surowiec ze złoża"
+                    display_res = self.loc.t("tooltip.mine_resource_placeholder")
 
                 bonus = 1.0
                 if self.state == "sweden" and display_res == "wood":
@@ -629,15 +659,24 @@ class BuildingsMixin:
                     bonus *= STATES[self.state].get("mine", 1.0)
 
                 real_amount = amount * bonus
-                lines.append(f"Poziom {idx}: +{real_amount:g} {display_res} / pracownik")
+                lines.append(self.loc.t(
+                    "tooltip.production_line",
+                    level=idx,
+                    amount=f"{real_amount:g}",
+                    res=display_res
+                ))
 
         if not lines:
             return self.loc.t("screen.buildings.no_direct_production")
 
         # Jeśli to kopalnia — dodaj precyzję opisu
+
         if name == "mine":
-            return ("Kopalnia: wydobywa surowiec ze złoża na wzniesieniach.\n"
-                    + "\n".join(lines))
+            return (
+                    self.loc.t("tooltip.mine_header")
+                    + "\n"
+                    + "\n".join(lines)
+            )
 
         return "\n".join(lines)
     def select_for_building(self, name, win):
@@ -648,7 +687,7 @@ class BuildingsMixin:
     # === Zarządzanie pracownikami ===
     def manage_workers(self):
 
-        win = self.create_window(f"Pracownicy")
+        win = self.create_window(self.loc.t("screen.workers.title"))
 
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
 
@@ -685,7 +724,7 @@ class BuildingsMixin:
                 foreground="red",
                 font=title_font
             ).pack(pady=15)
-            ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
+            ttk.Button(win, text=self.loc.t("ui.close"), command=win.destroy).pack(pady=5)
             self.center_window(win)
             return
 
@@ -712,10 +751,10 @@ class BuildingsMixin:
             for idx, scale in self.worker_sliders:
                 self.buildings[idx]["workers"] = scale.get()
 
-            self.log("Pracownicy przydzieleni.", "green")
+            self.log(self.loc.t("log.workers_assigned"), "green")
             win.destroy()
 
-        ttk.Button(win, text="Zatwierdź", command=save).pack(pady=10)
+        ttk.Button(win, text=self.loc.t("ui.confirm"), command=save).pack(pady=10)
 
         # wyśrodkuj okno statków
         self.center_window(win)

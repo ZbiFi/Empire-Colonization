@@ -568,6 +568,27 @@
   "log.not_enough_free_workers": "Za dużo! Za mało wolnych ludzi.",
 
   "screen.buildings.no_jobs": "Brak miejsc pracy",
-  "screen.buildings.no_direct_production": "Brak bezpośredniej produkcji ani kosztów."
+  "screen.buildings.no_direct_production": "Brak bezpośredniej produkcji ani kosztów.",
+
+  "log.cannot_build_here": "{building} nie może być budowany na {terrain}!",
+  "log.construction_started": "Budowa: {building} → {date}",
+  "log.upgrading_started": "Ulepszanie: {building} → poziom {level} → {date}",
+  "log.building_downgraded": "Zdegradowano budynek do poziomu {level}: {building} (zwrot 50% kosztu ulepszenia).",
+
+  "screen.build_menu.title": "Buduj",
+  "ui.build_time_days": "Czas budowy: {days} dni",
+  "ui.work_places": "Miejsca pracy: {workers}",
+  "ui.cost_prefix": "Koszt: {cost}",
+
+  "tooltip.tent_capacity": "+{cap} mieszkań",
+  "tooltip.district_slots": "+5 nowych miejsc na budowle",
+  "tooltip.production_line": "Poziom {level}: +{amount} {res} / pracownik",
+  "tooltip.mine_header": "Kopalnia: wydobywa surowiec ze złoża na wzniesieniach.",
+
+  "screen.workers.title": "Pracownicy",
+  "ui.confirm": "Zatwierdź",
+  "ui.level_fallback": "Poziom {level}",
+  "ui.close": "Zamknij",
+  "tooltip.mine_resource_placeholder": "surowiec ze złoża"
 
 }
