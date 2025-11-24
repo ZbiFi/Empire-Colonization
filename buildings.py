@@ -438,8 +438,9 @@ class BuildingsMixin:
             frame = ttk.Frame(win)
             frame.pack(fill="x", padx=20, pady=3)
 
+            level_prefix = self.loc.t("ui.level_fallback", level=level)
             # nazwa + poziom + informacja o statusie ulepszenia
-            label_text = f"{current_name} ({b['pos'][0]},{b['pos'][1]}) [poziom {level}]"
+            label_text = f"{current_name} ({b['pos'][0]},{b['pos'][1]}) [{level_prefix}]"
             if in_progress:
                 label_text += self.loc.t("ui.upgrading_suffix")
             ttk.Label(frame, text=label_text, width=40).pack(side="left")
@@ -465,8 +466,10 @@ class BuildingsMixin:
                 if not up_name:
                     # fallback na standardowy klucz upgrade jeśli nie ma name/name_key
                     up_name = self.loc.t("ui.level_fallback", level=level + 1)
-                cost_str = ", ".join(f"{k}: {v}" for k, v in next_up.get("cost", {}).items()) \
-                           or self.loc.t("ui.none")
+                cost_str = ", ".join(
+                    f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(k, k), default=k)}: {v}"
+                    for k, v in next_up.get("cost", {}).items()
+                ) or self.loc.t("ui.none")
                 time = next_up.get("build_time", 7)
 
                 up_btn = ttk.Button(
@@ -537,7 +540,10 @@ class BuildingsMixin:
                 mult = STATES[self.state]["build_cost"]  # np. 0.8
                 display_cost = {k: int(v * mult) for k, v in display_cost.items()}
 
-            cost_str = ", ".join(f"{k}: {v}" for k, v in display_cost.items()) or self.loc.t("ui.none")
+            cost_str = ", ".join(
+                f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(k, k), default=k)}: {v}"
+                for k, v in display_cost.items()
+            ) or self.loc.t("ui.none")
             build_time = data.get("build_time", 0)
             base_workers = data.get("base_workers", 0)
             desc = data.get("desc") or data.get("description", "")

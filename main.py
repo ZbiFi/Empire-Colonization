@@ -1042,20 +1042,33 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 missing_resources = consumes_something and eff < 1.0
                 if missing_resources:
                     color_tag = "red"
+
                 local_net = {r: prod.get(r, 0) - cons.get(r, 0) for r in RESOURCES}
-                prod_str = " | ".join(f"{r}: +{v:.1f}" for r, v in local_net.items() if v > 0.05)
+
+                prod_str = " | ".join(
+                    f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)}: +{v:.1f}"
+                    for r, v in local_net.items()
+                    if v > 0.05
+                )
+
                 eff_str = f" ({eff:.0%})" if eff < 1 else ""
                 status = f"{prod_str}{eff_str}" if prod_str else "—"
+
                 for r, v in local_net.items():
                     net_total[r] += v * eff
 
             pos = b["pos"]
             cell = self.map_grid[pos[0]][pos[1]]
-            area = "osada" if cell["terrain"] == "osada" else "dzielnica"
+
+            pos = b["pos"]
+            area_id = "settlement" if cell["terrain"] == "settlement" else "district"
+            area_label = self.loc.t(f"terrain.{area_id}.name", default=area_id)
+
+            workers_word = self.loc.t("ui.workers_short", default="pracownicy")
 
             line = (
-                f"{display_name} | Prac: {b.get('workers', 0)}/{self.get_max_workers(b)} "
-                f"| {status} | ({pos[0]},{pos[1]}) | {area}"
+                f"{display_name} | {workers_word}: {b.get('workers', 0)}/{self.get_max_workers(b)} "
+                f"| {status} | ({pos[0]},{pos[1]}) | {area_label}"
             )
             self.build_listbox.insert(tk.END, line)
             self.build_listbox.itemconfig(tk.END, fg=color_tag)

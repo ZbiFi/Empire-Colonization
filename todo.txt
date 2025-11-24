@@ -27,7 +27,7 @@ drogi? -> bonus do produkcji.
 <SAVE/LOAD>
 2.save/load
 3.settings
-1.localization
+                    DONE !!!!! 1.localization
 
 <MAPA>
                     DONE !!! - lepsze tile

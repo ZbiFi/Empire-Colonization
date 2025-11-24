@@ -565,6 +565,7 @@
   "log.cannot_build_on_sea": "Nie na morzu!",
 
   "log.no_upgrade_to_cancel": "Brak ulepszenia do zatrzymania.",
+  "log.upgrade_done": "Ulepszenie zakończone.",
   "log.upgrade_cancelled_refunded": "Ulepszenie zatrzymane — zwrócono wszystkie surowce i robotników.",
 
   "log.building_demolished_refund": "Zburzono budynek. Zwrot: 50% kosztu budowy.",
@@ -590,6 +591,7 @@
   "tooltip.mine_header": "Kopalnia: wydobywa surowiec ze złoża na wzniesieniach.",
   "tooltip.population": "By zdobyć więcej ludzi musisz sprowadzić ich z Europy \nlub zintegrować lokalnych Indian.",
 
+  "ui.workers_short": "Pracownicy",
   "screen.workers.title": "Pracownicy",
   "ui.confirm": "Zatwierdź",
   "ui.level_fallback": "Poziom {level}",
