@@ -250,6 +250,10 @@ class RelationsMixin:
         if self.state == "england":
             sell_mod += STATES[self.state]["trade"]
             buy_mod -= STATES[self.state]["trade"]
+        if self.state == "venice":
+            sell_mod += STATES[self.state]["trade"]
+            buy_mod -= STATES[self.state]["trade"]
+
         return sell_mod, buy_mod
 
     def open_native_trade(self, tribe, parent):
@@ -265,9 +269,6 @@ class RelationsMixin:
 
         rel = self.native_relations[tribe]
         sell_mod, buy_mod = self.get_native_price_modifier(rel)
-        if self.state == "england":
-            sell_mod += STATES[self.state]["trade"]
-            buy_mod -= STATES[self.state]["trade"]
 
         blocked_txt = (self.res_name(r) for r in sorted(BLOCK_NATIVE_BUY))
 
@@ -324,9 +325,9 @@ class RelationsMixin:
         sum_frame = ttk.Frame(trade_win)
         sum_frame.pack(pady=8)
 
-        self.sell_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_sell_value", gain=0))
-        self.buy_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_buy_value", cost=0))
-        self.net_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_net_value", sign="", net=0))
+        self.sell_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_sell_value", gain=0), foreground="green")
+        self.buy_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_buy_value", cost=0), foreground="red")
+        self.net_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_net_value", sign="", net=0), foreground="blue")
 
         self.sell_sum_lbl.pack(side="left", padx=10)
         self.buy_sum_lbl.pack(side="left", padx=10)
@@ -528,6 +529,14 @@ class RelationsMixin:
             t = max(0, min(100, rel)) / 100.0
             sell_mult = 0.5 + 0.4 * t
             buy_mult = 1.5 - 0.4 * t
+
+            if self.state == "england":
+                sell_mult += STATES[self.state]["trade"]
+                buy_mult -= STATES[self.state]["trade"]
+            if self.state == "venice":
+                sell_mult += STATES[self.state]["trade"]
+                buy_mult -= STATES[self.state]["trade"]
+
             return sell_mult, buy_mult
 
         rel = self.europe_relations[state]
@@ -586,9 +595,9 @@ class RelationsMixin:
         sum_frame = ttk.Frame(trade_win)
         sum_frame.pack(pady=8)
 
-        self.sell_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_sell_ducats", gain=0))
-        self.buy_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_buy_ducats", cost=0))
-        self.net_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_net_ducats", sign="", net=0))
+        self.sell_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_sell_ducats", gain=0), foreground="green")
+        self.buy_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_buy_ducats", cost=0), foreground="red")
+        self.net_sum_lbl = ttk.Label(sum_frame, text=self.loc.t("screen.trade.summary_net_ducats", sign="", net=0), foreground="blue")
 
         self.sell_sum_lbl.pack(side="left", padx=10)
         self.buy_sum_lbl.pack(side="left", padx=10)

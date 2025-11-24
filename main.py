@@ -162,9 +162,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.europe_trade_value = {s: 0 for s in self.europe_relations}
         self.trade_reputation_threshold = 1000
 
-        if self.state == "france":
-            self.trade_reputation_threshold += STATES[self.state]["reputation_threshold"]
-
         self.map_size = MAP_SIZE
         self.map_grid = None
         self.settlement_pos = None
@@ -177,7 +174,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.mission_multiplier = 1.0
         self.first_mission_given = False
 
-        self.start_screen()
         self.completed_missions = 0
         self.missions_to_win = 100
 
@@ -192,6 +188,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         self.current_monarch = ""
 
+        self.start_screen()
         pygame.mixer.init()
         self.init_sounds()
 
@@ -448,10 +445,14 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         start_btn.pack(pady=10)
 
     def start_game(self):
+
         display = self.state_var.get()
         self.state_display = display
         self.state = self.state_display_to_id.get(display, display)
         if not self.state: return
+
+        if self.state == "france":
+            self.trade_reputation_threshold = STATES[self.state]["reputation_threshold"]
 
         # ustawienie długości gry na podstawie wyboru na ekranie startowym
         length_key = getattr(self, "game_length_var", None).get() if hasattr(self, "game_length_var") else "normal"

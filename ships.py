@@ -101,7 +101,8 @@ class ShipsMixin:
                     font=small_info_font
                 ).pack(anchor="w")
 
-                gold = sum(a * EUROPE_PRICES.get(r, 0) for r, a in load.items())
+                sell_mult = self.get_europe_sell_mult_for_player()
+                gold = round(sum(a * EUROPE_PRICES.get(r, 0) * sell_mult for r, a in load.items()))
                 ttk.Label(
                     frame,
                     text=self.loc.t("screen.ships.expected_profit_line", gold=gold),
@@ -149,8 +150,10 @@ class ShipsMixin:
 
     def calculate_travel_days(self):
         base = random.randint(40, 80)
+        print(base)
         if STATES[self.state].get("speed"):
             base = int(base / STATES[self.state]["speed"])
+        print(base)
         return base
 
     def send_ship(self, load):
@@ -434,9 +437,13 @@ class ShipsMixin:
                             self.complete_royal_mission()
 
                     # === SPRZEDAŻ NADMIARU ===
-                    gold = sum(a * EUROPE_PRICES.get(r, 0) for r, a in excess.items())
+                    sell_mult = self.get_europe_sell_mult_for_player()
+                    gold = round(sum(a * EUROPE_PRICES.get(r, 0) * sell_mult for r, a in load.items()))
                     if gold > 0:
-                        excess_str = ", ".join(f"{k}: {v}" for k, v in excess.items())
+                        excess_str = ", ".join(
+                            f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(k, k), default=k)}: {v}"
+                            for k, v in excess.items()
+                        )
                         self.log(
                             self.loc.t(
                                 "log.ship_unloaded_in_europe",
@@ -444,7 +451,7 @@ class ShipsMixin:
                                 cargo=excess_str,
                                 gold=gold
                             ),
-                            "gold"
+                            "green"
                         )
                         self.resources["ducats"] += gold
 
@@ -494,6 +501,18 @@ class ShipsMixin:
                             (self.current_date - self.last_mission_date).days >= 90):
                         if not self.current_mission:
                             self.deliver_new_mission()
+
+    def get_europe_sell_mult_for_player(self):
+        # reputacja z własnym państwem europejskim
+        rel = self.europe_relations.get(self.state, 0)
+        t = max(0, min(100, rel)) / 100.0
+        sell_mult = 0.5 + 0.4 * t
+
+        # bonus handlowy gracza (Anglia/Wenecja)
+        if self.state in ("england", "venice"):
+            sell_mult += STATES[self.state]["trade"]
+
+        return sell_mult
 
     def auto_send_empty_ship(self):
         if self.auto_sail_timer and self.current_date >= self.auto_sail_timer:
