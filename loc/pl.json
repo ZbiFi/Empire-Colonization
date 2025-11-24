@@ -304,10 +304,11 @@
 
   "ui.none_resource": "brak",
 
+  "log.discovered_no_resource_cell": "Odkryto ({y},{x}): {terrain}",
   "log.discovered_cell": "Odkryto ({y},{x}): {terrain} | {resource}",
   "log.gain_resource": "{res} +{amount}",
 
-   "state.portugal.ruler.john_ii_the_perfect.name": "Jan II Doskonały",
+  "state.portugal.ruler.john_ii_the_perfect.name": "Jan II Doskonały",
   "state.portugal.ruler.manuel_i_the_fortunate.name": "Manuel I Szczęśliwy",
   "state.portugal.ruler.john_iii.name": "Jan III",
   "state.portugal.ruler.sebastian_i.name": "Sebastian I",
@@ -531,6 +532,7 @@
   "log.not_enough_people": "Za mało ludzi!",
   "log.not_enough_resources": "Za mało surowców!",
   "log.exploration.return": "Eksploracja ({y},{x}): powrót {date}",
+  "log.exploration_loot": "Eksploracja wróciła z łupami: ",
 
   "ui.must_be_in_settlement": "Tylko w osadzie/dzielnicy!",
   "ui.no_space_in_settlement": "Brak miejsca w osadzie! (w tym budowa)",
@@ -728,6 +730,9 @@
   "log.native_rel_change": "Relacje z {tribe}: +{rep_change} (nowe: {new_rel}/100).",
 
   "debug.native_stock_info": "stan {stock}, prod {prod}/d",
-  "screen.missions.item_line": "{tribe}: {name}"
+  "screen.missions.item_line": "{tribe}: {name}",
+
+  "screen.diplomacy.rep_cost": "Koszt reputacji: {rep_cost}",
+  "screen.diplomacy.gold_cost": "Koszt dukatów: {gold_cost}"
 
 }

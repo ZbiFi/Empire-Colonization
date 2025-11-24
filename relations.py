@@ -21,6 +21,11 @@ class RelationsMixin:
         except Exception:
             return 0
 
+    def state_name(self, state_id: str) -> str:
+        data = STATES.get(state_id, {})
+        key = data.get("name_key")
+        return self.loc.t(key, default=state_id) if key else state_id
+
     def res_name(self, res_id: str) -> str:
         key = RESOURCE_DISPLAY_KEYS.get(res_id, res_id)
         return self.loc.t(key, default=res_id)
@@ -464,7 +469,7 @@ class RelationsMixin:
             frame = ttk.Frame(win)
             frame.pack(fill="x", padx=20, pady=3)
 
-            ttk.Label(frame, text=f"{state}: {rel}/100", width=25).pack(side="left")
+            ttk.Label(frame, text=f"{self.state_name(state)}: {rel}/100", width=25).pack(side="left")
 
             if state == self.state:
                 ttk.Button(
@@ -512,7 +517,8 @@ class RelationsMixin:
         - przy reputacji 100: sprzedaż 0.9x, kupno 1.1x
         Reputacja rośnie jak u Indian (progi 1000 + bonus za bardzo korzystny handel dla nich).
         """
-        trade_win = self.create_window(self.loc.t("screen.europe_trade.title", state=state))
+        state_disp = self.state_name(state)
+        trade_win = self.create_window(self.loc.t("screen.europe_trade.title", state=state_disp))
 
         trade_win.geometry("500x1350")  # stały rozmiar
         trade_win.resizable(False, False)
@@ -530,7 +536,7 @@ class RelationsMixin:
         blocked_txt = (self.res_name(r) for r in sorted(BLOCK_EUROPE_BUY))
 
         info_text = (
-                self.loc.t("screen.europe_trade.relations_line", state=state, rel=rel) + "\n" +
+                self.loc.t("screen.europe_trade.relations_line", state=state_disp, rel=rel) + "\n" +
                 self.loc.t("screen.europe_trade.prices_line",
                            sell_pct=(sell_mult * 100), buy_pct=(buy_mult * 100)) + "\n" +
                 self.loc.t("screen.europe_trade.blocked_buy_line",
@@ -663,7 +669,7 @@ class RelationsMixin:
 
             self.log(
                 self.loc.t("log.europe_trade_result",
-                           state=state, net_word=net_word, amount=abs(int(net))),
+                           state=self.state_name(state), net_word=net_word, amount=abs(int(net))),
                 "green" if net > 0 else "orange" if net < 0 else "gray"
             )
 
@@ -690,7 +696,7 @@ class RelationsMixin:
                 self.europe_relations[state] = new_rel
                 self.log(
                     self.loc.t("log.europe_relations_change",
-                               state=state, rep_change=rep_change, new_rel=new_rel),
+                               state=self.state_name(state), rep_change=rep_change, new_rel=new_rel),
                     "purple"
                 )
 
@@ -706,11 +712,11 @@ class RelationsMixin:
 
         cost = {"gold": 10, "food": 250, "silver": 20, "steel": 15}
         if not self.can_afford(cost):
-            self.log(self.loc.t("log.gift_not_enough", state=state), "red")
+            self.log(self.loc.t("log.gift_not_enough", state=self.state_name(state)), "red")
             return
         self.spend_resources(cost)
         self.europe_relations[state] = min(100, self.europe_relations[state] + 5)
-        self.log(self.loc.t("log.gift_sent", state=state), "purple")
+        self.log(self.loc.t("log.gift_sent", state=self.state_name(state)), "purple")
 
     def try_generate_native_missions(self):
         """Co dzień wywoływane: sprawdza, czy jakieś plemię powinno dostać misję."""

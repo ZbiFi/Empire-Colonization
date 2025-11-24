@@ -592,8 +592,12 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             amt = amount_var.get()
             rep_cost = amt * 10
             gold_cost = amt * 1000
-            rep_cost_lbl.config(text=self.loc.t("ui.rep_cost"))
-            gold_cost_lbl.config(text=self.loc.t("ui.ducat_cost"))
+            rep_cost_lbl.config(
+                text=self.loc.t("screen.diplomacy.rep_cost", rep_cost=rep_cost)
+            )
+            gold_cost_lbl.config(
+                text=self.loc.t("screen.diplomacy.gold_cost", gold_cost=gold_cost)
+            )
 
             # Podświetl aktywną metodę
             if payment_method.get() == "reputation":
@@ -1141,20 +1145,32 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         if exp[2] == "explore":
             cell["discovered"] = True
-            res = cell["resource"] or self.loc.t("ui.none_resource")
-            terrain = cell["terrain"]
-            terrain_name = self.loc.t(f"terrain.{terrain}", default=terrain)
-            res_name = self.loc.t(RESOURCE_DISPLAY_KEYS.get(res, res), default=res)
 
-            self.log(
-                self.loc.t(
-                    "log.discovered_cell",
-                    y=y, x=x,
-                    terrain=terrain_name,
-                    resource=res_name
-                ),
-                "DarkOrange"
-            )
+            terrain = cell["terrain"]
+            terrain_name = self.loc.t(f"terrain.{terrain}.name", default=terrain)
+
+            raw_res = cell.get("resource")  # to jest ID albo None
+
+            if not raw_res:  # None / "" / brak
+                self.log(
+                    self.loc.t(
+                        "log.discovered_no_resource_cell",
+                        y=y, x=x,
+                        terrain=terrain_name
+                    ),
+                    "DarkOrange"
+                )
+            else:
+                res_name = self.loc.t(RESOURCE_DISPLAY_KEYS.get(raw_res, raw_res), default=raw_res)
+                self.log(
+                    self.loc.t(
+                        "log.discovered_cell",
+                        y=y, x=x,
+                        terrain=terrain_name,
+                        resource=res_name
+                    ),
+                    "DarkOrange"
+                )
 
             # bonus eksploracyjny państwa (np. Hiszpania ma 'explore': 1.4)
             from constants import STATES
@@ -1171,17 +1187,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 self.resources["wood"] += wood
                 self.resources["skins"] += skins
                 gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.wood"), amount=wood))
-                gains.append(self.loc.t("ui.skins_bonus", skins=skins))
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.skins"), amount=skins))
 
             elif terrain == "field":
                 food = scaled(50)
                 self.resources["food"] += food
-                gains.append(self.loc.t("ui.food_bonus", food=food))
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
 
             elif terrain == "sea":
                 food = scaled(50)
                 self.resources["food"] += food
-                gains.append(self.loc.t("ui.fish_food_bonus", food=food))
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
 
             elif terrain == "hills":
                 ore_type = cell.get("resource")
@@ -1192,12 +1208,12 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 else:
                     food = scaled(50)
                     self.resources["food"] += food
-                    gains.append(self.loc.t("ui.food_bonus", food=food))
+                    gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
 
             else:
                 food = scaled(50)
                 self.resources["food"] += food
-                gains.append(self.loc.t("ui.food_bonus", food=food))
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
 
             if gains:
                 self.log(

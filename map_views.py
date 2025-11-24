@@ -965,13 +965,15 @@ class MapUIMixin:
 
                     if terrain in ["settlement", "district"]:
                         buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
+                        label = self.loc.t(f"terrain.{terrain}.name", default=terrain.capitalize())
                         used = len(buildings_here)
                         canvas.create_text(
                             offset_x + x * cell_size + cell_size // 2,
                             offset_y + y * cell_size + cell_size // 2 - 20,
-                            text=f"{terrain.capitalize()}",
+                            text=label,
                             fill="white",
-                            font=settlement_label_font
+                            font=settlement_label_font,
+                            tags=("tile_label",)
                         )
                         canvas.create_text(
                             offset_x + x * cell_size + cell_size // 2,
@@ -1032,6 +1034,7 @@ class MapUIMixin:
                             width=3
                         )
 
+            canvas.tag_raise("tile_label")
             self.draw_legend(canvas, offset_x, offset_y, cell_size)
 
         def click(event):
