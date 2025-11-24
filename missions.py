@@ -4,7 +4,7 @@ from datetime import timedelta
 import tkinter as tk
 from tkinter import ttk
 
-from constants import ROYAL_MISSIONS, EUROPE_PRICES
+from constants import ROYAL_MISSIONS, EUROPE_PRICES, RESOURCE_DISPLAY_KEYS, TRIBE_DISPLAY_KEYS
 
 
 class MissionsMixin:
@@ -29,7 +29,10 @@ class MissionsMixin:
 
         end_date = self.current_date + timedelta(days=365)
         monarch = self.get_monarch()
-        resources_txt = ", ".join(f"{v} {res}" for res, v in required.items())
+        resources_txt = ", ".join(
+            f"{v} {self.loc.t(RESOURCE_DISPLAY_KEYS.get(res, res), default=res)}"
+            for res, v in required.items()
+        )
         mission_text = self.loc.t(
             "mission.royal.request",
             monarch=monarch,
@@ -42,6 +45,11 @@ class MissionsMixin:
         self.current_mission = (end_date, required.copy(), {}, difficulty, mission_text, mission_idx)
         self.log(mission_text, "purple")
         self.play_sound("new_mission")
+
+    def tribe_name(self, tribe: str) -> str:
+        """Zwraca zlokalizowaną nazwę plemienia dla UI."""
+        key = TRIBE_DISPLAY_KEYS.get(tribe)
+        return self.loc.t(key, default=tribe) if key else tribe
 
     def pay_mission_with_gold(self):
         if not self.current_mission:
@@ -156,7 +164,7 @@ class MissionsMixin:
             ttk.Label(
                 royal_frame,
                 text=mname,
-                wraplength=600,
+                wraplength=740,
                 justify="center",
                 anchor="center",
                 font=(bold_info_font[0], bold_info_font[1] + 1, "bold")
@@ -166,7 +174,7 @@ class MissionsMixin:
                 ttk.Label(
                     royal_frame,
                     text=mdesc,
-                    wraplength=600,
+                    wraplength=740,
                     justify="center",
                     font=(top_info_font[0], top_info_font[1] + 1)
                 ).pack(pady=6, fill="x")
@@ -185,12 +193,13 @@ class MissionsMixin:
             progress_frame.pack(pady=6, fill="x")
 
             for r in req:
+                res_label = self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)
                 have = sent.get(r, 0)
                 need = req[r]
                 color = "green" if have >= need else ("orange" if have > 0 else "red")
                 ttk.Label(
                     progress_frame,
-                    text=f"{r}: {have}/{need}",
+                    text=f"{res_label}: {have}/{need}",
                     foreground=color,
                     font=top_info_font,
                     anchor="center",
@@ -383,10 +392,10 @@ class MissionsMixin:
                     color = "red"
 
                 have_sent = sent.get(r, 0)
-
+                res_label = self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)
                 ttk.Label(
                     mframe,
-                    text=f"{r}: {have_sent}/{need}",
+                    text=f"{res_label}: {have_sent}/{need}",
                     foreground=color,
                     font=top_info_font,
                     anchor="center",
@@ -435,7 +444,7 @@ class MissionsMixin:
                     )
 
                     self.log(
-                        self.loc.t("mission.native.done_log", tribe=str(tribe), reward=reward),
+                        self.loc.t("mission.native.done_log", tribe=self.tribe_name(tribe), reward=reward),
                         "green"
                     )
 

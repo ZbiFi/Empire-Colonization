@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import timedelta
 
-from constants import BUILDINGS, RESOURCES, STATES
+from constants import BUILDINGS, RESOURCES, STATES, RESOURCE_DISPLAY_KEYS
 from tooltip import Tooltip
 
 
@@ -631,19 +631,24 @@ class BuildingsMixin:
         # === bazowa produkcja ===
         if base_prod:
             for res, amount in base_prod.items():
-                display_res = res
+                res_id = res
 
-                # kopalnia: „trzcina” → prawdziwy surowiec ('węgiel', 'żelazo', 'srebro', 'złoto')
+                # kopalnia – zostaw jak było (placeholder jest już zlokalizowany)
                 if name == "mine":
-                    display_res = self.loc.t("tooltip.mine_resource_placeholder")
+                    res_label = self.loc.t("tooltip.mine_resource_placeholder")
+                else:
+                    res_label = self.loc.t(
+                        RESOURCE_DISPLAY_KEYS.get(res_id, res_id),
+                        default=res_id
+                    )
 
-                # premie państw
+                # premie państw licz na ID (nie na labelu)
                 bonus = 1.0
-                if self.state == "sweden" and display_res == "wood":
+                if self.state == "sweden" and res_id == "wood":
                     bonus = STATES[self.state]["wood"]
-                if self.state == "denmark" and display_res == "food":
+                if self.state == "denmark" and res_id == "food":
                     bonus = STATES[self.state]["food"]
-                if self.state == "brandenburg" and display_res == "steel":
+                if self.state == "brandenburg" and res_id == "steel":
                     bonus = STATES[self.state]["steel"]
                 if self.state == "genua" and name == "mine":
                     bonus *= STATES[self.state].get("mine", 1.0)
@@ -653,23 +658,29 @@ class BuildingsMixin:
                     "tooltip.production_line",
                     level=0,
                     amount=f"{real_amount:g}",
-                    res=display_res
+                    res=res_label
                 ))
 
         # === produkcja z ulepszeń ===
         for idx, up in enumerate(upgrades, start=1):
             up_prod = up.get("prod", up.get("base_prod", {})) or {}
             for res, amount in up_prod.items():
-                display_res = res
+                res_id = res
+
                 if name == "mine":
-                    display_res = self.loc.t("tooltip.mine_resource_placeholder")
+                    res_label = self.loc.t("tooltip.mine_resource_placeholder")
+                else:
+                    res_label = self.loc.t(
+                        RESOURCE_DISPLAY_KEYS.get(res_id, res_id),
+                        default=res_id
+                    )
 
                 bonus = 1.0
-                if self.state == "sweden" and display_res == "wood":
+                if self.state == "sweden" and res_id == "wood":
                     bonus = STATES[self.state]["wood"]
-                if self.state == "denmark" and display_res == "food":
+                if self.state == "denmark" and res_id == "food":
                     bonus = STATES[self.state]["food"]
-                if self.state == "brandenburg" and display_res == "steel":
+                if self.state == "brandenburg" and res_id == "steel":
                     bonus = STATES[self.state]["steel"]
                 if self.state == "genua" and name == "mine":
                     bonus *= STATES[self.state].get("mine", 1.0)
@@ -679,7 +690,7 @@ class BuildingsMixin:
                     "tooltip.production_line",
                     level=idx,
                     amount=f"{real_amount:g}",
-                    res=display_res
+                    res=res_label
                 ))
 
         if not lines:

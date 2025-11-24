@@ -839,6 +839,7 @@ class RelationsMixin:
             self.native_relations[tribe] = min(
                 100, self.native_relations[tribe] + reward
             )
+            print(self.tribe_name(tribe))
             self.log(
                 self.loc.t("log.native_mission_done", tribe=self.tribe_name(tribe), reward=reward),
                 "green"

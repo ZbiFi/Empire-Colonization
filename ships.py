@@ -252,7 +252,10 @@ class ShipsMixin:
                 have = sent.get(r, 0)
                 need = req[r]
                 color = "green" if have >= need else "red"
-                ttk.Label(mission_frame, text=f"{r}: {have}/{need}", foreground=color).pack()
+
+                res_label = self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)
+
+                ttk.Label(mission_frame, text=f"{res_label}: {have}/{need}", foreground=color).pack()
 
         btn_frame = ttk.Frame(top_frame)
         btn_frame.pack(side="right")

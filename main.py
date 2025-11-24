@@ -734,6 +734,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.pop_lbl = ttk.Label(self.pop_frame, text=self.loc.t("ui.population_placeholder"), font=base_font)
         self.pop_lbl.pack(side="left", padx=5)
 
+        self.pop_tooltip = Tooltip(self.pop_lbl, self.loc.t("tooltip.population"))
+
         ttk.Label(self.pop_frame, text="|", font=base_font).pack(side="left", padx=5)
 
         self.work_lbl = ttk.Label(self.pop_frame, text=self.loc.t("ui.free_workers_placeholder"), font=base_font)
@@ -978,9 +980,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.pop_lbl.config(
             text=self.loc.t("ui.population_label", people=self.people, cap=cap)
         )
-
-        Tooltip(self.pop_lbl,
-                self.loc.t("tooltip.population"))
 
         self.work_lbl.config(
             text=self.loc.t("ui.free_workers_label", free=self.free_workers())

@@ -588,6 +588,7 @@
   "tooltip.district_slots": "+5 nowych miejsc na budowle",
   "tooltip.production_line": "Poziom {level}: +{amount} {res} / pracownik",
   "tooltip.mine_header": "Kopalnia: wydobywa surowiec ze złoża na wzniesieniach.",
+  "tooltip.population": "By zdobyć więcej ludzi musisz sprowadzić ich z Europy \nlub zintegrować lokalnych Indian.",
 
   "screen.workers.title": "Pracownicy",
   "ui.confirm": "Zatwierdź",
