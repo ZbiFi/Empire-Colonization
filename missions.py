@@ -29,20 +29,20 @@ class MissionsMixin:
 
         end_date = self.current_date + timedelta(days=365)
         monarch = self.get_monarch()
-        mission_text = (
-            f"Jego Królewska Mość {monarch} żąda na {missionName}: " +
-            ", ".join(f"{v} {res}" for res, v in required.items()) +
-            f". Termin: {end_date.strftime('%d %b %Y')}  (1 rok). "
+        resources_txt = ", ".join(f"{v} {res}" for res, v in required.items())
+        mission_text = self.loc.t(
+            "mission.royal.request",
+            monarch=monarch,
+            missionName=missionName,
+            resources=resources_txt,
+            date=end_date.strftime("%d %b %Y")
         )
-
-        # (end_date, required, sent, difficulty, mission_text, mission_idx)
-        self.current_mission = (end_date, required.copy(), {}, difficulty, mission_text, mission_idx)
         self.log(mission_text, "purple")
         self.play_sound("new_mission")
 
     def pay_mission_with_gold(self):
         if not self.current_mission:
-            self.log("Brak aktywnej misji!", "red")
+            self.log(self.loc.t("mission.none_active"), "red")
             return
 
         end, req, sent, diff, text, idx = self.current_mission
@@ -50,7 +50,7 @@ class MissionsMixin:
         # czego jeszcze brakuje
         remaining = {r: req[r] - sent.get(r, 0) for r in req if sent.get(r, 0) < req[r]}
         if not remaining:
-            self.log("Misja już wykonana!", "gray")
+            self.log(self.loc.t("mission.already_done"), "gray")
             return
 
         # wartość brakujących towarów wg cen europejskich
@@ -61,12 +61,12 @@ class MissionsMixin:
         # (możesz to łatwo zmienić, np. na diff * 1.2, jeśli będzie za tanio/drogo)
         cost = int(total_value * diff)
 
-        if self.resources["dukaty"] < cost:
-            self.log(f"Za mało dukatów! Potrzeba: {cost}", "red")
+        if self.resources["ducats"] < cost:
+            self.log(self.loc.t("mission.royal.not_enough_ducats", cost=cost), "red")
             return
 
-        self.resources["dukaty"] -= cost
-        self.log(f"Misja opłacona dukatami: {cost}. +reputacja", "DarkOrange")
+        self.resources["ducats"] -= cost
+        self.log(self.loc.t("mission.royal.paid_log", cost=cost), "DarkOrange")
 
         # nagroda jak poprzednio
         self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
@@ -77,7 +77,7 @@ class MissionsMixin:
            Z tego okna można natychmiast wypełnić misje (bez handlu, bez opóźnień).
         """
 
-        win = self.create_window("Misje")
+        win = self.create_window(self.loc.t("screen.missions.title"))
         win.geometry("800x1000")
 
         # === GRID NA OKNIE: content + bottom bar ===
@@ -99,7 +99,7 @@ class MissionsMixin:
         # ====== GŁÓWNY TYTUŁ OKNA ======
         ttk.Label(
             content_frame,
-            text="MISJE",
+            text=self.loc.t("screen.missions.header"),
             font=(top_title_font[0], top_title_font[1] + 2, "bold"),
             anchor="center",
             justify="center"
@@ -115,7 +115,7 @@ class MissionsMixin:
 
         ttk.Label(
             royal_frame,
-            text="✦ MISJA KRÓLEWSKA ✦",
+            text=self.loc.t("mission.royal.header"),
             font=top_title_font,
             anchor="center",
             justify="center"
@@ -126,7 +126,7 @@ class MissionsMixin:
         if not self.current_mission:
             ttk.Label(
                 royal_frame,
-                text="Brak aktywnej misji królewskiej.",
+                text=self.loc.t("mission.royal.none_active"),
                 foreground="gray",
                 font=top_info_font,
                 anchor="center",
@@ -138,10 +138,13 @@ class MissionsMixin:
             # --- PRZYWRÓCONE: name na górze + desc poniżej ---
             try:
                 mission_def = ROYAL_MISSIONS[idx]
-                mname = mission_def.get("name", "Misja królewska")
+                mname = mission_def.get(
+                    "name",
+                    self.loc.t("mission.royal.default_name")
+                )
                 mdesc = mission_def.get("desc", text)
             except Exception:
-                mname = "Misja królewska"
+                mname = self.loc.t("mission.royal.default_name")
                 mdesc = text
 
             ttk.Label(
@@ -162,9 +165,10 @@ class MissionsMixin:
                     font=(top_info_font[0], top_info_font[1] + 1)
                 ).pack(pady=6, fill="x")
 
+            days_left = (end - self.current_date).days
             ttk.Label(
                 royal_frame,
-                text=f"Pozostało: {(end - self.current_date).days} dni",
+                text=self.loc.t("mission.royal.remaining_days", days=days_left),
                 foreground="red",
                 font=top_info_font,
                 anchor="center",
@@ -195,20 +199,20 @@ class MissionsMixin:
 
             if remaining:
                 total_value = sum(a * EUROPE_PRICES.get(r, 10) for r, a in remaining.items())
-                dukaty_cost = int(total_value * diff)
+                ducats_cost = int(total_value * diff)
 
                 ttk.Label(
                     royal_frame,
-                    text=f"Koszt spłacenia dukatami: {dukaty_cost}",
+                    text=self.loc.t("mission.royal.pay_cost", ducats_cost=ducats_cost),
                     foreground="orange",
                     font=bold_info_font,
                     anchor="center",
                     justify="center"
                 ).pack(pady=(6, 4), fill="x")
 
-                def _pay_and_maybe_close(cost=dukaty_cost):
+                def _pay_and_maybe_close(cost=ducats_cost):
                     # jeśli nie ma dość dukatów -> pay_mission_with_gold zaloguje błąd, ale nie zamykamy okna
-                    if self.resources.get("dukaty", 0) < cost:
+                    if self.resources.get("ducats", 0) < cost:
                         self.pay_mission_with_gold()
                         return
                     # jak ma dość -> opłać i zamknij
@@ -217,14 +221,14 @@ class MissionsMixin:
 
                 ttk.Button(
                     royal_frame,
-                    text="Opłać dukatami",
+                    text=self.loc.t("mission.royal.pay_button"),
                     command=_pay_and_maybe_close
                 ).pack(pady=(4, 8), anchor="center")
 
             else:
                 ttk.Label(
                     royal_frame,
-                    text="Misja już wykonana!",
+                    text=self.loc.t("mission.already_done"),
                     foreground="green",
                     font=bold_info_font,
                     anchor="center",
@@ -239,7 +243,7 @@ class MissionsMixin:
 
         ttk.Label(
             native_frame,
-            text=self.loc.t("native_missions.header"),
+            text=self.loc.t("mission.native.header"),
             font=top_title_font,
             anchor="center",
             justify="center"
@@ -328,10 +332,15 @@ class MissionsMixin:
                 anchor="center"
             ).pack(fill="x", pady=2)
 
+            date_txt = mission["end"].strftime("%d %b %Y")
+            days_left = (mission["end"] - self.current_date).days
             ttk.Label(
                 mframe,
-                text=f"Termin: {mission['end'].strftime('%d %b %Y')} "
-                     f"(pozostało {(mission['end'] - self.current_date).days} dni)",
+                text=self.loc.t(
+                    "mission.native.deadline",
+                    date=date_txt,
+                    days=days_left
+                ),
                 foreground="red",
                 font=top_info_font,
                 anchor="center",
@@ -395,10 +404,11 @@ class MissionsMixin:
                             missing[r] = (have, need)
 
                     if missing:
-                        msg = (
-                                "Nie masz wystarczających surowców do wykonania misji od "
-                                + str(tribe) + ": "
-                                + ", ".join([f"{r} {have}/{need}" for r, (have, need) in missing.items()])
+                        missing_txt = ", ".join([f"{r} {have}/{need}" for r, (have, need) in missing.items()])
+                        msg = self.loc.t(
+                            "mission.native.not_enough_resources",
+                            tribe=str(tribe),
+                            missing=missing_txt
                         )
                         self.log(msg, "red")
                         return
@@ -415,7 +425,7 @@ class MissionsMixin:
                     )
 
                     self.log(
-                        f"Misja od {tribe} wykonana! Nagroda: +{reward} reputacji.",
+                        self.loc.t("mission.native.done_log", tribe=str(tribe), reward=reward),
                         "green"
                     )
 
@@ -429,7 +439,7 @@ class MissionsMixin:
 
             ttk.Button(
                 mframe,
-                text="Wypełnij misję teraz",
+                text=self.loc.t("mission.native.fill_now_button"),
                 command=make_finish_fn()
             ).pack(pady=6, anchor="center")
 
@@ -438,7 +448,7 @@ class MissionsMixin:
         if not any_native:
             ttk.Label(
                 native_list,
-                text="Brak aktywnych misji indiańskich.",
+                text=self.loc.t("mission.native.none_active"),
                 foreground="gray",
                 font=top_info_font,
                 anchor="center",
@@ -452,7 +462,7 @@ class MissionsMixin:
 
         ttk.Button(
             bottom_frame,
-            text="Zamknij",
+            text=self.loc.t("screen.missions.close"),
             command=win.destroy
         ).pack(anchor="center")
 
@@ -462,7 +472,11 @@ class MissionsMixin:
         """Wywoływane po ukończeniu misji królewskiej."""
         self.completed_missions += 1
         self.mission_counter_label.config(
-            text=f"Misje królewskie wykonane: {self.completed_missions} / {self.missions_to_win}"
+            text=self.loc.t(
+                "mission.royal.counter",
+                completed=self.completed_missions,
+                to_win=self.missions_to_win
+            )
         )
 
         # self.log("Misja królewska wykonana!", "green")
@@ -473,19 +487,23 @@ class MissionsMixin:
 
     def win_game(self):
 
-        win = self.create_window(f"ZWYCIĘSTWO!")
+        win = self.create_window(self.loc.t("screen.victory.title"))
 
         ttk.Label(
             win,
-            text="🎉 WYGRAŁEŚ! 🎉",
+            text=self.loc.t("screen.victory.banner"),
             font=("Arial", 22, "bold"),
             foreground="green"
         ).pack(pady=20)
 
         ttk.Label(
             win,
-            text=f"Wykonałeś {self.missions_to_win} królewskich misji.\nKolonia stała się legendą!",
+            text=self.loc.t("screen.victory.text", to_win=self.missions_to_win),
             font=("Arial", 12)
         ).pack(pady=10)
 
-        ttk.Button(win, text="Zakończ grę", command=self.root.quit).pack(pady=15)
+        (ttk.Button(
+            win,
+            text=self.loc.t("screen.victory.quit_button"),
+            command=self.root.quit)
+         .pack(pady=15))

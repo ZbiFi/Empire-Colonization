@@ -526,6 +526,7 @@
 
   "screen.exploration.unknown_tile": "?",
 
+  "log.starvation_deaths": "GŁÓD przez {days} dni! Zmarło {deaths} kolonistów.",
   "log.not_enough_people": "Za mało ludzi!",
   "log.not_enough_resources": "Za mało surowców!",
   "log.exploration.return": "Eksploracja ({y},{x}): powrót {date}",
@@ -589,6 +590,36 @@
   "ui.confirm": "Zatwierdź",
   "ui.level_fallback": "Poziom {level}",
   "ui.close": "Zamknij",
-  "tooltip.mine_resource_placeholder": "surowiec ze złoża"
+  "tooltip.mine_resource_placeholder": "surowiec ze złoża",
+
+  "screen.missions.title": "Misje",
+  "screen.missions.header": "MISJE",
+  "screen.missions.close": "Zamknij",
+
+  "mission.none_active": "Brak aktywnej misji!",
+  "mission.already_done": "Misja już wykonana!",
+
+  "mission.royal.default_name": "Misja królewska",
+  "mission.royal.header": "✦ MISJA KRÓLEWSKA ✦",
+  "mission.native.header": "✦ MISJE INDIAŃSKIE ✦",
+  "mission.royal.none_active": "Brak aktywnej misji królewskiej.",
+  "mission.royal.remaining_days": "Pozostało: {days} dni",
+  "mission.royal.pay_cost": "Koszt spłacenia dukatami: {ducats_cost}",
+  "mission.royal.pay_button": "Opłać dukatami",
+  "mission.royal.paid_log": "Misja opłacona dukatami: {cost}. +reputacja",
+  "mission.royal.not_enough_ducats": "Za mało dukatów! Potrzeba: {cost}",
+  "mission.royal.request": "Jego Królewska Mość {monarch} żąda na {missionName}: {resources}. Termin: {date} (1 rok).",
+  "mission.royal.counter": "Misje królewskie wykonane: {completed} / {to_win}",
+
+  "mission.native.none_active": "Brak aktywnych misji indiańskich.",
+  "mission.native.deadline": "Termin: {date} (pozostało {days} dni)",
+  "mission.native.not_enough_resources": "Nie masz wystarczających surowców do wykonania misji od {tribe}: {missing}",
+  "mission.native.done_log": "Misja od {tribe} wykonana! Nagroda: +{reward} reputacji.",
+  "mission.native.fill_now_button": "Wypełnij misję teraz",
+
+  "screen.victory.title": "ZWYCIĘSTWO!",
+  "screen.victory.banner": "🎉 WYGRAŁEŚ! 🎉",
+  "screen.victory.text": "Wykonałeś {to_win} królewskich misji.\nKolonia stała się legendą!",
+  "screen.victory.quit_button": "Zakończ grę"
 
 }

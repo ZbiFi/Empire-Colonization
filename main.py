@@ -904,7 +904,11 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             if deaths > 0:
                 self.people -= deaths
                 self.log(
-                    self.loc.t("log.starvation"),
+                    self.loc.t(
+                        "log.starvation_deaths",
+                        days=starvation_days,
+                        deaths=deaths
+                    ),
                     "red"
                 )
 
