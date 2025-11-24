@@ -89,6 +89,8 @@
   "ui.wait_1_day": "Czekaj 1 dzień",
   "ui.wait_3_days": "Czekaj 3 dni",
   "ui.wait_7_days": "Czekaj 7 dni",
+  "ui.cancel": "Anuluj",
+  "ui.send": "Wyślij",
 
   "building.tent.name": "Namiot",
   "building.tent.upgrade.hut": "Chata",
@@ -528,6 +530,11 @@
   "log.not_enough_resources": "Za mało surowców!",
   "log.exploration.return": "Eksploracja ({y},{x}): powrót {date}",
 
-  "screen.exploration.debug_reveal_all": "Odkryj wszystkie pola (debug)"
+   "screen.exploration.debug_reveal_all": "Odkryj wszystkie pola (debug)",
+  "screen.exploration.cost_title": "Koszt eksploracji:",
+  "screen.exploration.cost_line": "• 3 ludzie • 15 żywności • 10 drewna",
+  "screen.exploration.confirm_title": "Potwierdź ekspedycję",
+  "screen.exploration.confirm_send_to": "Wyślij ekspedycję na pole ({y},{x})?",
+  "screen.exploration.confirm_time_cost": "Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {food} żywności, {wood} drewna"
 
 }

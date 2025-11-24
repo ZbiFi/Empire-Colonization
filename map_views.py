@@ -116,13 +116,13 @@ class MapUIMixin:
         """Mapuje nazwę surowca na klucz ikony (coal/iron/silver/gold)."""
         if not res: return None
         r = str(res).lower()
-        if "węgiel" in r or "wegiel" in r or "coal" in r: return "coal"
-        if "żelazo" in r or "zelazo" in r or "iron" in r: return "iron"
-        if "srebro" in r or "silver" in r: return "silver"
-        if "złoto" in r or "zloto" in r or "gold" in r: return "gold"
+        if "coal" in r or "coal" in r or "coal" in r: return "coal"
+        if "iron" in r or "iron" in r or "iron" in r: return "iron"
+        if "silver" in r or "silver" in r: return "silver"
+        if "gold" in r or "gold" in r or "gold" in r: return "gold"
         if "forest" in r or "forest" in r or "forest" in r: return "forest"
         if "field" in r or "field" in r or "plains" in r: return "plains"
-        if "wzgórze" in r or "wzgorze" in r or "mountains" in r: return "mountains"
+        if "mountains" in r or "mountains" in r or "mountains" in r: return "mountains"
         if "sea" in r or "sea" in r or "sea" in r: return "sea"
         return None
 
@@ -701,7 +701,7 @@ class MapUIMixin:
                                         fill=color, outline="black")
             canvas.create_text(
                 x, terrain_y + 22,
-                text=self.loc.t(f"terrain.{name}", default=name.capitalize()),
+                text=self.loc.t(f"terrain.{name}.name", default=name.capitalize()),
                 anchor="center",
                 font=small_info_font
             )
@@ -1020,7 +1020,7 @@ class MapUIMixin:
                         if data.get("requires_adjacent_settlement"):
                             if not self.is_adjacent_to_settlement((y, x)):
                                 continue
-                            if terrain == "sea" and self.selected_building != "przystań":
+                            if terrain == "sea" and self.selected_building != "harbor":
                                 continue
 
                         canvas.create_rectangle(

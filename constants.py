@@ -25,7 +25,8 @@ FOOD_OVERCROWDING_MULTIPLIER = 1.5
 MAX_SHIP_CARGO = 1500
 
 # ============== PAŃSTWA ==============
-STATES = {'portugal': {'speed': 1.3,
+STATES = {
+'portugal': {'speed': 1.3,
               'rulers': [
                   {"name_key": "state.portugal.ruler.john_ii_the_perfect.name", "start": 1481, "end": 1495},
                   {"name_key": "state.portugal.ruler.manuel_i_the_fortunate.name", "start": 1495, "end": 1521},
