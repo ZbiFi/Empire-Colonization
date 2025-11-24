@@ -5,13 +5,13 @@ from datetime import timedelta
 import random
 from functools import partial
 
-from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES
+from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES, SHIP_STATUS_IN_EUROPE_PORT, SHIP_STATUS_RETURNING, SHIP_STATUS_IN_PORT, SHIP_STATUS_TO_EUROPE, SHIP_STATUS_KEYS, RESOURCE_DISPLAY_KEYS
 
 
 class ShipsMixin:
     def ships_menu(self):
 
-        win = self.create_window("Statki")
+        win = self.create_window(self.loc.t("screen.ships.title"))
 
         # fonty spójne z resztą UI (misje)
         title_font = getattr(self, "top_title_font", ("Cinzel", 16, "bold"))
@@ -19,58 +19,68 @@ class ShipsMixin:
         small_info_font = (info_font[0], max(10, info_font[1] - 2))
         small_info_bold = (info_font[0], max(10, info_font[1] - 2), "bold")
 
-        ttk.Label(win, text="STATKI HANDLOWE", font=title_font).pack(pady=10)
+        ttk.Label(win, text=self.loc.t("screen.ships.header"), font=title_font).pack(pady=10)
 
         for i, (arrival_to_eu, arrival_back, load, status, pending) in enumerate(self.ships):
             is_flagship = (i == self.flagship_index)
+            frame_title_key = "screen.ships.ship_frame_flagship" if is_flagship else "screen.ships.ship_frame"
             frame = ttk.LabelFrame(
                 win,
-                text=f"Statek {i + 1}{' (okręt flagowy)' if is_flagship else ''}"
+                text=self.loc.t(frame_title_key, num=i + 1)
             )
             frame.pack(fill="x", padx=20, pady=5)
 
             if pending > 0:
                 ttk.Label(
                     frame,
-                    text=f"Oczekiwani koloniści: {pending}",
+                    text=self.loc.t("screen.ships.pending_colonists", pending=pending),
                     foreground="purple",
                     font=small_info_bold
                 ).pack(anchor="w")
 
-            ttk.Label(frame, text=f"Status: {status}", font=small_info_bold).pack(anchor="w")
+            status_key = SHIP_STATUS_KEYS.get(status, status)
+
+            ttk.Label(
+                frame,
+                text=self.loc.t(
+                    "screen.ships.status_line",
+                    status=self.loc.t(status_key)
+                ),
+                font=small_info_bold
+            ).pack(anchor="w")
 
             # Pokazuj odpowiednie daty w zależności od statusu
-            if status == "w drodze do Europy" and arrival_to_eu:
+            if status == SHIP_STATUS_TO_EUROPE and arrival_to_eu:
                 ttk.Label(
                     frame,
-                    text=f"Do Europy: {arrival_to_eu.strftime('%d %b %Y')}",
+                    text=self.loc.t("screen.ships.to_europe_date", date=arrival_to_eu.strftime("%d %b %Y")),
                     font=small_info_font
                 ).pack(anchor="w")
                 if arrival_back:
                     ttk.Label(
                         frame,
-                        text=f"Powrót: {arrival_back.strftime('%d %b %Y')}",
+                        text=self.loc.t("screen.ships.return_date", date=arrival_back.strftime("%d %b %Y")),
                         font=small_info_font
                     ).pack(anchor="w")
 
-            elif status == "w porcie w Europie":
+            elif status == SHIP_STATUS_IN_EUROPE_PORT:
                 days_left = max(0, 7 - (self.current_date - arrival_to_eu).days)
                 ttk.Label(
                     frame,
-                    text=f"Czeka w porcie: {days_left} dni",
+                    text=self.loc.t("screen.ships.waiting_in_europe", days=days_left),
                     font=small_info_font
                 ).pack(anchor="w")
                 if arrival_back:
                     ttk.Label(
                         frame,
-                        text=f"Powrót: {arrival_back.strftime('%d %b %Y')}",
+                        text=self.loc.t("screen.ships.return_date", date=arrival_back.strftime("%d %b %Y")),
                         font=small_info_font
                     ).pack(anchor="w")
 
-            elif status == "w drodze powrotnej" and arrival_back:
+            elif status == SHIP_STATUS_RETURNING and arrival_back:
                 ttk.Label(
                     frame,
-                    text=f"Powrót: {arrival_back.strftime('%d %b %Y')}",
+                    text=self.loc.t("screen.ships.return_date", date=arrival_back.strftime("%d %b %Y")),
                     font=small_info_font
                 ).pack(anchor="w")
 
@@ -79,14 +89,14 @@ class ShipsMixin:
                 total_units = sum(load.values())
                 ttk.Label(
                     frame,
-                    text=f"Ładunek: {load_str}",
+                    text=self.loc.t("screen.ships.cargo_line", cargo=load_str),
                     font=small_info_font
                 ).pack(anchor="w")
 
                 load_color = "red" if total_units > MAX_SHIP_CARGO else "black"
                 ttk.Label(
                     frame,
-                    text=f"Ładowność: {total_units}/{MAX_SHIP_CARGO}",
+                    text=self.loc.t("screen.ships.cargo_capacity_line", current=total_units, max=MAX_SHIP_CARGO),
                     foreground=load_color,
                     font=small_info_font
                 ).pack(anchor="w")
@@ -94,7 +104,7 @@ class ShipsMixin:
                 gold = sum(a * EUROPE_PRICES.get(r, 0) for r, a in load.items())
                 ttk.Label(
                     frame,
-                    text=f"Przewidywany zarobek: {gold} dukatów",
+                    text=self.loc.t("screen.ships.expected_profit_line", gold=gold),
                     font=small_info_font
                 ).pack(anchor="w")
 
@@ -108,15 +118,15 @@ class ShipsMixin:
                         )
                         ttk.Label(
                             frame,
-                            text=f"Do misji: {mission_str}",
+                            text=self.loc.t("screen.ships.mission_cargo_line", mission_cargo=mission_str),
                             foreground="purple",
                             font=small_info_bold
                         ).pack(anchor="w")
             else:
-                ttk.Label(frame, text="Ładunek: pusty", font=small_info_font).pack(anchor="w")
-                ttk.Label(frame, text=f"Ładowność: 0/{MAX_SHIP_CARGO}", font=small_info_font).pack(anchor="w")
+                ttk.Label(frame, text=self.loc.t("screen.ships.cargo_empty"), font=small_info_font).pack(anchor="w")
+                ttk.Label(frame, text=self.loc.t("screen.ships.cargo_capacity_line", current=0, max=MAX_SHIP_CARGO), font=small_info_font).pack(anchor="w")
 
-            if status == "w porcie":
+            if status == SHIP_STATUS_IN_PORT:
                 ttk.Button(
                     frame,
                     text=self.loc.t("ui.send"),
@@ -125,11 +135,11 @@ class ShipsMixin:
 
         ttk.Label(
             win,
-            text=f"Łączne dukaty: {self.resources['dukaty']}",
+            text=self.loc.t("screen.ships.total_ducats", ducats=self.resources["ducats"]),
             font=info_font
         ).pack(pady=10)
 
-        ttk.Button(win, text="Zamknij", command=win.destroy).pack(pady=5)
+        ttk.Button(win, text=self.loc.t("ui.close"), command=win.destroy).pack(pady=5)
 
         # wyśrodkuj okno statków
         self.center_window(win)
@@ -146,12 +156,15 @@ class ShipsMixin:
     def send_ship(self, load):
         total_units = sum(load.values())
         if total_units > MAX_SHIP_CARGO:
-            self.log(f"Za dużo towarów! Max: {MAX_SHIP_CARGO}", "red")
+            self.log(
+                self.loc.t("log.too_much_cargo", max_cargo=MAX_SHIP_CARGO, total=total_units),
+                "red"
+            )
             return False
 
-        free_ship = next((i for i, s in enumerate(self.ships) if s[3] == "w porcie"), None)
+        free_ship = next((i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT), None)
         if free_ship is None:
-            self.log("Brak wolnego statku!", "red")
+            self.log(self.loc.t("log.no_free_ship"), "red")
             return False
 
         # zachowaj ewentualnych oczekujących kolonistów przypiętych do tego statku
@@ -172,7 +185,7 @@ class ShipsMixin:
                         sent[res] = sent.get(res, 0) + contrib
 
             if not mission_completed_before and all(sent.get(r, 0) >= req[r] for r in req):
-                self.log("MISJA KRÓLEWSKA WYKONANA! (po dopłynięciu do Europy)", "DarkOrange")
+                self.log(self.loc.t("log.royal_mission_completed_after_arrival"), "DarkOrange")
                 self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
                 self.current_mission = None
                 self.mission_multiplier *= 0.9
@@ -191,14 +204,18 @@ class ShipsMixin:
         arrival_to_europe = self.current_date + timedelta(days=days_to_europe)
         arrival_back = arrival_to_europe + timedelta(days=days_in_europe + days_back)
 
-        self.ships[free_ship] = (arrival_to_europe, arrival_back, load.copy(), "w drodze do Europy", pending)
+        self.ships[free_ship] = (arrival_to_europe, arrival_back, load.copy(), SHIP_STATUS_TO_EUROPE, pending)
         self.auto_sail_timer = None
 
         self.log(
-            f"Statek wypłynął → Europa: {arrival_to_europe.strftime('%d %b %Y')} "
-            f"→ Czeka 7 dni → Powrót: {arrival_back.strftime('%d %b %Y')} | "
-            f"Ładunek: {total_units}/{MAX_SHIP_CARGO}",
-            "blue",
+            self.loc.t(
+                "log.ship_departed_summary",
+                to_europe=arrival_to_europe.strftime("%d %b %Y"),
+                back=arrival_back.strftime("%d %b %Y"),
+                current=total_units,
+                max=MAX_SHIP_CARGO
+            ),
+            "blue"
         )
 
         if mission_contribution:
@@ -207,20 +224,20 @@ class ShipsMixin:
                 f"{k}: {v}/{req[k]}" for k, v in mission_contribution.items() if k in req
             )
             if contrib_str:
-                self.log(f"Do misji: {contrib_str}", "purple")
+                self.loc.t("log.mission_contribution", cargo=contrib_str)
 
         return True
 
     def open_load_menu(self, ship_idx, parent):
 
-        load_win = self.create_window(f"Załaduj statek")
+        load_win = self.create_window(self.loc.t("screen.load_ship.title"))
 
-        load_win.geometry("560x680")
+        load_win.geometry("600x850")
 
         top_frame = ttk.Frame(load_win)
         top_frame.pack(fill="x", padx=15, pady=10)
 
-        ttk.Label(top_frame, text="Ładowność:", font=("Arial", 10, "bold")).pack(side="left")
+        ttk.Label(top_frame, text=self.loc.t("screen.load_ship.capacity_label"), font=("Arial", 10, "bold")).pack(side="left")
         total_var = tk.IntVar(value=0)
         limit_lbl = ttk.Label(top_frame, text=f"0/{MAX_SHIP_CARGO}", font=("Arial", 10, "bold"))
         limit_lbl.pack(side="left", padx=10)
@@ -229,7 +246,7 @@ class ShipsMixin:
 
         if self.current_mission and ship_idx == self.flagship_index:
             end, req, sent, diff, text, idx = self.current_mission
-            mission_frame = ttk.LabelFrame(top_frame, text="Postęp misji")
+            mission_frame = ttk.LabelFrame(top_frame, text=self.loc.t("screen.load_ship.mission_progress"))
             mission_frame.pack(side="left", padx=20)
             for r in req:
                 have = sent.get(r, 0)
@@ -247,7 +264,14 @@ class ShipsMixin:
                 self.log(self.loc.t("ui.empty_cargo"), "red")
                 return
             if total > MAX_SHIP_CARGO:
-                self.log(fself.loc.t("ui.too_much_cargo", max=MAX_SHIP_CARGO, have=total), "red")
+                self.log(
+                    self.loc.t(
+                        "log.too_much_cargo",
+                        max_cargo=MAX_SHIP_CARGO,
+                        total=total
+                    ),
+                    "red"
+                )
                 return
             if self.send_ship(load):
                 parent.destroy()
@@ -291,7 +315,10 @@ class ShipsMixin:
                 text=f"{total}/{MAX_SHIP_CARGO}",
                 foreground="red" if total > MAX_SHIP_CARGO else "blue"
             )
-            over_lbl.config(text=f"Przekroczono o {total - MAX_SHIP_CARGO}!" if total > MAX_SHIP_CARGO else "")
+            over_lbl.config(
+                text=self.loc.t("screen.load_ship.exceeded_by", over=total - MAX_SHIP_CARGO)
+                if total > MAX_SHIP_CARGO else ""
+            )
 
         for res in RESOURCES[:-1]:
             if self.resources[res] == 0:
@@ -300,7 +327,13 @@ class ShipsMixin:
             f = ttk.Frame(scrollable_frame)
             f.pack(fill="x", pady=4, padx=5)
 
-            ttk.Label(f, text=res, width=15, anchor="w").pack(side="left")
+            label_key = RESOURCE_DISPLAY_KEYS.get(res, res)  # fallback jakby nie było w mapie
+            ttk.Label(
+                f,
+                text=self.loc.t(label_key, default=res),
+                width=15,
+                anchor="w"
+            ).pack(side="left")
 
             var = tk.IntVar(value=0)
             cargo_vars[res] = var
@@ -323,7 +356,12 @@ class ShipsMixin:
                 cargo_vars[r].set(max_pos)
                 update_total()
 
-            max_btn = ttk.Button(f, text="Max", width=5, command=partial(set_max_for_res, res))
+            max_btn = ttk.Button(
+                f,
+                text=self.loc.t("ui.max"),
+                width=5,
+                command=partial(set_max_for_res, res)
+            )
             max_btn.pack(side="left", padx=5)
 
             def make_sync_slider(e=entry, r=res, v=var, s=slider):
@@ -368,7 +406,7 @@ class ShipsMixin:
         for i, (arrival_to_eu, arrival_back, load, status, pending) in enumerate(self.ships):
 
             # 1. Statek dotarł do Europy → ROZŁADUNEK + MISJA + 7 DNI POSTOJU
-            if status == "w drodze do Europy" and arrival_to_eu and self.current_date >= arrival_to_eu:
+            if status == SHIP_STATUS_TO_EUROPE and arrival_to_eu and self.current_date >= arrival_to_eu:
                 if load:
                     excess = load.copy()
 
@@ -397,35 +435,54 @@ class ShipsMixin:
                     if gold > 0:
                         excess_str = ", ".join(f"{k}: {v}" for k, v in excess.items())
                         self.log(
-                            f"Statek powinien być {i+1} rozładowany w Europie: {excess_str} → {gold} dukatów",
-                            "gold",
+                            self.loc.t(
+                                "log.ship_unloaded_in_europe",
+                                num=i + 1,
+                                cargo=excess_str,
+                                gold=gold
+                            ),
+                            "gold"
                         )
-                        self.resources["dukaty"] += gold
+                        self.resources["ducats"] += gold
 
                 # Statek pusty, czeka 7 dni
                 departure_date = arrival_to_eu + timedelta(days=7)
-                self.ships[i] = (arrival_to_eu, departure_date, {}, "w porcie w Europie", pending)
-                self.log(f"Statek powinien {i+1} czekać 7 dni w porcie europejskim...", "blue")
+                self.ships[i] = (arrival_to_eu, departure_date, {}, SHIP_STATUS_IN_EUROPE_PORT, pending)
+                self.log(
+                    self.loc.t("log.ship_waiting_in_europe", num=i + 1),
+                    "blue"
+                )
 
             # 2. Koniec postoju → wypływa PUSTY w drogę powrotną
-            elif status == "w porcie w Europie" and self.current_date >= arrival_back:
+            elif status == SHIP_STATUS_IN_EUROPE_PORT    and self.current_date >= arrival_back:
                 days_back = random.randint(60, 90)
                 return_date = self.current_date + timedelta(days=days_back)
-                self.ships[i] = (None, return_date, {}, "w drodze powrotnej", pending)
+                self.ships[i] = (None, return_date, {}, SHIP_STATUS_RETURNING, pending)
                 self.log(
-                    f"Statek {i+1} wypłynął z Europy → szacowany powrót: {return_date.strftime('%d %b %Y')}",
-                    "blue",
+                    self.loc.t(
+                        "log.ship_sailed_from_europe",
+                        num=i + 1,
+                        date=return_date.strftime("%d %b %Y")
+                    ),
+                    "blue"
                 )
 
             # 3. Statek wrócił do kolonii
-            elif status == "w drodze powrotnej" and arrival_back and self.current_date >= arrival_back:
+            elif status == SHIP_STATUS_RETURNING and arrival_back and self.current_date >= arrival_back:
                 if pending > 0:
                     self.people += pending
-                    self.log(f"Przybyło {pending} nowych kolonistów z Europy!", "green")
+                    self.log(
+                        self.loc.t("log.colonists_arrived", pending=pending),
+                        "green"
+                    )
                     pending = 0  # zeruj po wysadzeniu
-                self.ships[i] = (None, None, {}, "w porcie", 0)
+                self.ships[i] = (None, None, {}, SHIP_STATUS_IN_PORT, 0)
                 self.auto_sail_timer = self.current_date + timedelta(days=14)
-                self.log(f"Statek {i+1} wrócił do kolonii. Gotowy do kolejnej podróży.", "blue")
+
+                self.log(
+                    self.loc.t("log.ship_returned_ready", num=i + 1),
+                    "blue"
+                )
                 self.play_sound("ship_arrived")
 
                 # Nowa misja (jeśli minęło 90 dni)
@@ -437,7 +494,7 @@ class ShipsMixin:
 
     def auto_send_empty_ship(self):
         if self.auto_sail_timer and self.current_date >= self.auto_sail_timer:
-            free_ship = next((i for i, s in enumerate(self.ships) if s[3] == "w porcie"), None)
+            free_ship = next((i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT), None)
             if free_ship is not None:
                 self.send_ship({})
                 self.auto_sail_timer = None

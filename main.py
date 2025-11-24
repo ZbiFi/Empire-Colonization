@@ -21,11 +21,6 @@ from ships import ShipsMixin
 from map_views import MapUIMixin
 from tooltip import Tooltip
 
-
-SHIP_STATUS_IN_PORT = "ship.status.in_port"
-SHIP_STATUS_TO_EUROPE = "ship.status.to_europe"
-SHIP_STATUS_IN_EUROPE_PORT = "ship.status.in_europe_port"
-
 def load_font_ttf(path):
     """
     Ładuje font TTF do pamięci procesu Windows.

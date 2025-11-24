@@ -290,6 +290,7 @@
   "ship.status.in_port": "w porcie",
   "ship.status.to_europe": "w drodze do Europy",
   "ship.status.in_europe_port": "w porcie w Europie",
+  "ship.status.returning": "w drodze powrotnej",
 
   "ui.date_label": "Data: {date}",
   "ui.monarch_placeholder": "Monarcha: ...",
@@ -620,6 +621,49 @@
   "screen.victory.title": "ZWYCIĘSTWO!",
   "screen.victory.banner": "🎉 WYGRAŁEŚ! 🎉",
   "screen.victory.text": "Wykonałeś {to_win} królewskich misji.\nKolonia stała się legendą!",
-  "screen.victory.quit_button": "Zakończ grę"
+  "screen.victory.quit_button": "Zakończ grę",
+
+  "ui.empty_cargo": "Pusty ładunek!",
+  "ui.too_much_cargo": "Za dużo! Max: {max_cargo} (masz {total})",
+  "royal_mission_done": "MISJA KRÓLEWSKA WYKONANA!",
+
+    "screen.ships.title": "Statki",
+  "screen.ships.header": "STATKI HANDLOWE",
+
+  "screen.ships.ship_frame": "Statek {num}",
+  "screen.ships.ship_frame_flagship": "Statek {num} (okręt flagowy)",
+
+  "screen.ships.pending_colonists": "Oczekiwani koloniści: {pending}",
+  "screen.ships.status_line": "Status: {status}",
+
+  "screen.ships.to_europe_date": "Do Europy: {date}",
+  "screen.ships.return_date": "Powrót: {date}",
+  "screen.ships.waiting_in_europe": "Czeka w porcie: {days} dni",
+
+  "screen.ships.cargo_line": "Ładunek: {cargo}",
+  "screen.ships.cargo_capacity_line": "Ładowność: {current}/{max}",
+  "screen.ships.expected_profit_line": "Przewidywany zarobek: {gold} dukatów",
+  "screen.ships.mission_cargo_line": "Do misji: {mission_cargo}",
+  "screen.ships.cargo_empty": "Ładunek: pusty",
+
+  "screen.ships.total_ducats": "Łączne dukaty: {ducats}",
+  "ui.max": "Max",
+
+  "log.no_free_ship": "Brak wolnego statku!",
+  "log.royal_mission_completed_after_arrival": "MISJA KRÓLEWSKA WYKONANA! (po dopłynięciu do Europy)",
+
+  "log.ship_departed_summary": "Statek wypłynął → Europa: {to_europe} → Czeka 7 dni → Powrót: {back} | Ładunek: {current}/{max}",
+  "log.mission_contribution": "Do misji: {cargo}",
+
+  "screen.load_ship.title": "Załaduj statek",
+  "screen.load_ship.capacity_label": "Ładowność:",
+  "screen.load_ship.mission_progress": "Postęp misji",
+  "screen.load_ship.exceeded_by": "Przekroczono o {over}!",
+
+  "log.ship_unloaded_in_europe": "Statek {num} rozładowany w Europie: {cargo} → {gold} dukatów",
+  "log.ship_waiting_in_europe": "Statek {num} czeka 7 dni w porcie europejskim...",
+  "log.ship_sailed_from_europe": "Statek {num} wypłynął z Europy → szacowany powrót: {date}",
+  "log.colonists_arrived": "Przybyło {pending} nowych kolonistów z Europy!",
+  "log.ship_returned_ready": "Statek {num} wrócił do kolonii. Gotowy do kolejnej podróży."
 
 }

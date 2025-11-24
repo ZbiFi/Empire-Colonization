@@ -996,3 +996,15 @@ TRIBE_DISPLAY_KEYS = {
     'Creeks': 'tribe.creek',
     'Sioux': 'tribe.sioux'
 }
+
+SHIP_STATUS_IN_PORT = "in_port"
+SHIP_STATUS_TO_EUROPE = "to_europe"
+SHIP_STATUS_IN_EUROPE_PORT = "in_europe_port"
+SHIP_STATUS_RETURNING = "returning"
+
+SHIP_STATUS_KEYS = {
+    SHIP_STATUS_IN_PORT: "ship.status.in_port",
+    SHIP_STATUS_TO_EUROPE: "ship.status.to_europe",
+    SHIP_STATUS_IN_EUROPE_PORT: "ship.status.in_europe_port",
+    SHIP_STATUS_RETURNING: "ship.status.returning",
+}
