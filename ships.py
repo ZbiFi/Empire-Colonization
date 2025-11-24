@@ -150,10 +150,8 @@ class ShipsMixin:
 
     def calculate_travel_days(self):
         base = random.randint(40, 80)
-        print(base)
         if STATES[self.state].get("speed"):
             base = int(base / STATES[self.state]["speed"])
-        print(base)
         return base
 
     def send_ship(self, load):
