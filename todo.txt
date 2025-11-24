@@ -23,6 +23,7 @@ drogi? -> bonus do produkcji.
                     DONE !!! poprawić nazwy z posiadanych budynkach
                     DONE !!! brak pożywienia jeszcze - przenieść produkcję +/- obok danych zasobów
                     DONE !!!! spójność fontowa
+przetłumacz królów
 
 <SAVE/LOAD>
 2.save/load
