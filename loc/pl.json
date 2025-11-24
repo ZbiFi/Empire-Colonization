@@ -530,11 +530,44 @@
   "log.not_enough_resources": "Za mało surowców!",
   "log.exploration.return": "Eksploracja ({y},{x}): powrót {date}",
 
-   "screen.exploration.debug_reveal_all": "Odkryj wszystkie pola (debug)",
+  "ui.must_be_in_settlement": "Tylko w osadzie/dzielnicy!",
+  "ui.no_space_in_settlement": "Brak miejsca w osadzie! (w tym budowa)",
+  "ui.not_enough_workers": "Za mało wolnych ludzi!",
+  "ui.building_already_in_progress": "To ulepszenie jest już w trakcie realizacji!",
+  "ui.max_level_reached": "Maksymalny poziom!",
+  "ui.upgrade_cancelled_no_refund": "Przerwano trwające ulepszenie tego budynku (bez zwrotu surowców).",
+
+ "screen.exploration.debug_reveal_all": "Odkryj wszystkie pola (debug)",
   "screen.exploration.cost_title": "Koszt eksploracji:",
   "screen.exploration.cost_line": "• 3 ludzie • 15 żywności • 10 drewna",
   "screen.exploration.confirm_title": "Potwierdź ekspedycję",
   "screen.exploration.confirm_send_to": "Wyślij ekspedycję na pole ({y},{x})?",
-  "screen.exploration.confirm_time_cost": "Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {food} żywności, {wood} drewna"
+  "screen.exploration.confirm_time_cost": "Czas wyprawy: {days} dni\nKoszt: 3 ludzie, {food} żywności, {wood} drewna",
+
+  "screen.buildings.manage_title": "Ulepsz / Zdegraduj / Zatrzymaj",
+  "screen.buildings.choose_building_label": "Wybierz budynek:",
+  "screen.buildings.no_buildings_to_upgrade": "Brak budynków do ulepszenia (lub wszystkie są gotowe).",
+
+  "ui.upgrading_suffix": " (ulepszanie w toku)",
+  "ui.cancel_upgrade": "Zatrzymaj ulepszenie",
+
+  "ui.upgrade_to_with_cost_time": "Ulepsz → {upgrade}\n({cost} | {days} dni)",
+  "ui.downgrade_to_with_refund_note": "Zdegraduj → {prev}\n(+50% kosztu ulepszenia)",
+  "ui.demolish_with_refund_note": "Zburz\n(+50% kosztu budowy)",
+
+  "log.building_already_exists": "Już coś tu jest!",
+  "log.construction_in_progress_here": "Trwa budowa na tym polu!",
+  "log.requires_adjacent_settlement": "Musi sąsiadować z osadą!",
+  "log.cannot_build_on_sea": "Nie na morzu!",
+
+  "log.no_upgrade_to_cancel": "Brak ulepszenia do zatrzymania.",
+  "log.upgrade_cancelled_refunded": "Ulepszenie zatrzymane — zwrócono wszystkie surowce i robotników.",
+
+  "log.building_demolished_refund": "Zburzono budynek. Zwrot: 50% kosztu budowy.",
+  "log.workers_assigned": "Pracownicy przydzieleni.",
+  "log.not_enough_free_workers": "Za dużo! Za mało wolnych ludzi.",
+
+  "screen.buildings.no_jobs": "Brak miejsc pracy",
+  "screen.buildings.no_direct_production": "Brak bezpośredniej produkcji ani kosztów."
 
 }

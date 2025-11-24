@@ -14,7 +14,7 @@ class BuildingsMixin:
             (y, x)
             for y in range(self.map_size)
             for x in range(self.map_size)
-            if self.map_grid[y][x]["terrain"] in ["osada", "dzielnica"]
+            if self.map_grid[y][x]["terrain"] in ["settlement", "district"]
         ]
 
     def get_free_settlement_slots(self):
@@ -22,7 +22,7 @@ class BuildingsMixin:
         for y in range(self.map_size):
             for x in range(self.map_size):
                 cell = self.map_grid[y][x]
-                if cell["terrain"] not in ["osada", "dzielnica"]:
+                if cell["terrain"] not in ["settlement", "district"]:
                     continue
                 used = len([b for b in cell["building"] if not b.get("is_district", False)])
                 in_progress = [c for c in self.constructions if c[1]["pos"] == (y, x)]
@@ -48,7 +48,7 @@ class BuildingsMixin:
         ]:
             ny, nx = y + dy, x + dx
             if 0 <= ny < self.map_size and 0 <= nx < self.map_size:
-                if self.map_grid[ny][nx]["terrain"] in ["osada", "dzielnica"]:
+                if self.map_grid[ny][nx]["terrain"] in ["settlement", "district"]:
                     return True
         return False
 
@@ -112,20 +112,20 @@ class BuildingsMixin:
                 # dla kopalni: zamiast sztucznego zasobu z constants
                 # używamy faktycznego surowca z pola (węgiel/żelazo/srebro/złoto)
                 target_res = res
-                if b["base"] == "kopalnia" and b.get("resource"):
+                if b["base"] == "mine" and b.get("resource"):
                     target_res = b["resource"]
 
                 bonus = 1.0
                 # premie państw zależne od surowca (po mapowaniu)
-                if self.state == "Szwecja" and target_res == "drewno":
+                if self.state == "sweden" and target_res == "wood":
                     bonus = STATES[self.state]["wood"]
-                if self.state == "Dania" and target_res == "żywność":
+                if self.state == "denmark" and target_res == "food":
                     bonus = STATES[self.state]["food"]
-                if self.state == "Brandenburgia" and target_res == "stal":
+                if self.state == "brandenburg" and target_res == "steel":
                     bonus = STATES[self.state]["steel"]
 
                 # bonus Genui dla wszystkich kopalń
-                if self.state == "Genua" and b["base"] == "kopalnia":
+                if self.state == "genua" and b["base"] == "mine":
                     bonus *= STATES[self.state].get("mine", 1.0)
 
                 prod[target_res] = prod.get(target_res, 0) + amt * workers * bonus
@@ -140,18 +140,18 @@ class BuildingsMixin:
 
                 for res, amt in upgrade_prod.items():
                     target_res = res
-                    if b["base"] == "kopalnia" and b.get("resource"):
+                    if b["base"] == "mine" and b.get("resource"):
                         target_res = b["resource"]
 
                     bonus = 1.0
-                    if self.state == "Szwecja" and target_res == "drewno":
+                    if self.state == "sweden" and target_res == "wood":
                         bonus = STATES[self.state]["wood"]
-                    if self.state == "Dania" and target_res == "żywność":
+                    if self.state == "denmark" and target_res == "food":
                         bonus = STATES[self.state]["food"]
-                    if self.state == "Brandenburgia" and target_res == "stal":
+                    if self.state == "brandenburg" and target_res == "steel":
                         bonus = STATES[self.state]["steel"]
 
-                    if self.state == "Genua" and b["base"] == "kopalnia":
+                    if self.state == "genua" and b["base"] == "mine":
                         bonus *= STATES[self.state].get("mine", 1.0)
 
                     prod[target_res] = prod.get(target_res, 0) + amt * workers * bonus
@@ -192,7 +192,7 @@ class BuildingsMixin:
             return
 
         if data.get("requires_settlement"):
-            if cell["terrain"] not in ["osada", "dzielnica"]:
+            if cell["terrain"] not in ["settlement", "district"]:
                 self.log(self.loc.t("ui.must_be_in_settlement"), "red")
                 return
             used = len([b for b in cell["building"] if not b.get("is_district", False)])
@@ -202,22 +202,22 @@ class BuildingsMixin:
                 return
         else:
             if cell["building"]:
-                self.log("Już coś tu jest!", "red")
+                self.log(self.loc.t("log.building_already_exists"), "red")
                 return
             if any(c[1]["pos"] == (y, x) for c in self.constructions):
-                self.log("Trwa budowa na tym polu!", "red")
+                self.log(self.loc.t("log.construction_in_progress_here"), "red")
                 return
 
         if data.get("requires_adjacent_settlement"):
             if not self.is_adjacent_to_settlement(pos):
-                self.log("Musi sąsiadować z osadą!", "red")
+                self.log(self.loc.t("log.requires_adjacent_settlement"), "red")
                 return
-            if cell["terrain"] == "morze" and name != "przystań":
-                self.log("Nie na morzu!", "red")
+            if cell["terrain"] == "sea" and name != "harbor":
+                self.log(self.loc.t("log.cannot_build_on_sea"), "red")
                 return
 
         if not self.can_afford(data["base_cost"]):
-            self.log("Za mało surowców!", "red")
+            self.log(self.loc.t("log.not_enough_resources"), "red")
             return
         if self.free_workers() < data["base_workers"]:
             self.log(self.loc.t("ui.not_enough_workers"), "red")
@@ -227,11 +227,11 @@ class BuildingsMixin:
         start_date = self.current_date
         end_date = start_date + timedelta(days=data["build_time"])
         new_b = {"base": name, "level": 0, "workers": 0, "pos": pos}
-        if name == "kopalnia":
+        if name == "mine":
             new_b["resource"] = cell["resource"]
-        if name == "dzielnica":
+        if name == "district":
             new_b["is_district"] = True
-            cell["terrain"] = "dzielnica"
+            cell["terrain"] = "district"
         if name == "tent":
             new_b["capacity"] = 4
 
@@ -260,7 +260,7 @@ class BuildingsMixin:
         workers_needed = upgrade.get("workers", 1)
         build_time = upgrade.get("build_time", 7)
 
-        if self.state == "Holandia":
+        if self.state == "netherlands":
             mult = STATES[self.state]["build_cost"]  # np. 0.8
             cost = {k: int(v * mult) for k, v in cost.items()}
 
@@ -340,7 +340,7 @@ class BuildingsMixin:
 
         self.buildings.pop(building_idx)
         self.map_grid[y][x]["building"] = [bb for bb in self.map_grid[y][x]["building"] if bb is not b]
-        self.log("Zburzono budynek. Zwrot: 50% kosztu budowy.", "orange")
+        self.log(self.loc.t("log.building_demolished_refund"), "orange")
 
     def cancel_upgrade(self, building_idx):
         """Anuluje trwające ulepszenie budynku, zwraca 100% surowców i zwalnia ludzi."""
@@ -351,7 +351,7 @@ class BuildingsMixin:
         to_cancel = [u for u in self.upgrades_in_progress if u[1] == building_idx]
 
         if not to_cancel:
-            self.log("Brak ulepszenia do zatrzymania.", "red")
+            self.log(self.loc.t("log.no_upgrade_to_cancel"), "red")
             return
 
         for u in to_cancel:
@@ -365,7 +365,7 @@ class BuildingsMixin:
                 original_cost = upgrades[prev_level].get("cost", {}).copy()
 
                 # uwzględnij bonus Holandii (koszty budowy -20%)
-                if self.state == "Holandia":
+                if self.state == "netherlands":
                     mult = STATES[self.state]["build_cost"]  # np. 0.8
                     original_cost = {k: int(v * mult) for k, v in original_cost.items()}
 
@@ -380,17 +380,21 @@ class BuildingsMixin:
             # usuń zadanie ulepszenia
             self.upgrades_in_progress.remove(u)
 
-        self.log("Ulepszenie zatrzymane — zwrócono wszystkie surowce i robotników.", "orange")
+        self.log(self.loc.t("log.upgrade_cancelled_refunded"), "orange")
 
     # === Menu: Ulepsz/Zdegraduj (jeden przycisk) ===
     def show_upgrade_menu(self):
 
-        win = self.create_window(f"Ulepsz / Zdegraduj / Zatrzymaj")
+        win = self.create_window(self.loc.t("screen.buildings.manage_title"))
 
         # fonty spójne z resztą UI (misje)
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
 
-        ttk.Label(win, text="Wybierz budynek:", font=title_font).pack(pady=10)
+        ttk.Label(
+            win,
+            text=self.loc.t("screen.buildings.choose_building_label"),
+            font=title_font
+        ).pack(pady=10)
 
         has_any = False
         for i, b in enumerate(self.buildings):
@@ -410,7 +414,7 @@ class BuildingsMixin:
             # nazwa + poziom + informacja o statusie ulepszenia
             label_text = f"{current_name} ({b['pos'][0]},{b['pos'][1]}) [poziom {level}]"
             if in_progress:
-                label_text += " (ulepszanie w toku)"
+                label_text += self.loc.t("ui.upgrading_suffix")
             ttk.Label(frame, text=label_text, width=40).pack(side="left")
 
             # --- NOWY: przycisk ZATRZYMAJ ULEPSZENIE ---
@@ -432,7 +436,12 @@ class BuildingsMixin:
 
                 up_btn = ttk.Button(
                     frame,
-                    text=f"Ulepsz → {up_name}\n({cost_str} | {time} dni)",
+                    text=self.loc.t(
+                        "ui.upgrade_to_with_cost_time",
+                        upgrade=up_name,
+                        cost=cost_str,
+                        days=time
+                    ),
                     command=lambda idx=i: [self.start_upgrade(idx), win.destroy()],
                 )
                 up_btn.pack(side="right", padx=5)
@@ -443,9 +452,12 @@ class BuildingsMixin:
                     prev_name = b["base"]
                 else:
                     prev_name = upgrades[level - 2].get("name", b["base"])
-                text = f"Zdegraduj → {prev_name}\n(+50% kosztu ulepszenia)"
+                text = self.loc.t(
+                    "ui.downgrade_to_with_refund_note",
+                    prev=prev_name
+                )
             else:
-                text = "Zburz\n(+50% kosztu budowy)"
+                text = self.loc.t("ui.demolish_with_refund_note")
 
             de_btn = ttk.Button(
                 frame,
@@ -458,7 +470,7 @@ class BuildingsMixin:
         if not has_any:
             ttk.Label(
                 win,
-                text="Brak budynków do ulepszenia (lub wszystkie są gotowe).",
+                text=self.loc.t("screen.buildings.no_buildings_to_upgrade"),
                 foreground="gray",
             ).pack(pady=20)
 
@@ -482,7 +494,7 @@ class BuildingsMixin:
         for name, data in BUILDINGS.items():
             # koszt z uwzględnieniem bonusu Holandii
             display_cost = data["base_cost"].copy()
-            if self.state == "Holandia":
+            if self.state == "netherlands":
                 mult = STATES[self.state]["build_cost"]  # np. 0.8
                 display_cost = {k: int(v * mult) for k, v in display_cost.items()}
 
@@ -561,7 +573,7 @@ class BuildingsMixin:
             return f"+{cap} mieszkań"
 
         # === DZIELNICA ===
-        if name == "dzielnica":
+        if name == "district":
             return "+5 nowych miejsc na budowle"
 
         # === BUDYNKI PRODUKCYJNE I KOPALNIA ===
@@ -581,18 +593,18 @@ class BuildingsMixin:
                 display_res = res
 
                 # kopalnia: „trzcina” → prawdziwy surowiec ('węgiel', 'żelazo', 'srebro', 'złoto')
-                if name == "kopalnia":
+                if name == "mine":
                     display_res = "surowiec ze złoża"
 
                 # premie państw
                 bonus = 1.0
-                if self.state == "Szwecja" and display_res == "drewno":
+                if self.state == "sweden" and display_res == "wood":
                     bonus = STATES[self.state]["wood"]
-                if self.state == "Dania" and display_res == "żywność":
+                if self.state == "denmark" and display_res == "food":
                     bonus = STATES[self.state]["food"]
-                if self.state == "Brandenburgia" and display_res == "stal":
+                if self.state == "brandenburg" and display_res == "steel":
                     bonus = STATES[self.state]["steel"]
-                if self.state == "Genua" and name == "kopalnia":
+                if self.state == "genua" and name == "mine":
                     bonus *= STATES[self.state].get("mine", 1.0)
 
                 real_amount = amount * bonus
@@ -603,27 +615,27 @@ class BuildingsMixin:
             up_prod = up.get("prod", up.get("base_prod", {})) or {}
             for res, amount in up_prod.items():
                 display_res = res
-                if name == "kopalnia":
+                if name == "mine":
                     display_res = "surowiec ze złoża"
 
                 bonus = 1.0
-                if self.state == "Szwecja" and display_res == "drewno":
+                if self.state == "sweden" and display_res == "wood":
                     bonus = STATES[self.state]["wood"]
-                if self.state == "Dania" and display_res == "żywność":
+                if self.state == "denmark" and display_res == "food":
                     bonus = STATES[self.state]["food"]
-                if self.state == "Brandenburgia" and display_res == "stal":
+                if self.state == "brandenburg" and display_res == "steel":
                     bonus = STATES[self.state]["steel"]
-                if self.state == "Genua" and name == "kopalnia":
+                if self.state == "genua" and name == "mine":
                     bonus *= STATES[self.state].get("mine", 1.0)
 
                 real_amount = amount * bonus
                 lines.append(f"Poziom {idx}: +{real_amount:g} {display_res} / pracownik")
 
         if not lines:
-            return "Brak bezpośredniej produkcji ani kosztów."
+            return self.loc.t("screen.buildings.no_direct_production")
 
         # Jeśli to kopalnia — dodaj precyzję opisu
-        if name == "kopalnia":
+        if name == "mine":
             return ("Kopalnia: wydobywa surowiec ze złoża na wzniesieniach.\n"
                     + "\n".join(lines))
 
@@ -642,7 +654,7 @@ class BuildingsMixin:
 
         self.worker_sliders = []
         for i, b in enumerate(self.buildings):
-            if b["base"] in ["dzielnica", "tent"]:
+            if b["base"] in ["district", "tent"]:
                 continue
 
             max_w = self.get_max_workers(b)
@@ -669,7 +681,7 @@ class BuildingsMixin:
         if not self.worker_sliders:
             ttk.Label(
                 win,
-                text="Brak miejsc pracy",
+                text=self.loc.t("screen.buildings.no_jobs"),
                 foreground="red",
                 font=title_font
             ).pack(pady=15)
@@ -693,7 +705,7 @@ class BuildingsMixin:
 
             # jeśli trzeba więcej ludzi niż mamy WOLNYCH -> błąd
             if delta > self.free_workers():
-                self.log("Za dużo! Za mało wolnych ludzi.", "red")
+                self.log(self.loc.t("log.not_enough_free_workers"), "red")
                 return
 
             # zapisujemy nowe wartości
