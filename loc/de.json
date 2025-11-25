@@ -683,6 +683,26 @@
 "ui.building_col_pos": "Pos.",
 "ui.building_col_area": "Gebiet",
 "screen.buildings_overview.title": "Gebäude",
-"tooltip.free_workers_info": "Menschen arbeiten in Gebäuden oder nehmen an Erkundungen teil"
+"tooltip.free_workers_info": "Menschen arbeiten in Gebäuden oder nehmen an Erkundungen teil",
+  "screen.save.title": "Spiel speichern",
+"screen.load.title": "Spiel laden",
+"screen.save.name_label": "Name des Speicherstands:",
+"screen.save.no_name_title": "Kein Name",
+"screen.save.no_name_text": "Bitte gib einen Namen für den Speicherstand ein.",
+"screen.save.new_meta": "Neuer Speicherstand",
 
+"screen.edit_save.title": "Speicherstand bearbeiten",
+"screen.edit_save.label": "Namen ändern:",
+
+"screen.delete_save.title": "Speicherstand löschen",
+"screen.delete_save.q1": "Möchtest du diesen Speicherstand wirklich löschen?",
+"screen.delete_save.q2": "Diese Aktion ist unwiderruflich. Trotzdem löschen?",
+
+"ui.save": "Speichern",
+"ui.load": "Laden",
+"ui.edit": "Bearbeiten",
+"ui.delete": "Löschen",
+"ui.ok": "OK",
+
+"log.save_done": "Spiel gespeichert als: {name}."
 }

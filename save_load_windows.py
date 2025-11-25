@@ -1,7 +1,12 @@
 # save_load_windows.py
+import json
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox as mb
 from datetime import datetime
+import reset_manager
+from state_manager import export_state, list_saves, import_state, load_from_file, save_to_file
+
 
 class SaveLoadWindow:
     """
@@ -29,18 +34,8 @@ class SaveLoadWindow:
         outer.columnconfigure(0, weight=1)
 
         # sztuczne save'y na start
-        self.saves = [
-            {
-                "name": app.loc.t("save.fake1.name", default="Autosave #1"),
-                "date": "12 Nov 1607",
-                "meta": app.loc.t("save.fake1.meta", default="Jamestown • Day 42")
-            },
-            {
-                "name": app.loc.t("save.fake2.name", default="Manual Save"),
-                "date": "18 Nov 1607",
-                "meta": app.loc.t("save.fake2.meta", default="Fort Nassau • Day 57")
-            }
-        ]
+        # realne save'y z dysku
+        self.saves = list_saves()
 
         # ======= LISTA SAVÓW (środek okna) - scroll po ~5 rekordach =======
         list_wrap = ttk.Frame(outer)
@@ -167,12 +162,23 @@ class SaveLoadWindow:
     # ========================= akcje =========================
 
     def _load(self, idx):
-        # na razie nic nie robi (placeholder)
-        self.app.log(self.app.loc.t("log.load_not_implemented"), "orange")
+        save = self.saves[idx]
+        payload = load_from_file(self.app, save["path"])
+
+        # reset -> import -> rebuild UI
+        self.win.destroy()
+        reset_manager.reset_game_state(self.app, to_start_screen=False)
+        import_state(self.app, payload)
+        self.app.main_game()
+        self.app.refresh_game_texts()
+        self.app.update_display()
 
     def _overwrite(self, idx):
-        # na razie nic nie robi (placeholder)
-        self.app.log(self.app.loc.t("log.save_not_implemented"), "orange")
+        save = self.saves[idx]
+        path = save_to_file(self.app, save["name"])
+        self.app.log(self.app.loc.t("log.save_done", name=save["name"]), "green")
+        self.saves = list_saves()
+        self._render_list()
 
     def _save_new(self):
         name = self.name_var.get().strip()
@@ -180,11 +186,11 @@ class SaveLoadWindow:
             mb.showinfo(self.app.loc.t("screen.save.no_name_title"), self.app.loc.t("screen.save.no_name_text"))
             return
 
-        now = datetime.now().strftime("%d %b %Y %H:%M")
-        self.saves.insert(0, {"name": name, "date": now, "meta": self.app.loc.t("screen.save.new_meta", default="New Save")})
+        path = save_to_file(self.app, name)
+        self.app.log(self.app.loc.t("log.save_done", name=name), "green")
         self.name_var.set("")
+        self.saves = list_saves()
         self._render_list()
-        self.app.log(self.app.loc.t("log.save_not_implemented"), "orange")  # placeholder
 
     def _edit(self, idx):
         s = self.saves[idx]
@@ -198,9 +204,22 @@ class SaveLoadWindow:
         def ok():
             new_name = var.get().strip()
             if new_name:
-                s["name"] = new_name
+                old_path = s["path"]
+                payload = load_from_file(self.app, old_path)
+                # ustaw nazwę w payloadzie i zapisz pod nową
+                reset_manager.reset_game_state(self.app, to_start_screen=False)  # tylko żeby export nie walił na None nie trzeba; tu nie używamy exportu
+                import_state(self.app, payload, do_runtime_reset=False)
+                save_to_file(self.app, new_name)
+
+                # usuń stary plik
+                import os
+                try:
+                    os.remove(old_path)
+                except Exception:
+                    pass
+
+                self.saves = list_saves()
                 self._render_list()
-            edit_win.destroy()
 
         btns = ttk.Frame(frm); btns.pack(anchor="e", pady=(6, 0))
         ttk.Button(btns, text=self.app.loc.t("ui.ok"), command=ok).pack(side="left", padx=4)
@@ -225,7 +244,11 @@ class SaveLoadWindow:
 
     def _delete(self, idx):
         def really_delete():
-            self.saves.pop(idx)
+            try:
+                os.remove(self.saves[idx]["path"])
+            except Exception:
+                pass
+            self.saves = list_saves()
             self._render_list()
 
         self._confirm_dialog("screen.delete_save.title", "screen.delete_save.q1", really_delete)

@@ -684,5 +684,27 @@
   "ui.building_col_pos": "Pos.",
   "ui.building_col_area": "Area",
   "screen.buildings_overview.title": "Buildings",
-  "tooltip.free_workers_info": "People are employed in buildings or take part in explorations"
+  "tooltip.free_workers_info": "People are employed in buildings or take part in explorations",
+
+  "screen.save.title": "Save game",
+"screen.load.title": "Load game",
+"screen.save.name_label": "Save name:",
+"screen.save.no_name_title": "No name",
+"screen.save.no_name_text": "Please enter a save name.",
+"screen.save.new_meta": "New save",
+
+"screen.edit_save.title": "Edit save",
+"screen.edit_save.label": "Change save name:",
+
+"screen.delete_save.title": "Delete save",
+"screen.delete_save.q1": "Are you sure you want to delete this save?",
+"screen.delete_save.q2": "This action is permanent. Delete anyway?",
+
+"ui.save": "Save",
+"ui.load": "Load",
+"ui.edit": "Edit",
+"ui.delete": "Delete",
+"ui.ok": "OK",
+
+"log.save_done": "Game saved as: {name}."
 }

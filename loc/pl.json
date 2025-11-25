@@ -810,14 +810,7 @@
   "ui.load": "Wczytaj",
   "ui.edit": "Edytuj",
   "ui.delete": "Usuń",
-  "ui.cancel": "Anuluj",
   "ui.ok": "OK",
 
-  "log.save_not_implemented": "Zapis gry nie jest jeszcze zaimplementowany.",
-  "log.load_not_implemented": "Wczytywanie gry nie jest jeszcze zaimplementowane.",
-
-  "save.fake1.name": "Autosave #1",
-  "save.fake1.meta": "Jamestown • Dzień 42",
-  "save.fake2.name": "Zapis ręczny",
-  "save.fake2.meta": "Fort Nassau • Dzień 57"
+  "log.save_done": "Zapisano grę jako: {name}."
 }

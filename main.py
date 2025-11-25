@@ -113,7 +113,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # self.resources = {r: 5000 if r in ["drewno", "żywność", "skóry", "żelazo", "stal"] else 0 for r in RESOURCES}
         self.resources = {r: 0 for r in RESOURCES}
 
-        self.resources["food"] = 1000
+        self.resources["food"] = 100000
         self.resources["wood"] = 1000
         self.resources["skins"] = 1000
         self.resources["clothes"] = 1000
@@ -913,8 +913,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         self.log_text.tag_configure("spacing", spacing3=4)
         self.log_text.tag_add("spacing", "1.0", "end")
-        self.log(self.loc.t("log.colonization_started"), "green")
-        self.log(self.loc.t("story.monarch_order", monarch=self.get_monarch()), "green")
+        if not getattr(self, "log_lines", []):
+            self.log(self.loc.t("log.colonization_started"), "green")
+            self.log(self.loc.t("story.monarch_order", monarch=self.get_monarch()), "green")
         self.update_display()
         self.current_screen = "game"
 
@@ -1062,10 +1063,10 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.current_mission = None
 
     def update_display(self):
-        if not hasattr(self, 'day_lbl'): return
-        self.day_lbl.config(
-            text=self.loc.t("ui.date_label", date=self.current_date.strftime('%d %B %Y'))
-        )
+        if not hasattr(self, "day_lbl") or not self.current_date:
+            return
+        self.day_lbl.config(text=self.loc.t("ui.date_label", date=self.current_date.strftime('%d %B %Y')))
+
         self.monarch_lbl.config(
             text=self.loc.t("ui.monarch_label", monarch=self.get_monarch())
         )
