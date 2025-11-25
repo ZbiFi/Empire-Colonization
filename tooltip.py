@@ -63,7 +63,7 @@ class Tooltip:
             background="#ffffe0",
             relief="solid",
             borderwidth=1,
-            font=("EB Garamond Italic", 10),
+            font=("EB Garamond Italic", 12),
         )
         label.pack(ipadx=4, ipady=2)
 

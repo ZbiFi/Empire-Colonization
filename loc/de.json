@@ -248,7 +248,7 @@
   "ui.population_placeholder": "Leute: 0 / 0",
   "ui.population_label": "Leute: {people} / {cap}",
   "ui.free_workers_placeholder": "Frei: 0",
-  "ui.free_workers_label": " | Frei: {free}",
+  "ui.free_workers_label": "Frei: {free}",
   "ui.none_resource": "keiner",
   "log.discovered_no_resource_cell": "Entdeckt ({y},{x}): {terrain}",
   "log.discovered_cell": "Entdeckt ({y},{x}): {terrain} | {resource}",
@@ -682,5 +682,7 @@
 "ui.building_col_status": "Produktion",
 "ui.building_col_pos": "Pos.",
 "ui.building_col_area": "Gebiet",
-"screen.buildings_overview.title": "Gebäude"
+"screen.buildings_overview.title": "Gebäude",
+"tooltip.free_workers_info": "Menschen arbeiten in Gebäuden oder nehmen an Erkundungen teil"
+
 }

@@ -860,6 +860,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         ttk.Label(self.pop_frame, text="|", font=base_font).pack(side="left", padx=5)
         self.work_lbl = ttk.Label(self.pop_frame, text=self.loc.t("ui.free_workers_placeholder"), font=base_font)
         self.work_lbl.pack(side="left", padx=5)
+        self.work_tooltip = Tooltip(self.work_lbl, self.loc.t("tooltip.free_workers_info"))
 
         self.res_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.resources"));
         self.res_frame.pack(fill="x", padx=10, pady=5)
@@ -1071,9 +1072,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             text=self.loc.t("ui.population_label", people=self.people, cap=cap)
         )
 
-        self.work_lbl.config(
-            text=self.loc.t("ui.free_workers_label", free=self.free_workers())
-        )
+        free = self.free_workers()
+        self.work_lbl.config(text=self.loc.t("ui.free_workers_label", free=free), foreground=("goldenrod" if free > 0 else "black"))
 
         for res, lbl in self.res_labels.items():
             res_key = RESOURCE_DISPLAY_KEYS.get(res, res)

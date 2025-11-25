@@ -300,7 +300,7 @@
   "ui.population_label": "Ludzie: {people} / {cap}",
 
   "ui.free_workers_placeholder": "Wolni: 0",
-  "ui.free_workers_label": " | Wolni: {free}",
+  "ui.free_workers_label": "Wolni: {free}",
 
   "ui.none_resource": "brak",
 
@@ -789,5 +789,6 @@
   "ui.building_col_status": "Produkcja",
   "ui.building_col_pos": "Poz.",
   "ui.building_col_area": "Obszar",
-  "screen.buildings_overview.title": "Budynki"
+  "screen.buildings_overview.title": "Budynki",
+  "tooltip.free_workers_info": "Ludzie są zatrudniani w budynkach lub biorą udział w eksploracjach"
 }
