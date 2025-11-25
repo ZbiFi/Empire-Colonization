@@ -2,6 +2,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from save_load_windows import SaveLoadWindow
+
 
 class GameMenuWindow:
     """Okno menu gry (pauza)."""
@@ -36,12 +38,12 @@ class GameMenuWindow:
         self.btn_continue.pack(fill="x", pady=6)
 
         self.btn_save = ttk.Button(
-            container, style="Colonial.TButton", command=self.save_game_placeholder
+            container, style="Colonial.TButton", command=self.on_save
         )
         self.btn_save.pack(fill="x", pady=6)
 
         self.btn_load = ttk.Button(
-            container, style="Colonial.TButton", command=self.load_game_placeholder
+            container, style="Colonial.TButton", command=self.on_load
         )
         self.btn_load.pack(fill="x", pady=6)
 
@@ -63,12 +65,12 @@ class GameMenuWindow:
         if self.win and self.win.winfo_exists():
             self.win.destroy()
 
-    def save_game_placeholder(self):
-        # na razie nic nie robi
+    def on_save(self):
+        SaveLoadWindow(self.app, mode="save")
         return
 
-    def load_game_placeholder(self):
-        # na razie nic nie robi
+    def on_load(self):
+        SaveLoadWindow(self.app, mode="load")
         return
 
     def refresh_texts(self):

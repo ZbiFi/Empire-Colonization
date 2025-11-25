@@ -2,6 +2,7 @@
 import json
 
 from game_menu import GameMenuWindow
+from save_load_windows import SaveLoadWindow
 from settings_window import SettingsWindow
 
 LANG = "en"  # "pl" / "en" / "de"
@@ -563,7 +564,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.current_screen = "start"
 
     def load_game_dialog(self):
+        SaveLoadWindow(self, mode="load")
         return
+
     def start_game(self):
 
         display = self.state_var.get()

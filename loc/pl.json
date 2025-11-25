@@ -790,5 +790,34 @@
   "ui.building_col_pos": "Poz.",
   "ui.building_col_area": "Obszar",
   "screen.buildings_overview.title": "Budynki",
-  "tooltip.free_workers_info": "Ludzie są zatrudniani w budynkach lub biorą udział w eksploracjach"
+  "tooltip.free_workers_info": "Ludzie są zatrudniani w budynkach lub biorą udział w eksploracjach",
+
+  "screen.save.title": "Zapisz grę",
+  "screen.load.title": "Wczytaj grę",
+  "screen.save.name_label": "Nazwa zapisu:",
+  "screen.save.no_name_title": "Brak nazwy",
+  "screen.save.no_name_text": "Wpisz nazwę zapisu.",
+  "screen.save.new_meta": "Nowy zapis",
+
+  "screen.edit_save.title": "Edytuj zapis",
+  "screen.edit_save.label": "Zmień nazwę zapisu:",
+
+  "screen.delete_save.title": "Usuń zapis",
+  "screen.delete_save.q1": "Czy na pewno chcesz usunąć ten zapis?",
+  "screen.delete_save.q2": "To działanie jest nieodwracalne. Usunąć na pewno?",
+
+  "ui.save": "Zapisz",
+  "ui.load": "Wczytaj",
+  "ui.edit": "Edytuj",
+  "ui.delete": "Usuń",
+  "ui.cancel": "Anuluj",
+  "ui.ok": "OK",
+
+  "log.save_not_implemented": "Zapis gry nie jest jeszcze zaimplementowany.",
+  "log.load_not_implemented": "Wczytywanie gry nie jest jeszcze zaimplementowane.",
+
+  "save.fake1.name": "Autosave #1",
+  "save.fake1.meta": "Jamestown • Dzień 42",
+  "save.fake2.name": "Zapis ręczny",
+  "save.fake2.meta": "Fort Nassau • Dzień 57"
 }
