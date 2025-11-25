@@ -894,9 +894,9 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         action_frame = ttk.Frame(self.root);
         action_frame.pack(fill="x", padx=10, pady=5)
         groups = [
-            [("ui.build", self.build_menu), ("ui.upgrade", self.show_upgrade_menu), ("ui.manage_people", self.manage_workers)],
+            [("ui.build", self.build_menu), ("ui.upgrade", self.show_upgrade_menu), ("ui.buildings_btn", lambda: None)],
             [("ui.ships", self.ships_menu), ("ui.native_trade", self.native_menu), ("ui.diplomacy", self.diplomacy_menu)],
-            [("ui.explore", self.explore), ("ui.map", self.show_map), ("ui.missions", self.show_missions_overview)],
+            [("ui.manage_people", self.manage_workers), ("ui.map", self.show_world_map), ("ui.missions", self.show_missions_overview)],
             [("ui.wait_1_day", lambda: self.advance_date(1)), ("ui.wait_3_days", lambda: self.advance_date(3)), ("ui.wait_7_days", lambda: self.advance_date(7))]
         ]
         for col in range(3): action_frame.grid_columnconfigure(col, weight=1, uniform="actions")
@@ -1249,94 +1249,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.death_game()
             return
 
-    def explore(self):
-        if self.free_workers() < 3: self.log(self.loc.t("ui.not_enough_people"), "red"); return
-        if self.resources["food"] < 15 and self.resources["wood"] < 10: self.log(self.loc.t("ui.not_enough_food_or_wood"), "red"); return
-        self.show_explore_map()
-
-    def finish_expedition(self, exp):
-        self.busy_people -= 3
-        y, x = exp[1]
-        cell = self.map_grid[y][x]
-
-        if exp[2] == "explore":
-            cell["discovered"] = True
-
-            terrain = cell["terrain"]
-            terrain_name = self.loc.t(f"terrain.{terrain}.name", default=terrain)
-
-            raw_res = cell.get("resource")  # to jest ID albo None
-
-            if not raw_res:  # None / "" / brak
-                self.log(
-                    self.loc.t(
-                        "log.discovered_no_resource_cell",
-                        y=y, x=x,
-                        terrain=terrain_name
-                    ),
-                    "DarkOrange"
-                )
-            else:
-                res_name = self.loc.t(RESOURCE_DISPLAY_KEYS.get(raw_res, raw_res), default=raw_res)
-                self.log(
-                    self.loc.t(
-                        "log.discovered_cell",
-                        y=y, x=x,
-                        terrain=terrain_name,
-                        resource=res_name
-                    ),
-                    "DarkOrange"
-                )
-
-            # bonus eksploracyjny państwa (np. Hiszpania ma 'explore': 1.4)
-            from constants import STATES
-            explore_mult = STATES.get(self.state, {}).get("explore", 1.0)
-
-            def scaled(amount):
-                return max(1, int(amount * explore_mult))
-
-            gains = []
-
-            if terrain == "forest":
-                wood = scaled(50)
-                skins = scaled(25)
-                self.resources["wood"] += wood
-                self.resources["skins"] += skins
-                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.wood"), amount=wood))
-                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.skins"), amount=skins))
-
-            elif terrain == "field":
-                food = scaled(50)
-                self.resources["food"] += food
-                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
-
-            elif terrain == "sea":
-                food = scaled(50)
-                self.resources["food"] += food
-                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
-
-            elif terrain == "hills":
-                ore_type = cell.get("resource")
-                if ore_type:
-                    ore_amt = scaled(50)
-                    self.resources[ore_type] = self.resources.get(ore_type, 0) + ore_amt
-                    gains.append(self.loc.t("log.gain_resource", res=self.loc.t(RESOURCE_DISPLAY_KEYS.get(ore_type, ore_type)), amount=ore_amt))
-                else:
-                    food = scaled(50)
-                    self.resources["food"] += food
-                    gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
-
-            else:
-                food = scaled(50)
-                self.resources["food"] += food
-                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
-
-            if gains:
-                self.log(
-                    self.loc.t("log.exploration_loot") + ", ".join(gains),
-                    "green"
-                )
-
     def clear_root(self):
         for w in self.root.winfo_children():
             # NIE kasuj otwartych okien (settings, itp.)
@@ -1347,7 +1259,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
     def refresh_start_screen(self):
 
         self.start_screen()
-
 
 # ============== URUCHOMIENIE ==============
 if __name__ == "__main__":

@@ -674,5 +674,7 @@
   "ui.confirm_exit.question": "Are you sure you want to quit?",
 
   "ui.yes": "YES",
-  "ui.no": "NO"
+  "ui.no": "NO",
+
+  "ui.buildings_btn": "Buildings"
 }

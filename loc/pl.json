@@ -780,5 +780,7 @@
   "ui.confirm_exit.question": "Czy na pewno chcesz wyjść?",
 
   "ui.yes": "TAK",
-  "ui.no": "NIE"
+  "ui.no": "NIE",
+
+  "ui.buildings_btn": "Budynki"
 }

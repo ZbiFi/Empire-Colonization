@@ -8,7 +8,7 @@ from datetime import timedelta
 
 from PIL import Image, ImageTk
 
-from constants import BASE_COLORS, MINE_COLORS, MINE_RESOURCES, MINE_NAMES, BUILDINGS, STATES
+from constants import BASE_COLORS, MINE_COLORS, MINE_RESOURCES, MINE_NAMES, BUILDINGS, STATES, RESOURCE_DISPLAY_KEYS
 
 
 class MapUIMixin:
@@ -872,212 +872,39 @@ class MapUIMixin:
             outline="gray"
         )
 
-    # ===== MAPA BUDOWANIA =====
-    def show_map(self):
-        win = self.create_window(self.loc.t("screen.build_map.title"), key="screen.build_map")
+    # ===== WSPÓLNA MAPA (EKSPLORACJA + BUDOWANIE) =====
+    def show_world_map(self):
+        """
+        Unified mapa:
+        - zawsze rysuje się jak eksploracja (żółte pola + '?', koszty, brak odkrycia bez sąsiada)
+        - jeśli self.selected_building != None -> tryb budowy:
+            * zielone ramki na dozwolonych polach
+            * klik na zielone pole buduje
+        """
 
-        # fonty spójne z UI
-        title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
-        info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 12))
-        tile_label_font = (info_font[0], max(8, info_font[1] - 2), "bold")
-        tile_num_font = (info_font[0], max(9, info_font[1] - 1), "bold")
-
-        # większy napis dla osady/dzielnicy
-        settlement_label_font = (title_font[0], max(10, title_font[1] + 2), "bold")
-
-        canvas_width = 850
-        canvas_height = 850
-        canvas = tk.Canvas(
-            win, width=canvas_width, height=canvas_height,
-            bg=self.style.lookup("TFrame", "background"),
-            highlightthickness=0
-        )
-        canvas.pack(pady=10)
-
-        cell_size = self.get_cell_size()
-        map_pixel_size = self.map_size * cell_size
-
-        offset_x = (canvas_width - map_pixel_size) // 2
-        offset_y = 40
-
-        def draw():
-            canvas.delete("all")
-            for y in range(self.map_size):
-                for x in range(self.map_size):
-                    cell = self.map_grid[y][x]
-
-                    if not cell["discovered"]:
-                        try:
-                            if not hasattr(self, "terra_incognita_img") or cell_size not in self.terra_incognita_img:
-                                path = self.resource_path("img/tiles/terra_incognita.png")
-                                base = Image.open(path)
-                                img = base.resize((cell_size, cell_size), Image.LANCZOS)
-                                if not hasattr(self, "terra_incognita_img"):
-                                    self.terra_incognita_img = {}
-                                self.terra_incognita_img[cell_size] = ImageTk.PhotoImage(img)
-
-                            canvas.create_image(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                anchor="nw",
-                                image=self.terra_incognita_img[cell_size]
-                            )
-                        except Exception:
-                            canvas.create_rectangle(
-                                offset_x + x * cell_size,
-                                offset_y + y * cell_size,
-                                offset_x + (x + 1) * cell_size,
-                                offset_y + (y + 1) * cell_size,
-                                fill="#888888",
-                                outline="gray",
-                            )
-                        continue
-
-                    terrain = cell["terrain"]
-
-                    self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
-
-                    building_in_progress = next(
-                        (c for c in self.constructions if c[1]["pos"] == (y, x)), None
-                    )
-                    if building_in_progress:
-                        end, _, _, start = building_in_progress
-                        total_days = (end - start).days
-                        elapsed = (self.current_date - start).days
-                        pct = min(100, max(0, int(elapsed / total_days * 100))) if total_days > 0 else 0
-                        canvas.create_text(
-                            offset_x + x * cell_size + cell_size // 2,
-                            offset_y + y * cell_size + cell_size // 2 + 20,
-                            text=f"{pct}%",
-                            fill="white",
-                            font=tile_label_font
-                        )
-
-                    if terrain not in ["settlement", "district"]:
-                        buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
-                        if buildings_here:
-                            icon = self.get_building_icon(cell_size)
-                            if icon:
-                                img_icon, icon_size = icon
-                                cx = offset_x + x * cell_size + cell_size // 2
-                                cy = offset_y + y * cell_size + cell_size // 2
-                                canvas.create_image(cx, cy, image=img_icon)
-
-                    if terrain in ["settlement", "district"]:
-                        buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
-                        label = self.loc.t(f"terrain.{terrain}.name", default=terrain.capitalize())
-                        used = len(buildings_here)
-                        canvas.create_text(
-                            offset_x + x * cell_size + cell_size // 2,
-                            offset_y + y * cell_size + cell_size // 2 - 20,
-                            text=label,
-                            fill="white",
-                            font=settlement_label_font,
-                            tags=("tile_label",)
-                        )
-                        canvas.create_text(
-                            offset_x + x * cell_size + cell_size // 2,
-                            offset_y + y * cell_size + cell_size // 2,
-                            text=f"{used}/5",
-                            fill="yellow",
-                            font=tile_num_font
-                        )
-
-                    if terrain == "hills" and cell["resource"]:
-                        icon = self.get_mine_icon(cell["resource"], cell_size)
-                        if icon:
-                            img_icon, icon_size = icon
-                            cx = offset_x + x * cell_size + cell_size - 5 - icon_size // 2
-                            cy = offset_y + y * cell_size + cell_size - 5 - icon_size // 2
-                            canvas.create_image(cx, cy, image=img_icon)
-                        else:
-                            rc = MINE_COLORS[cell["resource"]]
-                            canvas.create_rectangle(
-                                offset_x + x * cell_size + cell_size - 20,
-                                offset_y + y * cell_size + cell_size - 20,
-                                offset_x + x * cell_size + cell_size - 5,
-                                offset_y + y * cell_size + cell_size - 5,
-                                fill=rc,
-                                outline="black"
-                            )
-
-                    if self.selected_building:
-                        data = BUILDINGS[self.selected_building]
-
-                        if terrain not in data.get("allowed_terrain", []):
-                            continue
-
-                        if not data.get("requires_settlement"):
-                            if cell["building"] or any(c[1]["pos"] == (y, x) for c in self.constructions):
-                                continue
-
-                        if data.get("requires_settlement"):
-                            if terrain not in ["settlement", "district"]:
-                                continue
-                            used = len([b for b in cell["building"] if not b.get("is_district", False)])
-                            in_progress = len([c for c in self.constructions if c[1]["pos"] == (y, x)])
-                            if used + in_progress >= 5:
-                                continue
-
-                        if data.get("requires_adjacent_settlement"):
-                            if not self.is_adjacent_to_settlement((y, x)):
-                                continue
-                            if terrain == "sea" and self.selected_building != "harbor":
-                                continue
-
-                        canvas.create_rectangle(
-                            offset_x + x * cell_size,
-                            offset_y + y * cell_size,
-                            offset_x + (x + 1) * cell_size,
-                            offset_y + (y + 1) * cell_size,
-                            outline="lime",
-                            width=3
-                        )
-
-            canvas.tag_raise("tile_label")
-            self.draw_legend(canvas, offset_x, offset_y, cell_size)
-
-        def click(event):
-            x = (event.x - offset_x) // cell_size
-            y = (event.y - offset_y) // cell_size
-            if 0 <= x < self.map_size and 0 <= y < self.map_size and self.map_grid[y][x]["discovered"]:
-                if self.selected_building:
-                    self.start_construction_at(self.selected_building, (y, x))
-                    self.selected_building = None
-                    win.destroy()
-
-        canvas.bind("<Button-1>", click)
-        draw()
-        ttk.Button(win, text=self.loc.t("ui.cancel"), command=win.destroy).pack(pady=5)
-
-        self.center_window(win)
-
-    # ===== MAPA EKSPLORACJI =====
-    def show_explore_map(self):
-        win = self.create_window(self.loc.t("screen.exploration.title"), key="screen.exploration")
+        building_mode = bool(self.selected_building)
+        title_key = "screen.build_map.title" if building_mode else "screen.exploration.title"
+        win = self.create_window(self.loc.t(title_key), key="screen.world_map")
 
         # fonty spójne z UI
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
         info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 12))
         tile_q_font = (title_font[0], max(14, title_font[1] + 6), "bold")
+        tile_label_font = (info_font[0], max(8, info_font[1] - 2), "bold")
+        tile_num_font = (info_font[0], max(9, info_font[1] - 1), "bold")
+        settlement_label_font = (title_font[0], max(10, title_font[1] + 2), "bold")
 
+        # --- info o kosztach eksploracji (jak w show_explore_map) ---
         info_frame = ttk.Frame(win)
-        info_frame.pack(pady=5)
-
-        ttk.Label(info_frame, text=self.loc.t("screen.exploration.cost_title"), font=title_font).pack()
-        ttk.Label(
-            info_frame,
-            text=self.loc.t("screen.exploration.cost_line"),
-            justify="center",
-            font=info_font
-        ).pack()
+        if not building_mode:
+            info_frame.pack(pady=5)
+            ttk.Label(info_frame, text=self.loc.t("screen.exploration.cost_title"), font=title_font).pack()
+            ttk.Label(info_frame, text=self.loc.t("screen.exploration.cost_line"), justify="center", font=info_font).pack()
 
         canvas_width = 850
         canvas_height = 850
         canvas = tk.Canvas(
-            win,
-            width=canvas_width,
-            height=canvas_height,
+            win, width=canvas_width, height=canvas_height,
             bg=self.style.lookup("TFrame", "background"),
             highlightthickness=0
         )
@@ -1088,12 +915,45 @@ class MapUIMixin:
         offset_x = (canvas_width - map_pixel_size) // 2
         offset_y = 20
 
+        def can_build_here(y, x, cell):
+            """Sprawdza logikę zielonych ramek 1:1 jak w show_map()."""
+            if not self.selected_building:
+                return False
+
+            data = BUILDINGS[self.selected_building]
+            terrain = cell["terrain"]
+
+            if terrain not in data.get("allowed_terrain", []):
+                return False
+
+            if not data.get("requires_settlement"):
+                if cell["building"] or any(c[1]["pos"] == (y, x) for c in self.constructions):
+                    return False
+
+            if data.get("requires_settlement"):
+                if terrain not in ["settlement", "district"]:
+                    return False
+                used = len([b for b in cell["building"] if not b.get("is_district", False)])
+                in_progress = len([c for c in self.constructions if c[1]["pos"] == (y, x)])
+                if used + in_progress >= 5:
+                    return False
+
+            if data.get("requires_adjacent_settlement"):
+                if not self.is_adjacent_to_settlement((y, x)):
+                    return False
+                if terrain == "sea" and self.selected_building != "harbor":
+                    return False
+
+            return True
+
         def draw():
             canvas.delete("all")
+
             for y in range(self.map_size):
                 for x in range(self.map_size):
                     cell = self.map_grid[y][x]
 
+                    # --- NIEODKRYTE jak w eksploracji ---
                     if not cell["discovered"]:
                         neighbors = [
                             (y + dy, x + dx)
@@ -1119,10 +979,58 @@ class MapUIMixin:
                             )
                         continue
 
+                    # --- ODKRYTE pola: rysunek terenu jak 1:1 z obu map ---
                     terrain = cell["terrain"]
-
                     self._draw_terrain_cell(canvas, x, y, offset_x, offset_y, cell_size)
 
+                    # --- budowa w toku procent ---
+                    building_in_progress = next((c for c in self.constructions if c[1]["pos"] == (y, x)), None)
+                    if building_in_progress:
+                        end, _, _, start = building_in_progress
+                        total_days = (end - start).days
+                        elapsed = (self.current_date - start).days
+                        pct = min(100, max(0, int(elapsed / total_days * 100))) if total_days > 0 else 0
+                        canvas.create_text(
+                            offset_x + x * cell_size + cell_size // 2,
+                            offset_y + y * cell_size + cell_size // 2 + 20,
+                            text=f"{pct}%",
+                            fill="white",
+                            font=tile_label_font
+                        )
+
+                    # --- ikona budynku (jak w show_map) ---
+                    if terrain not in ["settlement", "district"]:
+                        buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
+                        if buildings_here:
+                            icon = self.get_building_icon(cell_size)
+                            if icon:
+                                img_icon, icon_size = icon
+                                cx = offset_x + x * cell_size + cell_size // 2
+                                cy = offset_y + y * cell_size + cell_size // 2
+                                canvas.create_image(cx, cy, image=img_icon)
+
+                    # --- osada/dzielnica (label + used/5) ---
+                    if terrain in ["settlement", "district"]:
+                        buildings_here = [b for b in cell["building"] if not b.get("is_district", False)]
+                        label = self.loc.t(f"terrain.{terrain}.name", default=terrain.capitalize())
+                        used = len(buildings_here)
+                        canvas.create_text(
+                            offset_x + x * cell_size + cell_size // 2,
+                            offset_y + y * cell_size + cell_size // 2 - 20,
+                            text=label,
+                            fill="white",
+                            font=settlement_label_font,
+                            tags=("tile_label",)
+                        )
+                        canvas.create_text(
+                            offset_x + x * cell_size + cell_size // 2,
+                            offset_y + y * cell_size + cell_size // 2,
+                            text=f"{used}/5",
+                            fill="yellow",
+                            font=tile_num_font
+                        )
+
+                    # --- surowce na hills (jak w obu mapach) ---
                     if terrain == "hills" and cell["resource"]:
                         icon = self.get_mine_icon(cell["resource"], cell_size)
                         if icon:
@@ -1130,95 +1038,208 @@ class MapUIMixin:
                             cx = offset_x + x * cell_size + cell_size - 5 - icon_size // 2
                             cy = offset_y + y * cell_size + cell_size - 5 - icon_size // 2
                             canvas.create_image(cx, cy, image=img_icon)
+                        else:
+                            rc = MINE_COLORS[cell["resource"]]
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size + cell_size - 20,
+                                offset_y + y * cell_size + cell_size - 20,
+                                offset_x + x * cell_size + cell_size - 5,
+                                offset_y + y * cell_size + cell_size - 5,
+                                fill=rc, outline="black"
+                            )
 
+                    # --- ZIELONE RAMKI tylko w trybie budowy ---
+                    if self.selected_building and can_build_here(y, x, cell):
+                        canvas.create_rectangle(
+                            offset_x + x * cell_size,
+                            offset_y + y * cell_size,
+                            offset_x + (x + 1) * cell_size,
+                            offset_y + (y + 1) * cell_size,
+                            outline="lime",
+                            width=3
+                        )
+
+            canvas.tag_raise("tile_label")
             self.draw_legend(canvas, offset_x, offset_y, cell_size)
-
-        def debug_reveal_all():
-            for row in self.map_grid:
-                for cell in row:
-                    cell["discovered"] = True
-            draw()
 
         def click(event):
             x = (event.x - offset_x) // cell_size
             y = (event.y - offset_y) // cell_size
-            if not (0 <= x < self.map_size and 0 <= y < self.map_size):
-                return
-
+            if not (0 <= x < self.map_size and 0 <= y < self.map_size): return
             cell = self.map_grid[y][x]
-            if cell["discovered"]:
-                return
 
-            neighbors = [
-                (y + dy, x + dx)
-                for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
-            ]
-            if not any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
-                return
+            # --- klik w NIEODKRYTE pole (eksploracja) ---
+            if not cell["discovered"]:
+                if building_mode:
+                    return  # w trybie budowy klik w nieodkryte pole nic nie robi
 
-            days = random.randint(1, 3) + int(math.hypot(y - self.settlement_pos[0], x - self.settlement_pos[1]))
-            cost_food = 15
-            cost_wood = 10
-
-            confirm = self.create_window(self.loc.t("screen.exploration.confirm_title"), key="screen.exploration_confirm")
-            bg = self.style.lookup("TFrame", "background")
-
-            ttk.Label(
-                confirm,
-                text=self.loc.t("screen.exploration.confirm_send_to", y=y, x=x),
-                font=title_font,
-                background=bg
-            ).pack(pady=10)
-
-            ttk.Label(
-                confirm,
-                text=self.loc.t("screen.exploration.confirm_time_cost", days=days, food=cost_food, wood=cost_wood),
-                justify="center",
-                font=info_font,
-                background=bg
-            ).pack(pady=5)
-
-            def do_explore():
-                if self.free_workers() < 3:
-                    self.log(self.loc.t("log.not_enough_people"), "red")
-                    confirm.destroy()
-                    return
-                if self.resources["food"] < cost_food or self.resources["wood"] < cost_wood:
-                    self.log(self.loc.t("log.not_enough_resources"), "red")
-                    confirm.destroy()
+                neighbors = [
+                    (y + dy, x + dx)
+                    for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                    if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
+                ]
+                if not any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
                     return
 
-                self.busy_people += 3
-                self.resources["food"] -= cost_food
-                self.resources["wood"] -= cost_wood
+                # identycznie jak w show_explore_map
+                days = random.randint(1, 3) + int(math.hypot(y - self.settlement_pos[0], x - self.settlement_pos[1]))
+                cost_food = 15;
+                cost_wood = 10
 
-                end_date = self.current_date + timedelta(days=days)
-                self.expeditions.append((end_date, (y, x), "explore"))
-                self.log(
-                    self.loc.t(
-                        "log.exploration.return",
-                        y=y,
-                        x=x,
-                        date=end_date.strftime("%d %b %Y")
-                    ),
-                    "blue"
-                )
-                confirm.destroy()
+                confirm = self.create_window(self.loc.t("screen.exploration.confirm_title"), key="screen.exploration_confirm")
+                bg = self.style.lookup("TFrame", "background")
+
+                ttk.Label(confirm, text=self.loc.t("screen.exploration.confirm_send_to", y=y, x=x),
+                          font=title_font, background=bg).pack(pady=10)
+                ttk.Label(confirm, text=self.loc.t("screen.exploration.confirm_time_cost", days=days, food=cost_food, wood=cost_wood),
+                          justify="center", font=info_font, background=bg).pack(pady=5)
+
+                def do_explore():
+                    if self.free_workers() < 3:
+                        self.log(self.loc.t("log.not_enough_people"), "red");
+                        confirm.destroy();
+                        return
+                    if self.resources["food"] < cost_food or self.resources["wood"] < cost_wood:
+                        self.log(self.loc.t("log.not_enough_resources"), "red");
+                        confirm.destroy();
+                        return
+
+                    self.busy_people += 3
+                    self.resources["food"] -= cost_food
+                    self.resources["wood"] -= cost_wood
+
+                    end_date = self.current_date + timedelta(days=days)
+                    self.expeditions.append((end_date, (y, x), "explore"))
+                    self.log(self.loc.t("log.exploration.return", y=y, x=x, date=end_date.strftime("%d %b %Y")), "blue")
+                    confirm.destroy();
+                    win.destroy()
+
+                ttk.Button(confirm, text=self.loc.t("ui.send"), command=do_explore).pack(side="left", padx=10, pady=10)
+                ttk.Button(confirm, text=self.loc.t("ui.cancel"), command=confirm.destroy).pack(side="right", padx=10, pady=10)
+                return
+
+            # --- klik w ODKRYTE pole w trybie budowy ---
+            if self.selected_building:
+                data = BUILDINGS[self.selected_building]
+                name = self.selected_building
+                terrain = cell["terrain"]
+
+                # 1) najpierw komunikat o ZŁYM TERENIE (dokładnie tego brakowało)
+                if terrain not in data.get("allowed_terrain", []):
+                    self.log(
+                        self.loc.t(
+                            "log.cannot_build_here",
+                            building=self.loc.t(f"building.{name}.name", default=name),
+                            terrain=self.loc.t(f"terrain.{terrain}.name", default=terrain)
+                        ),
+                        "red"
+                    )
+                    return
+
+                # 2) reszta ograniczeń (zajęte pole, limit w osadzie, brak sąsiedztwa itd.)
+                if not can_build_here(y, x, cell):
+                    # jeśli chcesz osobne teksty na inne przypadki, tu jest miejsce;
+                    # na razie zostawiamy cicho jak było wcześniej
+                    return
+
+                # 3) poprawna budowa
+                self.start_construction_at(self.selected_building, (y, x))
+                self.selected_building = None
                 win.destroy()
-
-            ttk.Button(confirm, text=self.loc.t("ui.send"), command=do_explore).pack(side="left", padx=10, pady=10)
-            ttk.Button(confirm, text=self.loc.t("ui.cancel"), command=confirm.destroy).pack(side="right", padx=10, pady=10)
-
-        # ttk.Button(
-        #     info_frame,
-        #     text=self.loc.t("screen.exploration.debug_reveal_all"),
-        #     command=debug_reveal_all,
-        # ).pack(pady=2)
 
         canvas.bind("<Button-1>", click)
         draw()
         ttk.Button(win, text=self.loc.t("ui.cancel"), command=win.destroy).pack(pady=5)
-
         self.center_window(win)
+
+    # ===== MAPA BUDOWANIA =====
+    def show_map(self):
+        self.show_world_map()
+
+    # ===== MAPA EKSPLORACJI =====
+    def show_explore_map(self):
+        self.show_world_map()
+
+    def finish_expedition(self, exp):
+        self.busy_people -= 3
+        y, x = exp[1]
+        cell = self.map_grid[y][x]
+
+        if exp[2] == "explore":
+            cell["discovered"] = True
+
+            terrain = cell["terrain"]
+            terrain_name = self.loc.t(f"terrain.{terrain}.name", default=terrain)
+
+            raw_res = cell.get("resource")  # to jest ID albo None
+
+            if not raw_res:  # None / "" / brak
+                self.log(
+                    self.loc.t(
+                        "log.discovered_no_resource_cell",
+                        y=y, x=x,
+                        terrain=terrain_name
+                    ),
+                    "DarkOrange"
+                )
+            else:
+                res_name = self.loc.t(RESOURCE_DISPLAY_KEYS.get(raw_res, raw_res), default=raw_res)
+                self.log(
+                    self.loc.t(
+                        "log.discovered_cell",
+                        y=y, x=x,
+                        terrain=terrain_name,
+                        resource=res_name
+                    ),
+                    "DarkOrange"
+                )
+
+            # bonus eksploracyjny państwa (np. Hiszpania ma 'explore': 1.4)
+            from constants import STATES
+            explore_mult = STATES.get(self.state, {}).get("explore", 1.0)
+
+            def scaled(amount):
+                return max(1, int(amount * explore_mult))
+
+            gains = []
+
+            if terrain == "forest":
+                wood = scaled(50)
+                skins = scaled(25)
+                self.resources["wood"] += wood
+                self.resources["skins"] += skins
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.wood"), amount=wood))
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.skins"), amount=skins))
+
+            elif terrain == "field":
+                food = scaled(50)
+                self.resources["food"] += food
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
+
+            elif terrain == "sea":
+                food = scaled(50)
+                self.resources["food"] += food
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
+
+            elif terrain == "hills":
+                ore_type = cell.get("resource")
+                if ore_type:
+                    ore_amt = scaled(50)
+                    self.resources[ore_type] = self.resources.get(ore_type, 0) + ore_amt
+                    gains.append(self.loc.t("log.gain_resource", res=self.loc.t(RESOURCE_DISPLAY_KEYS.get(ore_type, ore_type)), amount=ore_amt))
+                else:
+                    food = scaled(50)
+                    self.resources["food"] += food
+                    gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
+
+            else:
+                food = scaled(50)
+                self.resources["food"] += food
+                gains.append(self.loc.t("log.gain_resource", res=self.loc.t("res.food"), amount=food))
+
+            if gains:
+                self.log(
+                    self.loc.t("log.exploration_loot") + ", ".join(gains),
+                    "green"
+                )
 

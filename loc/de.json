@@ -674,5 +674,6 @@
 "ui.confirm_exit.question": "Möchtest du das Spiel wirklich beenden?",
 
 "ui.yes": "JA",
-"ui.no": "NEIN"
+"ui.no": "NEIN",
+"ui.buildings_btn": "Gebäude"
 }
