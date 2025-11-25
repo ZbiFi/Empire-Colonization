@@ -874,7 +874,7 @@ class MapUIMixin:
 
     # ===== MAPA BUDOWANIA =====
     def show_map(self):
-        win = self.create_window(self.loc.t("screen.build_map.title"))
+        win = self.create_window(self.loc.t("screen.build_map.title"), key="screen.build_map")
 
         # fonty spójne z UI
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
@@ -1054,7 +1054,7 @@ class MapUIMixin:
 
     # ===== MAPA EKSPLORACJI =====
     def show_explore_map(self):
-        win = self.create_window(self.loc.t("screen.exploration.title"))
+        win = self.create_window(self.loc.t("screen.exploration.title"), key="screen.exploration")
 
         # fonty spójne z UI
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
@@ -1161,7 +1161,7 @@ class MapUIMixin:
             cost_food = 15
             cost_wood = 10
 
-            confirm = self.create_window(self.loc.t("screen.exploration.confirm_title"))
+            confirm = self.create_window(self.loc.t("screen.exploration.confirm_title"), key="screen.exploration_confirm")
             bg = self.style.lookup("TFrame", "background")
 
             ttk.Label(

@@ -227,11 +227,32 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         y = (sh - h) // 2
         win.geometry(f"{w}x{h}+{x}+{y}")
 
-    def create_window(self, title):
+    def create_window(self, title, key=None):
+        if key:
+            if not hasattr(self, "_open_windows"):
+                self._open_windows = {}
+            old = self._open_windows.get(key)
+            if old and old.winfo_exists():
+                old.lift()
+                old.focus_force()
+                return old
+
         win = tk.Toplevel(self.root)
         win.title(title)
         BG = self.style.lookup("TFrame", "background")
         win.configure(bg=BG)
+
+        if key:
+            self._open_windows[key] = win
+
+            def on_close():
+                try:
+                    win.destroy()
+                finally:
+                    self._open_windows.pop(key, None)
+
+            win.protocol("WM_DELETE_WINDOW", on_close)
+
         return win
 
     def resource_path(self, filename):
@@ -597,7 +618,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             self.log(self.loc.t("ui.order_only_own_state"), "red")
             return
 
-        win = self.create_window(self.loc.t("ui.order_colonists"))
+        win = self.create_window(self.loc.t("ui.order_colonists"), key="ui.order_colonists")
         win.geometry("460x420")
         win.resizable(False, False)
 

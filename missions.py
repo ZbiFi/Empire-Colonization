@@ -88,7 +88,7 @@ class MissionsMixin:
            Z tego okna można natychmiast wypełnić misje (bez handlu, bez opóźnień).
         """
 
-        win = self.create_window(self.loc.t("screen.missions.title"))
+        win = self.create_window(self.loc.t("screen.missions.title"), key="screen.missions")
         win.geometry("800x1000")
 
         # === GRID NA OKNIE: content + bottom bar ===
@@ -505,7 +505,7 @@ class MissionsMixin:
             self.win_game()
 
     def death_game(self):
-        win = self.create_window(self.loc.t("screen.death.title"))
+        win = self.create_window(self.loc.t("screen.death.title"), key="screen.death")
 
         ttk.Label(
             win,
@@ -534,7 +534,7 @@ class MissionsMixin:
 
     def win_game(self):
 
-        win = self.create_window(self.loc.t("screen.victory.title"))
+        win = self.create_window(self.loc.t("screen.victory.title"), key="screen.victory")
 
         ttk.Label(
             win,

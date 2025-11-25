@@ -104,7 +104,7 @@ class RelationsMixin:
 
     # === Relacje z Indianami ===
     def native_menu(self):
-        win = self.create_window(self.loc.t("screen.native_menu.title"))
+        win = self.create_window(self.loc.t("screen.native_menu.title"), key="screen.native_menu")
         for tribe in self.native_relations:
             rel = self.native_relations[tribe]
             frame = ttk.Frame(win)
@@ -149,7 +149,7 @@ class RelationsMixin:
             )
             return
 
-        win = self.create_window(self.loc.t("screen.integrate_native.title", tribe=self.tribe_name(tribe)))
+        win = self.create_window(self.loc.t("screen.integrate_native.title", tribe=self.tribe_name(tribe)), key="screen.integrate_native")
 
         win.geometry("460x320")
         win.resizable(False, False)
@@ -261,7 +261,7 @@ class RelationsMixin:
         ale zamiast dukatów jest bilans ilościowy (value units)."""
 
         trade_win = self.create_window(
-            self.loc.t("screen.native_trade.title", tribe=tribe)
+            self.loc.t("screen.native_trade.title", tribe=tribe), key="screen.native_trade"
         )
         trade_win.geometry("800x800")  # stały rozmiar
         trade_win.resizable(False, False)
@@ -476,7 +476,7 @@ class RelationsMixin:
 
     # === Dyplomacja z państwami europejskimi ===
     def diplomacy_menu(self):
-        win = self.create_window(self.loc.t("screen.diplomacy.title"))
+        win = self.create_window(self.loc.t("screen.diplomacy.title"), key="screen.diplomacy")
 
         for state, rel in self.europe_relations.items():
             frame = ttk.Frame(win)
@@ -531,7 +531,7 @@ class RelationsMixin:
         Reputacja rośnie jak u Indian (progi 1000 + bonus za bardzo korzystny handel dla nich).
         """
         state_disp = self.state_name(state)
-        trade_win = self.create_window(self.loc.t("screen.europe_trade.title", state=state_disp))
+        trade_win = self.create_window(self.loc.t("screen.europe_trade.title", state=state_disp), key="screen.europe_trade")
 
         trade_win.geometry("800x800")  # stały rozmiar
         trade_win.resizable(False, False)

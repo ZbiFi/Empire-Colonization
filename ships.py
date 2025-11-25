@@ -11,7 +11,7 @@ from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES, SHIP_STA
 class ShipsMixin:
     def ships_menu(self):
 
-        win = self.create_window(self.loc.t("screen.ships.title"))
+        win = self.create_window(self.loc.t("screen.ships.title"), key="screen.ships")
 
         # fonty spójne z resztą UI (misje)
         title_font = getattr(self, "top_title_font", ("Cinzel", 16, "bold"))
@@ -231,7 +231,7 @@ class ShipsMixin:
 
     def open_load_menu(self, ship_idx, parent):
 
-        load_win = self.create_window(self.loc.t("screen.load_ship.title"))
+        load_win = self.create_window(self.loc.t("screen.load_ship.title"), key="screen.load_ship")
 
         load_win.geometry("600x850")
 

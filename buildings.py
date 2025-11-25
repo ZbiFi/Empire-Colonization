@@ -412,7 +412,7 @@ class BuildingsMixin:
     # === Menu: Ulepsz/Zdegraduj (jeden przycisk) ===
     def show_upgrade_menu(self):
 
-        win = self.create_window(self.loc.t("screen.buildings.manage_title"))
+        win = self.create_window(self.loc.t("screen.buildings.manage_title"), key="screen.buildings")
 
         # fonty spójne z resztą UI (misje)
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
@@ -525,7 +525,7 @@ class BuildingsMixin:
 
     def build_menu(self):
 
-        win = self.create_window(self.loc.t("screen.build_menu.title"))
+        win = self.create_window(self.loc.t("screen.build_menu.title"), key="screen.build_menu")
 
         # styl dla budynków, na które gracza nie stać
         if not hasattr(self, "_cant_afford_building_style"):
@@ -720,7 +720,7 @@ class BuildingsMixin:
     # === Zarządzanie pracownikami ===
     def manage_workers(self):
 
-        win = self.create_window(self.loc.t("screen.workers.title"))
+        win = self.create_window(self.loc.t("screen.workers.title"), key="screen.workers")
 
         title_font = getattr(self, "top_title_font", ("Cinzel", 14, "bold"))
 
