@@ -782,5 +782,12 @@
   "ui.yes": "TAK",
   "ui.no": "NIE",
 
-  "ui.buildings_btn": "Budynki"
+  "ui.buildings_btn": "Budynki",
+
+  "ui.building_col_name": "Budynek",
+  "ui.building_col_workers": "Prac.",
+  "ui.building_col_status": "Produkcja",
+  "ui.building_col_pos": "Poz.",
+  "ui.building_col_area": "Obszar",
+  "screen.buildings_overview.title": "Budynki"
 }

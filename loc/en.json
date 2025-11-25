@@ -676,5 +676,12 @@
   "ui.yes": "YES",
   "ui.no": "NO",
 
-  "ui.buildings_btn": "Buildings"
+  "ui.buildings_btn": "Buildings",
+
+  "ui.building_col_name": "Building",
+  "ui.building_col_workers": "Workers",
+  "ui.building_col_status": "Production",
+  "ui.building_col_pos": "Pos.",
+  "ui.building_col_area": "Area",
+  "screen.buildings_overview.title": "Buildings"
 }

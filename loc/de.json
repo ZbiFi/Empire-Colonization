@@ -675,5 +675,12 @@
 
 "ui.yes": "JA",
 "ui.no": "NEIN",
-"ui.buildings_btn": "Gebäude"
+"ui.buildings_btn": "Gebäude",
+
+"ui.building_col_name": "Gebäude",
+"ui.building_col_workers": "Arbeiter",
+"ui.building_col_status": "Produktion",
+"ui.building_col_pos": "Pos.",
+"ui.building_col_area": "Gebiet",
+"screen.buildings_overview.title": "Gebäude"
 }

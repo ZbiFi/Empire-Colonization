@@ -869,32 +869,21 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
         for i, res in enumerate(RESOURCES):
             if i % 6 == 0 and i > 0: row = ttk.Frame(self.res_frame); row.pack(fill="x")
-            cell = ttk.Frame(row);
+            cell = ttk.Frame(row)
             cell.pack(side="left", padx=2)
-            res_key = RESOURCE_DISPLAY_KEYS.get(res, res);
+            res_key = RESOURCE_DISPLAY_KEYS.get(res, res)
             res_name = self.loc.t(res_key, default=res)
-            lbl = ttk.Label(cell, text=f"{res_name}: {int(self.resources[res])}", width=26, anchor="w");
+            lbl = ttk.Label(cell, text=f"{res_name}: {int(self.resources[res])}", width=26, anchor="w")
             lbl.pack(side="left")
             self.res_labels[res] = lbl
-            net_lbl = ttk.Label(cell, text="", width=8, anchor="w", foreground="gray");
+            net_lbl = ttk.Label(cell, text="", width=8, anchor="w", foreground="gray")
             net_lbl.pack(side="left")
             self.res_net_labels[res] = net_lbl
 
-        self.build_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.buildings"));
-        self.build_frame.pack(fill="x", padx=10, pady=5)
-        build_inner = ttk.Frame(self.build_frame);
-        build_inner.pack(fill="both", expand=True)
-
-        self.build_listbox = tk.Listbox(build_inner, height=8)
-        self.build_listbox.pack(side="left", fill="both", expand=True, padx=(5, 0), pady=5)
-        build_scroll = ttk.Scrollbar(build_inner, orient="vertical", command=self.build_listbox.yview)
-        build_scroll.pack(side="right", fill="y", padx=(0, 5), pady=5)
-        self.build_listbox.config(yscrollcommand=build_scroll.set)
-
-        action_frame = ttk.Frame(self.root);
+        action_frame = ttk.Frame(self.root)
         action_frame.pack(fill="x", padx=10, pady=5)
         groups = [
-            [("ui.build", self.build_menu), ("ui.upgrade", self.show_upgrade_menu), ("ui.buildings_btn", lambda: None)],
+            [("ui.build", self.build_menu), ("ui.upgrade", self.show_upgrade_menu), ("ui.buildings_btn", self.show_buildings_screen)],
             [("ui.ships", self.ships_menu), ("ui.native_trade", self.native_menu), ("ui.diplomacy", self.diplomacy_menu)],
             [("ui.manage_people", self.manage_workers), ("ui.map", self.show_world_map), ("ui.missions", self.show_missions_overview)],
             [("ui.wait_1_day", lambda: self.advance_date(1)), ("ui.wait_3_days", lambda: self.advance_date(3)), ("ui.wait_7_days", lambda: self.advance_date(7))]
@@ -911,19 +900,19 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 self.action_buttons.append((key, btn))
             current_row += 1
 
-        self.log_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.journal"));
+        self.log_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.journal"))
         self.log_frame.pack(fill="both", expand=True, padx=10, pady=5)
         self.log_text = tk.Text(self.log_frame, height=10, state=tk.DISABLED, wrap=tk.WORD, font=self.journal_font, bg="#e1d2ad", fg="#3b2a1a")
         self.log_text.pack(side="left", fill="both", expand=True, padx=5, pady=5)
         scrollbar = ttk.Scrollbar(self.log_frame, orient="vertical", command=self.log_text.yview)
-        scrollbar.pack(side="right", fill="y");
+        scrollbar.pack(side="right", fill="y")
         self.log_text.config(yscrollcommand=scrollbar.set)
 
-        self.log_text.tag_configure("spacing", spacing3=4);
+        self.log_text.tag_configure("spacing", spacing3=4)
         self.log_text.tag_add("spacing", "1.0", "end")
         self.log(self.loc.t("log.colonization_started"), "green")
         self.log(self.loc.t("story.monarch_order", monarch=self.get_monarch()), "green")
-        self.update_display();
+        self.update_display()
         self.current_screen = "game"
 
     def refresh_game_texts(self):
@@ -1105,77 +1094,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             food_needed = self.people * FOOD_CONSUMPTION_PER_PERSON
         net_total["food"] -= food_needed
 
-        # zapamiętaj aktualną pozycję przewinięcia
-        first, last = self.build_listbox.yview()
-
-        self.build_listbox.delete(0, tk.END)
-
-        for b in self.buildings:
+        # produkcja netto z budynków (lista nie jest już wyświetlana na głównym ekranie)
+        for b, prod, cons, eff in building_data:
             if b.get("is_district"):
                 continue
-
-            base_info = BUILDINGS[b["base"]]
-            base_name = self.loc.t(base_info.get("name_key"), default=b["base"])  # nazwa z BUILDINGS
-            level = b.get("level", 0)
-
-            # nazwa ulepszenia (jeśli jest)
-            upgrade_name = None
-            if level > 0:
-                up = base_info.get("upgrades", [])[level - 1]
-                upgrade_name = self.loc.t(up.get("name_key"), default=None) if up.get("name_key") else up.get("name")
-
-            # finalna nazwa do wyświetlenia
-            if upgrade_name and upgrade_name != base_name:
-                display_name = f"{upgrade_name} ({base_name})"
-            else:
-                display_name = base_name
-
-            if b.get("resource"):
-                display_name += f" [{b['resource']}]"
-
-            data = next((d for d in building_data if d[0] is b), None)
-            status = "—"
-            color_tag = "black"
-
-            if data:
-                _, prod, cons, eff = data
-                consumes_something = any(cons.values())
-                missing_resources = consumes_something and eff < 1.0
-                if missing_resources:
-                    color_tag = "red"
-
-                local_net = {r: prod.get(r, 0) - cons.get(r, 0) for r in RESOURCES}
-
-                prod_str = " | ".join(
-                    f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)}: +{v:.1f}"
-                    for r, v in local_net.items()
-                    if v > 0.05
-                )
-
-                eff_str = f" ({eff:.0%})" if eff < 1 else ""
-                status = f"{prod_str}{eff_str}" if prod_str else "—"
-
-                for r, v in local_net.items():
-                    net_total[r] += v * eff
-
-            pos = b["pos"]
-            cell = self.map_grid[pos[0]][pos[1]]
-
-            pos = b["pos"]
-            area_id = "settlement" if cell["terrain"] == "settlement" else "district"
-            area_label = self.loc.t(f"terrain.{area_id}.name", default=area_id)
-
-            workers_word = self.loc.t("ui.workers_short", default="pracownicy")
-
-            line = (
-                f"{display_name} | {workers_word}: {b.get('workers', 0)}/{self.get_max_workers(b)} "
-                f"| {status} | ({pos[0]},{pos[1]}) | {area_label}"
-            )
-            self.build_listbox.insert(tk.END, line)
-            self.build_listbox.itemconfig(tk.END, fg=color_tag)
-
-        # przywróć poprzednią pozycję przewinięcia
-        self.build_listbox.yview_moveto(first)
+            local_net = {r: prod.get(r, 0) - cons.get(r, 0) for r in RESOURCES}
+            for r, v in local_net.items():
+                net_total[r] += v * eff
 
         # aktualizuj zmiany netto przy surowcach
         if hasattr(self, "res_net_labels"):

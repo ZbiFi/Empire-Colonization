@@ -791,3 +791,80 @@ class BuildingsMixin:
 
         # wyśrodkuj okno statków
         self.center_window(win)
+
+    # === EKRAN BUDOWY (podgląd budynków) ===
+    def show_buildings_screen(self):
+        """Nowe okno z listą budynków w formie tabeli (Treeview)."""
+        win = self.create_window(self.loc.t("screen.buildings_overview.title"), key="screen.buildings_overview")
+        outer = ttk.Frame(win, padding=10);
+        outer.pack(fill="both", expand=True)
+
+        cols = ("name", "workers", "status", "pos", "area")
+        tree = ttk.Treeview(outer, columns=cols, show="headings", height=12)
+        tree.pack(side="left", fill="both", expand=True)
+
+        # Nagłówki (tłumaczenia jak w EKRANIE BUDOWY)
+        tree.heading("name", text=self.loc.t("ui.building_col_name", default="Budynek"))
+        tree.heading("workers", text=self.loc.t("ui.building_col_workers", default="Prac."))
+        tree.heading("status", text=self.loc.t("ui.building_col_status", default="Produkcja"))
+        tree.heading("pos", text=self.loc.t("ui.building_col_pos", default="Poz."))
+        tree.heading("area", text=self.loc.t("ui.building_col_area", default="Obszar"))
+
+        tree.column("name", width=260, anchor="w")
+        tree.column("workers", width=80, anchor="center")
+        tree.column("status", width=420, anchor="w")
+        tree.column("pos", width=70, anchor="center")
+        tree.column("area", width=140, anchor="w")
+
+        scroll = ttk.Scrollbar(outer, orient="vertical", command=tree.yview)
+        scroll.pack(side="right", fill="y");
+        tree.configure(yscrollcommand=scroll.set)
+
+        tree.tag_configure("ok", foreground="black")
+        tree.tag_configure("warn", foreground="orange")
+        tree.tag_configure("bad", foreground="red")
+
+        # dane produkcji (Twoje realne krotki)
+        building_data = self.calculate_production()
+
+        for b, prod, cons, eff in building_data:
+            if b.get("is_district"):
+                continue
+
+            name = self.get_building_display_name(b)
+            pos = b.get("pos", (0, 0))
+            workers_txt = f"{b.get('workers', 0)}/{self.get_max_workers(b)}"
+
+            # status produkcji netto + efektywność
+            local_net = {r: prod.get(r, 0) - cons.get(r, 0) for r in RESOURCES}
+            prod_str = " | ".join(
+                f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)}: +{v:.1f}"
+                for r, v in local_net.items() if v > 0.05
+            )
+            eff_str = f" ({eff:.0%})" if eff < 1 else ""
+            status = f"{prod_str}{eff_str}" if prod_str else "—"
+
+            maxw = self.get_max_workers(b)
+            if maxw == 0:
+                # budynek bez pracowników (np. namioty) nigdy nie jest "zły"
+                tag = "ok"
+            else:
+                if eff <= 0.0:
+                    tag = "bad"
+                elif eff < 1.0:
+                    tag = "warn"
+                else:
+                    tag = "ok"
+
+            y, x = pos
+            cell = self.map_grid[y][x] if 0 <= y < self.map_size and 0 <= x < self.map_size else None
+            terrain = cell.get("terrain") if cell else "unknown"
+            area_id = "settlement" if terrain == "settlement" else "district" if terrain == "district" else terrain
+            area_label = self.loc.t(f"terrain.{area_id}.name", default=area_id)
+
+            tree.insert("", "end", values=(name, workers_txt, status, f"{x+1},{y+1}", area_label), tags=(tag,))
+
+        btn_row = ttk.Frame(win);
+        btn_row.pack(pady=(0, 8))
+        ttk.Button(btn_row, text=self.loc.t("ui.close", default="Zamknij"), command=win.destroy).pack()
+        self.center_window(win)
