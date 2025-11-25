@@ -939,7 +939,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         max_excess = 0  # do logowania przeludnienia
 
         for _ in range(days):
-            self.days_passed += days
+            self.days_passed += 1
             cap = self.calculate_population_capacity()
 
             if self.people > cap:
