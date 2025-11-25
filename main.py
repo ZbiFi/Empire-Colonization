@@ -1,4 +1,8 @@
 # main.py
+import json
+
+from settings_window import SettingsWindow
+
 LANG = "pl"  # "en" / "de"
 
 import os
@@ -20,6 +24,7 @@ from relations import RelationsMixin
 from ships import ShipsMixin
 from map_views import MapUIMixin
 from tooltip import Tooltip
+from settings_manager import load_settings, save_settings
 
 def load_font_ttf(path):
     """
@@ -36,7 +41,16 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
     def __init__(self, root):
         self.root = root
-        self.loc = Localization(LANG, locales_dir=os.path.join(os.path.dirname(__file__), "loc"))
+        # ---- settings (trwałe, wczytywane z settings.json) ----
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.settings = load_settings(base_dir, defaults={
+            "lang": LANG,
+            "music_volume": 0.2,
+            "sfx_volume": 0.5,
+        })
+        lang = self.settings.get("lang", LANG)
+
+        self.loc = Localization(lang, locales_dir=os.path.join(os.path.dirname(__file__), "loc"))
         self.root.title(self.loc.t("app.title"))
         self.root.geometry("1600x1000")
 
@@ -228,15 +242,23 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             base = os.path.dirname(os.path.abspath(__file__))
         return os.path.join(base, filename)
 
+    def save_settings(self):
+        """Zapisz aktualne ustawienia do settings.json."""
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        save_settings(base_dir, self.settings)
+
     def init_sounds(self):
         # MUZYKA TŁA
         music_path = self.resource_path("sounds/music.mp3")
+        music_vol = float(self.settings.get("music_volume", 0.2))
+        sfx_vol = float(self.settings.get("sfx_volume", 0.5))
         try:
             pygame.mixer.music.load(music_path)
-            pygame.mixer.music.set_volume(0.2)  # głośność 0.0–1.0
             pygame.mixer.music.play(loops=1)  # -1 = gra w pętli bez końca
         except Exception as e:
             print(self.loc.t("error.music_load_failed"), e)
+
+        pygame.mixer.music.set_volume(music_vol)
 
         # tu od razu przygotujemy dźwięki efektów
         self.sounds = {}
@@ -247,10 +269,24 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         except Exception as e:
             print(self.loc.t("error.sound_load_failed"), e)
 
+        # ustaw głośność SFX od razu
+        for snd in self.sounds.values():
+            try:
+                snd.set_volume(sfx_vol)
+            except Exception:
+                pass
+
     def play_sound(self, name):
         snd = getattr(self, "sounds", {}).get(name)
         if snd:
             snd.play()
+
+    def open_settings(self):
+        # singleton: nie otwieraj wielu okien naraz
+        if getattr(self, "_settings_win", None) and self._settings_win.winfo_exists():
+            self._settings_win.lift()
+            return
+        self._settings_win = SettingsWindow(self)
 
     def update_log_display(self):
         if not hasattr(self, 'log_text'): return
@@ -316,6 +352,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
     # === Start gry ===
     def start_screen(self):
 
+        # jeśli start menu już istnieje (np. po zmianie języka), usuń je
+        if getattr(self, "start_container", None) is not None and self.start_container.winfo_exists():
+            self.start_container.destroy()
+
+        self.start_container = tk.Frame(self.root)
+        self.start_container.pack(fill="both", expand=True)
+
         def update_state_bonus(*_):
 
             display = self.state_var.get()
@@ -329,10 +372,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             else:
                 self.state_bonus_var.set(self.loc.t('ui.state_bonus_none', default='Bonus: brak unikalnego efektu.'))
 
-        # wyczyść stare widgety
-        for w in self.root.winfo_children():
-            w.destroy()
-
         # === TŁO Z OBRAZU ===
         try:
             img_path = self.resource_path("img/colony.jpg")
@@ -344,12 +383,34 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             # musimy trzymać referencję w self, inaczej obraz zniknie
             self.start_bg_image = ImageTk.PhotoImage(bg_image)
 
-            bg_label = tk.Label(self.root, image=self.start_bg_image)
+            bg_label = tk.Label(self.start_container, image=self.start_bg_image)
             bg_label.place(x=0, y=0, relwidth=1, relheight=1)
         except Exception as e:
             print(self.loc.t("error.background_load_failed"), e)
-            bg_label = tk.Label(self.root)
+            bg_label = tk.Label(self.start_container)
             bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+        try:
+            gear_img_path = self.resource_path("img/gear.png")
+            gear_img = Image.open(gear_img_path).resize((32, 32), Image.LANCZOS)
+            self.gear_icon_main = ImageTk.PhotoImage(gear_img)  # trzymaj referencję!
+        except Exception as e:
+            print("gear.png load failed:", e)
+            self.gear_icon_main = None
+
+        self.settings_btn_main = ttk.Button(
+            bg_label,
+            image=self.gear_icon_main,
+            command=self.open_settings,
+            style="ColonialSecondary.TButton"
+        )
+        if self.gear_icon_main is None:
+            self.settings_btn_main.config(text="⚙")
+
+        # prawy górny róg start menu
+        self.settings_btn_main.place(relx=1.0, rely=0.0, anchor="ne", x=-12, y=12)
+
+        Tooltip(self.settings_btn_main, self.loc.t("screen.settings.title", default="Settings"))
 
         # === GŁÓWNA RAMKA NA PRZYCISKI / WYBÓR PAŃSTWA ===
         frame = ttk.Frame(bg_label, padding=20)
@@ -396,6 +457,13 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # ustaw tekst dla domyślnego państwa (Portugalia)
         update_state_bonus()
 
+        ttk.Button(
+            frame,
+            text=self.loc.t("ui.random_state"),
+            style="ColonialSecondary.TButton",
+            command=lambda: self.state_var.set(random.choice(state_display_values))
+        ).pack(pady=(8, 10))
+
         # === Wybór wielkości mapy ===
         ttk.Label(frame, text=self.loc.t("ui.map_size"), font=self.ui_font).pack(pady=(10, 5))
 
@@ -441,10 +509,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 value=val
             ).pack(anchor="w")
 
-        ttk.Button(frame, text=self.loc.t("ui.random_state"), style="ColonialSecondary.TButton", command=lambda: self.state_var.set(random.choice(state_display_values))).pack(pady=10)
+        btn_row = ttk.Frame(frame)
+        btn_row.pack(pady=10)
+
         start_btn = ttk.Button(frame, text=self.loc.t("ui.start_game"), style="Colonial.TButton", command=self.start_game)
         start_btn.pack(pady=10)
 
+        start_btn = ttk.Button(frame, text=self.loc.t("ui.load_game"), style="Colonial.TButton", command=self.load_game_dialog)
+        start_btn.pack(pady=10)
+
+    def load_game_dialog(self):
+        return
     def start_game(self):
 
         display = self.state_var.get()
@@ -1240,6 +1315,18 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                     self.loc.t("log.exploration_loot") + ", ".join(gains),
                     "green"
                 )
+
+    def clear_root(self):
+        for w in self.root.winfo_children():
+            # NIE kasuj otwartych okien (settings, itp.)
+            if isinstance(w, tk.Toplevel):
+                continue
+            w.destroy()
+
+    def refresh_start_screen(self):
+
+        self.start_screen()
+
 
 # ============== URUCHOMIENIE ==============
 if __name__ == "__main__":

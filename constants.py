@@ -3,7 +3,7 @@ import random
 
 # ============== DATY ==============
 START_YEAR_MIN = 1492
-START_YEAR_MAX = 1776
+START_YEAR_MAX = 1742
 
 # Konfiguracja mapy
 MAP_SIZE = 8

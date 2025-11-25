@@ -741,6 +741,29 @@
   "screen.death.title": "KONIEC GRY",
   "screen.death.banner": "☠ WSZYSCY KOLONIŚCI ZGINĘLI ☠",
   "screen.death.text": "Twoja kolonia upadła.\nPrzetrwano dni: {days}\nUkończone misje królewskie: {completed} / {to_win}",
-  "screen.death.quit_button": "Zakończ grę"
+  "screen.death.quit_button": "Zakończ grę",
 
+  "screen.settings.title": "Ustawienia",
+  "screen.settings.header": "USTAWIENIA",
+
+  "settings.language.title": "Język",
+  "settings.language.label": "Wybierz język:",
+
+  "settings.music.title": "Muzyka",
+  "settings.music.volume": "Głośność muzyki:",
+
+  "settings.sfx.title": "Dźwięki",
+  "settings.sfx.volume": "Głośność dźwięków:",
+
+  "settings.gameplay.title": "Rozgrywka",
+  "settings.gameplay.start_date": "Data startowa:",
+
+  "settings.start_date.random": "Losowa",
+  "settings.start_date.1492": "1492 (Era odkryć)",
+  "settings.start_date.1607": "1607 (Wczesne kolonie)",
+  "settings.start_date.1700": "1700 (Późne kolonie)",
+
+  "settings.ui.title": "Interfejs",
+  "settings.ui.scale": "Skalowanie interfejsu:",
+  "ui.load_game": "Wczytaj"
 }

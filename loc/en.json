@@ -637,5 +637,28 @@
   "screen.death.title": "GAME OVER",
   "screen.death.banner": "☠ ALL COLONISTS HAVE PERISHED ☠",
   "screen.death.text": "Your colony has fallen.\nDays survived: {days}\nRoyal missions completed: {completed} / {to_win}",
-  "screen.death.quit_button": "Quit game"
+  "screen.death.quit_button": "Quit game",
+  "screen.settings.title": "Settings",
+  "screen.settings.header": "SETTINGS",
+
+  "settings.language.title": "Language",
+  "settings.language.label": "Choose language:",
+
+  "settings.music.title": "Music",
+  "settings.music.volume": "Music volume:",
+
+  "settings.sfx.title": "Sounds",
+  "settings.sfx.volume": "Sounds volume:",
+
+  "settings.gameplay.title": "Gameplay",
+  "settings.gameplay.start_date": "Start date:",
+
+  "settings.start_date.random": "Random",
+  "settings.start_date.1492": "1492 (Discovery Era)",
+  "settings.start_date.1607": "1607 (Early Colonies)",
+  "settings.start_date.1700": "1700 (Late Colonies)",
+
+  "settings.ui.title": "Interface",
+  "settings.ui.scale": "UI scale:",
+  "ui.load_game": "Load"
 }

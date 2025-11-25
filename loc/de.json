@@ -637,5 +637,28 @@
   "screen.death.title": "SPIEL ENDE",
   "screen.death.banner": "☠ ALLE KOLONISTEN SIND UMS GEKOMMEN ☠",
   "screen.death.text": "Deine Kolonie ist gefallen.\nÜberlebte Tage: {days}\nErfüllte königliche Missionen: {completed} / {to_win}",
-  "screen.death.quit_button": "Spiel beenden"
+  "screen.death.quit_button": "Spiel beenden",
+  "screen.settings.title": "Einstellungen",
+"screen.settings.header": "EINSTELLUNGEN",
+
+"settings.language.title": "Sprache",
+"settings.language.label": "Sprache wählen:",
+
+"settings.music.title": "Musik",
+"settings.music.volume": "Musiklautstärke:",
+
+"settings.sfx.title": "Geräusche",
+"settings.sfx.volume": "Geräuschlautstärke:",
+
+"settings.gameplay.title": "Gameplay",
+"settings.gameplay.start_date": "Startdatum:",
+
+"settings.start_date.random": "Zufällig",
+"settings.start_date.1492": "1492 (Entdeckungszeit)",
+"settings.start_date.1607": "1607 (Frühe Kolonien)",
+"settings.start_date.1700": "1700 (Späte Kolonien)",
+
+"settings.ui.title": "Oberfläche",
+"settings.ui.scale": "UI-Skalierung:",
+"ui.load_game": "Laden"
 }
