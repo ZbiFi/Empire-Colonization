@@ -263,7 +263,7 @@ class RelationsMixin:
         trade_win = self.create_window(
             self.loc.t("screen.native_trade.title", tribe=tribe)
         )
-        trade_win.geometry("500x1200")  # stały rozmiar
+        trade_win.geometry("800x800")  # stały rozmiar
         trade_win.resizable(False, False)
 
 
@@ -281,12 +281,24 @@ class RelationsMixin:
 
         ttk.Label(trade_win, text=info_text, justify="center").pack(pady=5)
 
-        # --- SEKCJE (tak jak u Europejczyków) ---
-        sell_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.native_trade.sell_frame"))
-        sell_frame.pack(fill="x", padx=15, pady=5)
+        # --- SEKCJE obok siebie ---
+        tables_frame = ttk.Frame(trade_win)
+        tables_frame.pack(fill="both", expand=True, padx=15, pady=5)
 
-        buy_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.native_trade.buy_frame"))
-        buy_frame.pack(fill="x", padx=15, pady=5)
+        tables_frame.columnconfigure(0, weight=1)
+        tables_frame.columnconfigure(1, weight=1)
+
+        sell_frame = ttk.LabelFrame(
+            tables_frame,
+            text=self.loc.t("screen.native_trade.sell_frame")
+        )
+        sell_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+
+        buy_frame = ttk.LabelFrame(
+            tables_frame,
+            text=self.loc.t("screen.native_trade.buy_frame")
+        )
+        buy_frame.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
 
         sell_vars = {}
         buy_vars = {}
@@ -521,7 +533,7 @@ class RelationsMixin:
         state_disp = self.state_name(state)
         trade_win = self.create_window(self.loc.t("screen.europe_trade.title", state=state_disp))
 
-        trade_win.geometry("500x1350")  # stały rozmiar
+        trade_win.geometry("800x800")  # stały rozmiar
         trade_win.resizable(False, False)
 
         def get_margins():
@@ -553,11 +565,24 @@ class RelationsMixin:
         )
         ttk.Label(trade_win, text=info_text, justify="center").pack(pady=5)
 
-        sell_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.europe_trade.sell_frame"))
-        sell_frame.pack(fill="x", padx=15, pady=5)
+        # --- SEKCJE obok siebie ---
+        tables_frame = ttk.Frame(trade_win)
+        tables_frame.pack(fill="both", expand=True, padx=15, pady=5)
 
-        buy_frame = ttk.LabelFrame(trade_win, text=self.loc.t("screen.europe_trade.buy_frame"))
-        buy_frame.pack(fill="x", padx=15, pady=5)
+        tables_frame.columnconfigure(0, weight=1)
+        tables_frame.columnconfigure(1, weight=1)
+
+        sell_frame = ttk.LabelFrame(
+            tables_frame,
+            text=self.loc.t("screen.europe_trade.sell_frame")
+        )
+        sell_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+
+        buy_frame = ttk.LabelFrame(
+            tables_frame,
+            text=self.loc.t("screen.europe_trade.buy_frame")
+        )
+        buy_frame.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
 
         sell_vars = {}
         buy_vars = {}
@@ -623,7 +648,7 @@ class RelationsMixin:
                 sell_vars[res] = var_s
 
             # KUPNO W EUROPIE ZABRONIONE DLA NIEKTÓRYCH TOWARÓW TYLKO WE WŁASNYM KRAJU
-            if res not in BLOCK_EUROPE_BUY or self.state != state:
+            if res not in BLOCK_EUROPE_BUY:
                 max_q_buy = 999
                 price_b = int(EUROPE_PRICES[res] * buy_mult)
                 var_b = self._create_trade_row(
