@@ -765,5 +765,20 @@
 
   "settings.ui.title": "Interfejs",
   "settings.ui.scale": "Skalowanie interfejsu:",
-  "ui.load_game": "Wczytaj"
+
+  "ui.load_game": "Wczytaj",
+
+  "ui.game_menu.title": "Menu gry",
+  "ui.game_menu.continue": "Kontynuuj",
+  "ui.game_menu.save": "Zapisz",
+  "ui.game_menu.load": "Wczytaj",
+  "ui.game_menu.options": "Opcje",
+  "ui.game_menu.quit": "Zamknij",
+  "ui.game_menu.tooltip": "Menu gry",
+
+  "ui.confirm_exit.title": "Wyjście",
+  "ui.confirm_exit.question": "Czy na pewno chcesz wyjść?",
+
+  "ui.yes": "TAK",
+  "ui.no": "NIE"
 }

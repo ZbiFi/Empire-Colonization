@@ -10,6 +10,8 @@ class SettingsWindow(tk.Toplevel):
         self.app = app
         self.loc = app.loc
 
+        self._pending_lang = app.settings.get("lang", "pl")
+
         self.title(self.loc.t("screen.settings.title", default="Settings"))
         self.resizable(False, False)
 
@@ -66,15 +68,12 @@ class SettingsWindow(tk.Toplevel):
         lang_combo.pack(anchor="w", padx=8, pady=(0, 6))
 
         def on_lang_change(*_):
-            # nic nie rób, jeśli okno już się zamyka
             if self._closing or not self.winfo_exists():
                 return
 
-            app.settings["lang"] = self.lang_var.get()
-            app.loc.load_language(app.settings["lang"])
-
-            # odśwież tylko to okno (opcjonalnie)
-            self.refresh_texts()
+            # tylko zapamiętaj wybór – bez przełączania języka w loc
+            self._pending_lang = self.lang_var.get()
+            app.settings["lang"] = self._pending_lang
 
         self._lang_trace_id = self.lang_var.trace_add("write", on_lang_change)
 
@@ -182,10 +181,20 @@ class SettingsWindow(tk.Toplevel):
         except Exception:
             pass
 
+        # zastosuj język dopiero przy zamykaniu okna
+        new_lang = getattr(self, "_pending_lang", self.app.settings.get("lang", "pl"))
+        if new_lang != getattr(self.app.loc, "lang", None):
+            self.app.settings["lang"] = new_lang
+            self.app.loc.load_language(new_lang)
         # zapisz ustawienia na dysk
         self.app.save_settings()
 
-        # odśwież start menu dopiero po zamknięciu
-        self.app.refresh_start_screen()
+        # odśwież odpowiedni ekran dopiero po zamknięciu
+        if getattr(self.app, "current_screen", "start") == "start":
+            self.app.refresh_start_screen()
+        else:
+            # jesteśmy w trakcie gry – tylko odśwież teksty UI gry
+            if hasattr(self.app, "refresh_game_texts"):
+                self.app.refresh_game_texts()
 
         self.destroy()

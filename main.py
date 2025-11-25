@@ -1,9 +1,10 @@
 # main.py
 import json
 
+from game_menu import GameMenuWindow
 from settings_window import SettingsWindow
 
-LANG = "pl"  # "en" / "de"
+LANG = "en"  # "pl" / "en" / "de"
 
 import os
 from localization import Localization
@@ -12,10 +13,8 @@ import tkinter as tk
 from ctypes import windll
 from tkinter import ttk
 from datetime import timedelta
-
 import pygame
 from PIL import Image, ImageTk
-
 from buildings import BuildingsMixin
 from map_generator import generate_map, MAP_SIZE
 from constants import *
@@ -309,6 +308,28 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             return
         self._settings_win = SettingsWindow(self)
 
+    def open_game_menu(self):
+        """Otwiera menu gry tylko jeśli nie ma innych otwartych okien."""
+        others = []
+        for w in self.root.winfo_children():
+            if isinstance(w, tk.Toplevel) and w.winfo_exists():
+                if getattr(self, "_game_menu_win", None) and w == self._game_menu_win.win:
+                    continue
+                others.append(w)
+
+        if others:
+            try:
+                others[0].lift(); others[0].focus_force()
+            except Exception:
+                pass
+            return
+
+        if getattr(self, "_game_menu_win", None) and self._game_menu_win.win.winfo_exists():
+            self._game_menu_win.win.lift();
+            return
+
+        self._game_menu_win = GameMenuWindow(self)
+
     def update_log_display(self):
         if not hasattr(self, 'log_text'): return
         self.log_text.config(state=tk.NORMAL)
@@ -539,13 +560,19 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         start_btn = ttk.Button(frame, text=self.loc.t("ui.load_game"), style="Colonial.TButton", command=self.load_game_dialog)
         start_btn.pack(pady=10)
 
+        self.current_screen = "start"
+
     def load_game_dialog(self):
         return
     def start_game(self):
 
         display = self.state_var.get()
-        self.state_display = display
         self.state = self.state_display_to_id.get(display, display)
+        if not self.state:
+            return
+
+        # klucz nazwy państwa masz w STATES[self.state]['name_key']
+        self.state_display = self.loc.t(STATES[self.state]["name_key"], default=self.state)
         if not self.state: return
 
         if self.state == "france":
@@ -567,18 +594,20 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # własne państwo startuje z lepszą reputacją, reszta pozostaje 0
         self.europe_relations[self.state] = 50
 
-        self.location = random.choice([
-            self.loc.t("map.gulf_of_mexico"),
-            self.loc.t("map.brazil_coast"),
-            self.loc.t("map.caribbean"),
-            self.loc.t("map.florida"),
-            self.loc.t("map.patagonia"),
-            self.loc.t("map.hudson_bay"),
-            self.loc.t("map.bahamas"),
-            self.loc.t("map.orinoco_delta"),
-            self.loc.t("map.peru_coast"),
-            self.loc.t("map.new_york")
+        # --- losujemy KLUCZ lokacji, a tłumaczenie robimy na bieżąco ---
+        self.location_key = random.choice([
+            "map.gulf_of_mexico",
+            "map.brazil_coast",
+            "map.caribbean",
+            "map.florida",
+            "map.patagonia",
+            "map.hudson_bay",
+            "map.bahamas",
+            "map.orinoco_delta",
+            "map.peru_coast",
+            "map.new_york"
         ])
+        self.location = self.loc.t(self.location_key)
         if "pop_start" in STATES[self.state]:
             self.people += STATES[self.state]["pop_start"]
 
@@ -764,189 +793,162 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # wyśrodkuj okno zamawiania kolonistów
         self.center_window(win)
 
+    def update_loc_state_text(self):
+        loc_txt = self.loc.t(getattr(self, "location_key", ""), default=getattr(self, "location", ""))
+        if self.state in STATES:
+            state_txt = self.loc.t(STATES[self.state]["name_key"], default=self.state)
+        else:
+            state_txt = getattr(self, "state_display", "")
+        if hasattr(self, "loc_state_lbl") and self.loc_state_lbl.winfo_exists():
+            self.loc_state_lbl.config(text=f"{loc_txt} | {state_txt} | ")
+
     # === Główny ekran ===
     def main_game(self):
         for w in self.root.winfo_children(): w.destroy()
 
-        top = ttk.Frame(self.root)
+        top = ttk.Frame(self.root);
         top.pack(fill="x", padx=10, pady=5)
+        for col in range(3): top.columnconfigure(col, weight=1)
 
-        # 3 kolumny: lewa (data), środek (lokacja/państwo/monarcha), prawa (misje)
-        for col in range(3):
-            top.columnconfigure(col, weight=1)
-
-        # ========== WIERSZ 1 ==========
-
-        # Data po lewej
-        self.day_lbl = ttk.Label(
-            top,
-            text="",
-            font=self.top_title_font if hasattr(self, "top_title_font") else ("Cinzel", 14, "bold")
-        )
+        self.day_lbl = ttk.Label(top, text="", font=self.top_title_font if hasattr(self, "top_title_font") else ("Cinzel", 14, "bold"))
         self.day_lbl.grid(row=0, column=0, sticky="w")
 
-        # Środkowy frame: lokalizacja | państwo | Monarcha: XYZ
-        center_frame = ttk.Frame(top)
+        center_frame = ttk.Frame(top);
         center_frame.grid(row=0, column=1)
+        self.loc_state_lbl = ttk.Label(center_frame, text="", font=self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12))
+        self.loc_state_lbl.pack(side="left");
+        self.update_loc_state_text()
 
-        self.loc_state_lbl = ttk.Label(
-            center_frame,
-            text=f"{self.location} | {self.state_display} | ",
-            font=self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12)
-        )
-        self.loc_state_lbl.pack(side="left")
-
-        # Monarcha tuż po państwie, pogrubiony
-        self.monarch_lbl = ttk.Label(
-            center_frame,
-            text=self.loc.t("ui.monarch_placeholder"),
-            font=( (self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
-                   self.top_info_font[1] if hasattr(self, "top_info_font") else 12,
-                   "bold")
-        )
+        self.monarch_lbl = ttk.Label(center_frame, text=self.loc.t("ui.monarch_placeholder"),
+                                     font=((self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
+                                           self.top_info_font[1] if hasattr(self, "top_info_font") else 12, "bold"))
         self.monarch_lbl.pack(side="left")
 
-        # Pogrubiony licznik misji po prawej
-        if not hasattr(self, "completed_missions"):
-            self.completed_missions = 0
-
+        right_frame = ttk.Frame(top);
+        right_frame.grid(row=0, column=2, sticky="e", padx=10)
         self.mission_counter_label = ttk.Label(
-            top,
+            right_frame,
             text=self.loc.t("ui.royal_missions_completed", completed=self.completed_missions, to_win=self.missions_to_win),
-            font=( (self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
-                   self.top_info_font[1] if hasattr(self, "top_info_font") else 12,
-                   "bold"),
+            font=((self.top_info_font[0] if hasattr(self, "top_info_font") else "EB Garamond Italic"),
+                  self.top_info_font[1] if hasattr(self, "top_info_font") else 12, "bold"),
             foreground="purple"
         )
-        self.mission_counter_label.grid(row=0, column=2, sticky="e", padx=10)
-        Tooltip(self.mission_counter_label,
-                self.loc.t("tooltip.royal_missions_info"))
+        self.mission_counter_label.pack(side="left")
+        Tooltip(self.mission_counter_label, self.loc.t("tooltip.royal_missions_info"))
 
-        # ========== WIERSZ 2 – Ludzie / Wolni, wyśrodkowane ==========
+        try:
+            if not hasattr(self, "gear_icon_menu") or self.gear_icon_menu is None:
+                gear_img = Image.open(self.resource_path("img/gear.png")).resize((22, 22), Image.LANCZOS)
+                self.gear_icon_menu = ImageTk.PhotoImage(gear_img)
+        except Exception as e:
+            print("gear.png load failed (menu):", e);
+            self.gear_icon_menu = None
 
-        self.pop_frame = ttk.Frame(top)
+        self.game_menu_btn = ttk.Button(right_frame, image=self.gear_icon_menu, command=self.open_game_menu,
+                                        style="ColonialSecondary.TButton", width=2)
+        if self.gear_icon_menu is None: self.game_menu_btn.config(text="⚙")
+        self.game_menu_btn.pack(side="left", padx=(8, 0))
+        Tooltip(self.game_menu_btn, self.loc.t("ui.game_menu.tooltip", default="Menu"))
+
+        self.pop_frame = ttk.Frame(top);
         self.pop_frame.grid(row=1, column=0, columnspan=3, pady=(2, 0))
-
         base_font = self.top_info_font if hasattr(self, "top_info_font") else ("EB Garamond Italic", 12)
 
         self.pop_lbl = ttk.Label(self.pop_frame, text=self.loc.t("ui.population_placeholder"), font=base_font)
-        self.pop_lbl.pack(side="left", padx=5)
-
+        self.pop_lbl.pack(side="left", padx=5);
         self.pop_tooltip = Tooltip(self.pop_lbl, self.loc.t("tooltip.population"))
-
         ttk.Label(self.pop_frame, text="|", font=base_font).pack(side="left", padx=5)
-
         self.work_lbl = ttk.Label(self.pop_frame, text=self.loc.t("ui.free_workers_placeholder"), font=base_font)
         self.work_lbl.pack(side="left", padx=5)
 
-        res_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.resources"))
-        res_frame.pack(fill="x", padx=10, pady=5)
-
-        # etykiety stanu surowców oraz ich zmiany netto / dzień
-        self.res_labels = {}
-        self.res_net_labels = {}
-
-        row = ttk.Frame(res_frame)
+        self.res_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.resources"));
+        self.res_frame.pack(fill="x", padx=10, pady=5)
+        self.res_labels, self.res_net_labels = {}, {}
+        row = ttk.Frame(self.res_frame);
         row.pack(fill="x")
 
         for i, res in enumerate(RESOURCES):
-            if i % 6 == 0 and i > 0:
-                row = ttk.Frame(res_frame)
-                row.pack(fill="x")
-
-            cell = ttk.Frame(row)
+            if i % 6 == 0 and i > 0: row = ttk.Frame(self.res_frame); row.pack(fill="x")
+            cell = ttk.Frame(row);
             cell.pack(side="left", padx=2)
-
-            res_key = RESOURCE_DISPLAY_KEYS.get(res, res)
+            res_key = RESOURCE_DISPLAY_KEYS.get(res, res);
             res_name = self.loc.t(res_key, default=res)
-            lbl = ttk.Label(cell, text=f"{res_name}: {int(self.resources[res])}", width=26, anchor="w")
+            lbl = ttk.Label(cell, text=f"{res_name}: {int(self.resources[res])}", width=26, anchor="w");
             lbl.pack(side="left")
             self.res_labels[res] = lbl
-
-            net_lbl = ttk.Label(cell, text="", width=8, anchor="w", foreground="gray")
+            net_lbl = ttk.Label(cell, text="", width=8, anchor="w", foreground="gray");
             net_lbl.pack(side="left")
             self.res_net_labels[res] = net_lbl
 
-        build_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.buildings"))
-        build_frame.pack(fill="x", padx=10, pady=5)
-
-        build_inner = ttk.Frame(build_frame)
+        self.build_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.buildings"));
+        self.build_frame.pack(fill="x", padx=10, pady=5)
+        build_inner = ttk.Frame(self.build_frame);
         build_inner.pack(fill="both", expand=True)
 
         self.build_listbox = tk.Listbox(build_inner, height=8)
         self.build_listbox.pack(side="left", fill="both", expand=True, padx=(5, 0), pady=5)
-
         build_scroll = ttk.Scrollbar(build_inner, orient="vertical", command=self.build_listbox.yview)
         build_scroll.pack(side="right", fill="y", padx=(0, 5), pady=5)
-
         self.build_listbox.config(yscrollcommand=build_scroll.set)
 
-        action_frame = ttk.Frame(self.root)
+        action_frame = ttk.Frame(self.root);
         action_frame.pack(fill="x", padx=10, pady=5)
-
         groups = [
-            [(self.loc.t("ui.build"), self.build_menu),
-             (self.loc.t("ui.upgrade"), self.show_upgrade_menu),
-             (self.loc.t("ui.manage_people"), self.manage_workers)],
-
-            [(self.loc.t("ui.ships"), self.ships_menu),
-             (self.loc.t("ui.native_trade"), self.native_menu),
-             (self.loc.t("ui.diplomacy"), self.diplomacy_menu)],
-
-            [(self.loc.t("ui.explore"), self.explore),
-             (self.loc.t("ui.map"), self.show_map),
-             (self.loc.t("ui.missions"), self.show_missions_overview)],
-
-            [(self.loc.t("ui.wait_1_day"), lambda: self.advance_date(1)),
-             (self.loc.t("ui.wait_3_days"), lambda: self.advance_date(3)),
-             (self.loc.t("ui.wait_7_days"), lambda: self.advance_date(7))],
+            [("ui.build", self.build_menu), ("ui.upgrade", self.show_upgrade_menu), ("ui.manage_people", self.manage_workers)],
+            [("ui.ships", self.ships_menu), ("ui.native_trade", self.native_menu), ("ui.diplomacy", self.diplomacy_menu)],
+            [("ui.explore", self.explore), ("ui.map", self.show_map), ("ui.missions", self.show_missions_overview)],
+            [("ui.wait_1_day", lambda: self.advance_date(1)), ("ui.wait_3_days", lambda: self.advance_date(3)), ("ui.wait_7_days", lambda: self.advance_date(7))]
         ]
-
-        # 3 kolumny dzielące szerokość *dla całego panelu* (uniform => te same w każdej linii)
-        for col in range(3):
-            action_frame.grid_columnconfigure(col, weight=1, uniform="actions")
+        for col in range(3): action_frame.grid_columnconfigure(col, weight=1, uniform="actions")
+        self.action_buttons = []
 
         current_row = 0
-        for group_index, group in enumerate(groups):
-            for col, (text, command) in enumerate(group):
-                # dodatkowy odstęp nad kolejnymi grupami
-                top_padding = 0 if group_index == 0 else 10
-
-                btn = ttk.Button(action_frame, text=text, command=command)
-                btn.grid(
-                    row=current_row,
-                    column=col,
-                    padx=5,
-                    pady=(top_padding, 5),
-                    sticky="ew",  # rozciąga się na całą szerokość kolumny
-                )
-
+        for gi, group in enumerate(groups):
+            for col, (key, cmd) in enumerate(group):
+                pad_top = 0 if gi == 0 else 10
+                btn = ttk.Button(action_frame, text=self.loc.t(key), command=cmd)
+                btn.grid(row=current_row, column=col, padx=5, pady=(pad_top, 5), sticky="ew")
+                self.action_buttons.append((key, btn))
             current_row += 1
 
-        log_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.journal"));
-        log_frame.pack(fill="both", expand=True, padx=10, pady=5)
-        self.log_text = tk.Text(
-            log_frame,
-            height=10,
-            state=tk.DISABLED,
-            wrap=tk.WORD,
-            font=self.journal_font,
-            bg="#e1d2ad",
-            fg="#3b2a1a"
-        )
+        self.log_frame = ttk.LabelFrame(self.root, text=self.loc.t("ui.journal"));
+        self.log_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        self.log_text = tk.Text(self.log_frame, height=10, state=tk.DISABLED, wrap=tk.WORD, font=self.journal_font, bg="#e1d2ad", fg="#3b2a1a")
         self.log_text.pack(side="left", fill="both", expand=True, padx=5, pady=5)
-
-        scrollbar = ttk.Scrollbar(log_frame, orient="vertical", command=self.log_text.yview)
-        scrollbar.pack(side="right", fill="y")
+        scrollbar = ttk.Scrollbar(self.log_frame, orient="vertical", command=self.log_text.yview)
+        scrollbar.pack(side="right", fill="y");
         self.log_text.config(yscrollcommand=scrollbar.set)
 
-        # Lepsza interlinia dla czytelności
-        self.log_text.tag_configure("spacing", spacing3=4)
+        self.log_text.tag_configure("spacing", spacing3=4);
         self.log_text.tag_add("spacing", "1.0", "end")
-
         self.log(self.loc.t("log.colonization_started"), "green")
         self.log(self.loc.t("story.monarch_order", monarch=self.get_monarch()), "green")
-        self.update_display()
+        self.update_display();
+        self.current_screen = "game"
+
+    def refresh_game_texts(self):
+        """Odświeża statyczne napisy w UI gry po zmianie języka."""
+        if getattr(self, "current_screen", None) != "game": return
+
+        self.update_loc_state_text()
+
+        if hasattr(self, "mission_counter_label") and self.mission_counter_label.winfo_exists():
+            self.mission_counter_label.config(text=self.loc.t("ui.royal_missions_completed",
+                                                              completed=self.completed_missions, to_win=self.missions_to_win))
+
+        if hasattr(self, "res_frame") and self.res_frame.winfo_exists(): self.res_frame.config(text=self.loc.t("ui.resources"))
+        if hasattr(self, "build_frame") and self.build_frame.winfo_exists(): self.build_frame.config(text=self.loc.t("ui.buildings"))
+        if hasattr(self, "log_frame") and self.log_frame.winfo_exists(): self.log_frame.config(text=self.loc.t("ui.journal"))
+
+        if hasattr(self, "action_buttons"):
+            for key, btn in self.action_buttons:
+                if btn.winfo_exists(): btn.config(text=self.loc.t(key))
+
+        if getattr(self, "_game_menu_win", None) and self._game_menu_win.win.winfo_exists():
+            self._game_menu_win.refresh_texts()
+
+        self.update_display();
+        self.update_log_display()
 
     def advance_date(self, days):
         # if days > 1 and self.free_workers() < 1:
@@ -1192,8 +1194,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                 lbl = self.res_net_labels.get(r)
                 if lbl:
                     lbl.config(text=txt, foreground=color)
-
-
 
         finished = [c for c in self.constructions if c[0] <= self.current_date]
         for c in finished:

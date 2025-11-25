@@ -27,8 +27,8 @@ przetłumacz królów
 
 <SAVE/LOAD>
 2.save/load
-1.settings
-                    DONE !!!!! 1.localization
+                    DONE !!!! 1.settings
+logi zrobić         DONE !!!!! 1.localization
 
 <MAPA>
                     DONE !!! - lepsze tile
@@ -41,6 +41,8 @@ tile dla przystani
                     DONE !!! NIE DZIAŁAJA QUESTY JAK POWINNY!!!!!!
                     DONE !!!! handel z limitami i produkcją u indian
 automatyczny handel
+4. zrobić coś z nadmiarem żarcia i drewna
+5. budowa statków
                     DONE!!!!! endgame screen, jak się przegra
 3a) eventy losowe - plaga, pozar, wypadki whatever, piractwo
 ?budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci

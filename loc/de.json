@@ -660,5 +660,19 @@
 
 "settings.ui.title": "Oberfläche",
 "settings.ui.scale": "UI-Skalierung:",
-"ui.load_game": "Laden"
+"ui.load_game": "Laden",
+
+"ui.game_menu.title": "Spielmenü",
+"ui.game_menu.continue": "Fortsetzen",
+"ui.game_menu.save": "Speichern",
+"ui.game_menu.load": "Laden",
+"ui.game_menu.options": "Optionen",
+"ui.game_menu.quit": "Beenden",
+"ui.game_menu.tooltip": "Spielmenü",
+
+"ui.confirm_exit.title": "Beenden",
+"ui.confirm_exit.question": "Möchtest du das Spiel wirklich beenden?",
+
+"ui.yes": "JA",
+"ui.no": "NEIN"
 }

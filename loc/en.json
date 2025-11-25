@@ -660,5 +660,19 @@
 
   "settings.ui.title": "Interface",
   "settings.ui.scale": "UI scale:",
-  "ui.load_game": "Load"
+  "ui.load_game": "Load",
+
+  "ui.game_menu.title": "Game menu",
+  "ui.game_menu.continue": "Continue",
+  "ui.game_menu.save": "Save",
+  "ui.game_menu.load": "Load",
+  "ui.game_menu.options": "Options",
+  "ui.game_menu.quit": "Quit",
+  "ui.game_menu.tooltip": "Game menu",
+
+  "ui.confirm_exit.title": "Exit",
+  "ui.confirm_exit.question": "Are you sure you want to quit?",
+
+  "ui.yes": "YES",
+  "ui.no": "NO"
 }
