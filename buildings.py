@@ -785,6 +785,11 @@ class BuildingsMixin:
                 self.buildings[idx]["workers"] = scale.get()
 
             self.log(self.loc.t("log.workers_assigned"), "green")
+
+            # odśwież EKRAN BUDOWY jeśli jest otwarty
+            if hasattr(self, "refresh_buildings_screen"):
+                self.refresh_buildings_screen()
+
             win.destroy()
 
         ttk.Button(win, text=self.loc.t("ui.confirm"), command=save).pack(pady=10)
@@ -796,8 +801,18 @@ class BuildingsMixin:
     def show_buildings_screen(self):
         """Nowe okno z listą budynków w formie tabeli (Treeview)."""
         win = self.create_window(self.loc.t("screen.buildings_overview.title"), key="screen.buildings_overview")
-        outer = ttk.Frame(win, padding=10);
+
+        # --- GÓRNY PASEK AKCJI (Buduj / Ulepsz / Zarządzaj ludźmi) ---
+        top_bar = ttk.Frame(win, padding=(10, 10, 10, 0))
+        top_bar.pack(fill="x")
+
+        ttk.Button(top_bar, text=self.loc.t("ui.build"), command=self.build_menu).pack(side="left", padx=5)
+        ttk.Button(top_bar, text=self.loc.t("ui.upgrade"), command=self.show_upgrade_menu).pack(side="left", padx=5)
+        ttk.Button(top_bar, text=self.loc.t("ui.manage_people"), command=self.manage_workers).pack(side="left", padx=5)
+
+        outer = ttk.Frame(win, padding=10)
         outer.pack(fill="both", expand=True)
+
 
         cols = ("name", "workers", "status", "pos", "area")
         tree = ttk.Treeview(outer, columns=cols, show="headings", height=12)
@@ -824,37 +839,63 @@ class BuildingsMixin:
         tree.tag_configure("warn", foreground="orange")
         tree.tag_configure("bad", foreground="red")
 
-        # dane produkcji (Twoje realne krotki)
-        building_data = self.calculate_production()
+        self._buildings_overview_win = win
+        self._buildings_overview_tree = tree
+        self._populate_buildings_overview_tree()
 
+        btn_row = ttk.Frame(win)
+        btn_row.pack(pady=(0, 8))
+        ttk.Button(btn_row, text=self.loc.t("ui.close", default="Zamknij"), command=win.destroy).pack()
+        self.center_window(win)
+    def _populate_buildings_overview_tree(self):
+        """Wypełnia tabelę EKRANU BUDOWY aktualnymi danymi."""
+        tree = getattr(self, "_buildings_overview_tree", None)
+        if not tree or not tree.winfo_exists(): return
+
+        # zachowaj scroll
+        first = 0.0
+        try: first = tree.yview()[0]
+        except Exception: pass
+
+        for i in tree.get_children(): tree.delete(i)
+
+        building_data = self.calculate_production()
         for b, prod, cons, eff in building_data:
-            if b.get("is_district"):
-                continue
+            if b.get("is_district"): continue
 
             name = self.get_building_display_name(b)
             pos = b.get("pos", (0, 0))
             workers_txt = f"{b.get('workers', 0)}/{self.get_max_workers(b)}"
 
-            # status produkcji netto + efektywność
-            local_net = {r: prod.get(r, 0) - cons.get(r, 0) for r in RESOURCES}
+            # produkcja i zużycie osobno
+            prod_only = {r: prod.get(r, 0) for r in RESOURCES if prod.get(r, 0) > 0.05}
+            cons_only = {r: cons.get(r, 0) for r in RESOURCES if cons.get(r, 0) > 0.05}
+
             prod_str = " | ".join(
                 f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)}: +{v:.1f}"
-                for r, v in local_net.items() if v > 0.05
+                for r, v in prod_only.items()
             )
-            eff_str = f" ({eff:.0%})" if eff < 1 else ""
-            status = f"{prod_str}{eff_str}" if prod_str else "—"
+            cons_str = " | ".join(
+                f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)}: -{v:.1f}"
+                for r, v in cons_only.items()
+            )
 
             maxw = self.get_max_workers(b)
-            if maxw == 0:
-                # budynek bez pracowników (np. namioty) nigdy nie jest "zły"
-                tag = "ok"
+            eff_str = f" ({eff:.0%})" if (maxw > 0 and eff < 1) else ""
+
+            if prod_str and cons_str:
+                status = f"{prod_str}  /  {cons_str}{eff_str}"
+            elif prod_str:
+                status = f"{prod_str}{eff_str}"
+            elif cons_str:
+                status = f"{cons_str}{eff_str}"
             else:
-                if eff <= 0.0:
-                    tag = "bad"
-                elif eff < 1.0:
-                    tag = "warn"
-                else:
-                    tag = "ok"
+                status = "—"
+
+            if maxw == 0: tag = "ok"
+            elif eff <= 0.0: tag = "bad"
+            elif eff < 1.0: tag = "warn"
+            else: tag = "ok"
 
             y, x = pos
             cell = self.map_grid[y][x] if 0 <= y < self.map_size and 0 <= x < self.map_size else None
@@ -862,9 +903,14 @@ class BuildingsMixin:
             area_id = "settlement" if terrain == "settlement" else "district" if terrain == "district" else terrain
             area_label = self.loc.t(f"terrain.{area_id}.name", default=area_id)
 
-            tree.insert("", "end", values=(name, workers_txt, status, f"{x+1},{y+1}", area_label), tags=(tag,))
+            tree.insert("", "end", values=(name, workers_txt, status, f"{y},{x}", area_label), tags=(tag,))
 
-        btn_row = ttk.Frame(win);
-        btn_row.pack(pady=(0, 8))
-        ttk.Button(btn_row, text=self.loc.t("ui.close", default="Zamknij"), command=win.destroy).pack()
-        self.center_window(win)
+        try: tree.yview_moveto(first)
+        except Exception: pass
+
+    def refresh_buildings_screen(self):
+        """Publiczny refresh EKRANU BUDOWY, jeśli jest otwarty."""
+        win = getattr(self, "_buildings_overview_win", None)
+        tree = getattr(self, "_buildings_overview_tree", None)
+        if win and win.winfo_exists() and tree and tree.winfo_exists():
+            self._populate_buildings_overview_tree()

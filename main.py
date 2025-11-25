@@ -884,9 +884,8 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         action_frame = ttk.Frame(self.root)
         action_frame.pack(fill="x", padx=10, pady=5)
         groups = [
-            [("ui.build", self.build_menu), ("ui.upgrade", self.show_upgrade_menu), ("ui.buildings_btn", self.show_buildings_screen)],
             [("ui.ships", self.ships_menu), ("ui.native_trade", self.native_menu), ("ui.diplomacy", self.diplomacy_menu)],
-            [("ui.manage_people", self.manage_workers), ("ui.map", self.show_world_map), ("ui.missions", self.show_missions_overview)],
+            [("ui.buildings_btn", self.show_buildings_screen), ("ui.map", self.show_world_map), ("ui.missions", self.show_missions_overview)],
             [("ui.wait_1_day", lambda: self.advance_date(1)), ("ui.wait_3_days", lambda: self.advance_date(3)), ("ui.wait_7_days", lambda: self.advance_date(7))]
         ]
         for col in range(3): action_frame.grid_columnconfigure(col, weight=1, uniform="actions")
