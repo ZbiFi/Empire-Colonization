@@ -26,7 +26,7 @@ drogi? -> bonus do produkcji.
 przetłumacz królów
 
 <SAVE/LOAD>
-                DONE??? 2.save/load
+            DONE??? 2.save/load
                     DONE !!!! 1.settings
 logi zrobić         DONE !!!!! 1.localization
 

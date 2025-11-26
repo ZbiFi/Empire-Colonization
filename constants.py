@@ -21,8 +21,8 @@ FOOD_CONSUMPTION_PER_PERSON = 1.0
 # mnożnik zużycia żywności dla osób ponad pojemność kolonii
 FOOD_OVERCROWDING_MULTIPLIER = 1.5
 
-# constants.py
-MAX_SHIP_CARGO = 1500
+# # constants.py
+# MAX_SHIP_CARGO = 1500
 
 # ============== PAŃSTWA ==============
 STATES = {

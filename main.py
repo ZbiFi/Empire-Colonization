@@ -106,7 +106,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.state = None
         self.location = None
         self.current_date = None
-        self.people = 20
+        self.people = 10
         self.busy_people = 0
         self.days_passed = 0
 
@@ -114,21 +114,21 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.resources = {r: 0 for r in RESOURCES}
 
         self.resources["food"] = 100000
-        self.resources["wood"] = 100000
-        self.resources["skins"] = 10000
-        self.resources["clothes"] = 10000
-        self.resources["herbs"] = 10000
-        self.resources["meds"] = 10000
-        self.resources["iron"] = 10000
-        self.resources["steel"] = 10000
-        self.resources["cane"] = 10000
-        self.resources["sugar"] = 10000
-        self.resources["tobacco"] = 10000
-        self.resources["cigars"] = 10000
-        self.resources["coal"] = 10000
-        self.resources["silver"] = 10000
-        self.resources["gold"] = 10000
-        self.resources["ducats"] = 10000
+        self.resources["wood"] = 1000
+        self.resources["skins"] = 1000
+        self.resources["clothes"] = 1000
+        self.resources["herbs"] = 1000
+        self.resources["meds"] = 1000
+        self.resources["iron"] = 1000
+        self.resources["steel"] = 1000
+        self.resources["cane"] = 1000
+        self.resources["sugar"] = 1000
+        self.resources["tobacco"] = 1000
+        self.resources["cigars"] = 1000
+        self.resources["coal"] = 1000
+        self.resources["silver"] = 1000
+        self.resources["gold"] = 1000
+        self.resources["ducats"] = 1000
 
         # self.resources["food"] = 1000
         # self.resources["wood"] = 50

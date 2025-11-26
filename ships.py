@@ -5,7 +5,7 @@ from datetime import timedelta
 import random
 from functools import partial
 
-from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES, SHIP_STATUS_IN_EUROPE_PORT, SHIP_STATUS_RETURNING, SHIP_STATUS_IN_PORT, SHIP_STATUS_TO_EUROPE, SHIP_STATUS_KEYS, RESOURCE_DISPLAY_KEYS, SHIP_NAMES_BY_STATE, SHIP_TYPES, BUILDINGS
+from constants import EUROPE_PRICES, RESOURCES, STATES, SHIP_STATUS_IN_EUROPE_PORT, SHIP_STATUS_RETURNING, SHIP_STATUS_IN_PORT, SHIP_STATUS_TO_EUROPE, SHIP_STATUS_KEYS, RESOURCE_DISPLAY_KEYS, SHIP_NAMES_BY_STATE, SHIP_TYPES, BUILDINGS
 from tooltip import Tooltip
 
 
@@ -41,7 +41,7 @@ class ShipsMixin:
         ships_win = self.ships_canvas.create_window((0, 0), window=ships_frame, anchor="nw")
 
         for c in range(3):
-            ships_frame.columnconfigure(c, weight=1)
+            ships_frame.columnconfigure(c, weight=1, uniform="shipscols")
 
         scroll_needed = {"value": False}
 
@@ -69,7 +69,13 @@ class ShipsMixin:
                     self.ships_scroll.grid()
 
         def _on_canvas_configure(evt):
+            # dopasuj szerokość okna z listą do szerokości canvasa
             self.ships_canvas.itemconfig(ships_win, width=evt.width)
+
+            # wymuś 3 równe kolumny nawet gdy część jest pusta
+            col_w = max(1, evt.width // 3)
+            for c in range(3):
+                ships_frame.columnconfigure(c, minsize=col_w, uniform="shipscols")
 
         ships_frame.bind("<Configure>", _on_frame_configure)
         self.ships_canvas.bind("<Configure>", _on_canvas_configure)
@@ -107,7 +113,10 @@ class ShipsMixin:
                 font=small_info_bold
             ).pack(anchor="w")
 
-            stype_key = SHIP_TYPES.get(ship_type, SHIP_TYPES["galleon"])["name_key"]
+            ship_data = SHIP_TYPES.get(ship_type, SHIP_TYPES["galleon"])
+            stype_key = ship_data["name_key"]
+            max_cargo = self._ship_capacity(ship_type)
+
             ttk.Label(
                 frame,
                 text=self.loc.t("screen.ships.type_line", type=self.loc.t(stype_key)),
@@ -166,10 +175,10 @@ class ShipsMixin:
                     font=small_info_font
                 ).pack(anchor="w")
 
-                load_color = "red" if total_units > MAX_SHIP_CARGO else "black"
+                load_color = "red" if total_units > max_cargo else "black"
                 ttk.Label(
                     frame,
-                    text=self.loc.t("screen.ships.cargo_capacity_line", current=total_units, max=MAX_SHIP_CARGO),
+                    text=self.loc.t("screen.ships.cargo_capacity_line", current=total_units, max=max_cargo),
                     foreground=load_color,
                     font=small_info_font
                 ).pack(anchor="w")
@@ -198,7 +207,7 @@ class ShipsMixin:
                         ).pack(anchor="w")
             else:
                 ttk.Label(frame, text=self.loc.t("screen.ships.cargo_empty"), font=small_info_font).pack(anchor="w")
-                ttk.Label(frame, text=self.loc.t("screen.ships.cargo_capacity_line", current=0, max=MAX_SHIP_CARGO), font=small_info_font).pack(anchor="w")
+                ttk.Label(frame, text=self.loc.t("screen.ships.cargo_capacity_line", current=0, max=max_cargo), font=small_info_font).pack(anchor="w")
 
             if status == SHIP_STATUS_IN_PORT:
                 ttk.Button(
@@ -218,6 +227,10 @@ class ShipsMixin:
 
         # wyśrodkuj okno statków
         self.center_window(win)
+
+    def _ship_capacity(self, ship_type):
+        """Zwraca ładowność statku wynikającą z jego typu (fallback na galleon)."""
+        return SHIP_TYPES.get(ship_type, SHIP_TYPES["galleon"])["capacity"]
 
     def _ensure_ship_names(self):
         """Dla nowych gier i starych savów: dopina nazwy i typy do statków jeśli ich brak."""
@@ -443,11 +456,19 @@ class ShipsMixin:
     def calculate_load_time(self, load):
         return 1 + (sum(load.values()) // 500)
 
-    def calculate_travel_days(self):
+    def calculate_travel_days(self, ship_type):
         base = random.randint(40, 80)
-        if STATES[self.state].get("speed"):
-            base = int(base / STATES[self.state]["speed"])
-        return base
+
+        # prędkość państwa (jeśli brak, to 1.0)
+        state_speed = STATES[self.state].get("speed", 1.0)
+
+        # prędkość statku z typu (fallback na galleon)
+        ship_speed = SHIP_TYPES.get(ship_type, SHIP_TYPES["galleon"]).get("speed", 1.0)
+
+        # im większa prędkość, tym mniej dni
+        days = int(base / state_speed / ship_speed)
+
+        return max(1, days)
 
     def get_random_ship_name(self, state_key, used=None):
         """Losuje nazwę statku dla danego państwa, unikając już użytych."""
@@ -461,14 +482,22 @@ class ShipsMixin:
     def send_ship(self, load):
         self._ensure_ship_names()
         total_units = sum(load.values())
-        if total_units > MAX_SHIP_CARGO:
+
+        free_ship = next((i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT), None)
+        if free_ship is None:
+            self.log(self.loc.t("log.no_free_ship"), "red")
+            return False
+
+        # pojemność wynika z typu tego konkretnego statku
+        ship_type = self.ships[free_ship][6]
+        max_cargo = self._ship_capacity(ship_type)
+
+        if total_units > max_cargo:
             self.log(
-                self.loc.t("log.too_much_cargo", max_cargo=MAX_SHIP_CARGO, total=total_units),
+                self.loc.t("log.too_much_cargo", max_cargo=max_cargo, total=total_units),
                 "red"
             )
             return False
-
-        free_ship = next((i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT), None)
         if free_ship is None:
             self.log(self.loc.t("log.no_free_ship"), "red")
             return False
@@ -502,7 +531,7 @@ class ShipsMixin:
             self.resources[r] -= a
 
         load_time = self.calculate_load_time(load)
-        travel_days = self.calculate_travel_days()
+        travel_days = self.calculate_travel_days(ship_type)
         days_to_europe = load_time + travel_days
         days_in_europe = 7
         days_back = travel_days
@@ -519,7 +548,7 @@ class ShipsMixin:
                 to_europe=arrival_to_europe.strftime("%d %b %Y"),
                 back=arrival_back.strftime("%d %b %Y"),
                 current=total_units,
-                max=MAX_SHIP_CARGO
+                max=max_cargo
             ),
             "blue"
         )
@@ -540,12 +569,15 @@ class ShipsMixin:
 
         load_win.geometry("600x850")
 
+        ship_type = self.ships[ship_idx][6]
+        max_cargo = self._ship_capacity(ship_type)
+
         top_frame = ttk.Frame(load_win)
         top_frame.pack(fill="x", padx=15, pady=10)
 
         ttk.Label(top_frame, text=self.loc.t("screen.load_ship.capacity_label"), font=("Arial", 10, "bold")).pack(side="left")
         total_var = tk.IntVar(value=0)
-        limit_lbl = ttk.Label(top_frame, text=f"0/{MAX_SHIP_CARGO}", font=("Arial", 10, "bold"))
+        limit_lbl = ttk.Label(top_frame, text=f"0/{max_cargo}", font=("Arial", 10, "bold"))
         limit_lbl.pack(side="left", padx=10)
         over_lbl = ttk.Label(top_frame, text="", foreground="red")
         over_lbl.pack(side="left", padx=5)
@@ -572,11 +604,11 @@ class ShipsMixin:
             if not load:
                 self.log(self.loc.t("ui.empty_cargo"), "red")
                 return
-            if total > MAX_SHIP_CARGO:
+            if total > max_cargo:
                 self.log(
                     self.loc.t(
                         "log.too_much_cargo",
-                        max_cargo=MAX_SHIP_CARGO,
+                        max_cargo=max_cargo,
                         total=total
                     ),
                     "red"
@@ -621,12 +653,12 @@ class ShipsMixin:
                     continue
             total_var.set(total)
             limit_lbl.config(
-                text=f"{total}/{MAX_SHIP_CARGO}",
-                foreground="red" if total > MAX_SHIP_CARGO else "blue"
+                text=f"{total}/{max_cargo}",
+                foreground="red" if total > max_cargo else "blue"
             )
             over_lbl.config(
-                text=self.loc.t("screen.load_ship.exceeded_by", over=total - MAX_SHIP_CARGO)
-                if total > MAX_SHIP_CARGO else ""
+                text=self.loc.t("screen.load_ship.exceeded_by", over=total - max_cargo)
+                if total > max_cargo else ""
             )
 
         for res in RESOURCES[:-1]:
@@ -660,7 +692,7 @@ class ShipsMixin:
 
             def set_max_for_res(r):
                 current_total = sum(v.get() for v in cargo_vars.values() if v != cargo_vars[r])
-                available_space = MAX_SHIP_CARGO - current_total
+                available_space = max_cargo  - current_total
                 max_pos = min(self.resources[r], available_space)
                 cargo_vars[r].set(max_pos)
                 update_total()
