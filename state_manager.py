@@ -179,18 +179,40 @@ def _restore_state_field(field_name, value):
         return out
 
     if field_name == "ships":
-        # struktura statku u Ciebie:
-        # (arrival_to_eu, arrival_back, load, status, pending)
+        # formaty:
+        # 7: (arrival_to_eu, arrival_back, load, status, pending, name, ship_type)
+        # 6: (arrival_to_eu, arrival_back, load, status, pending, name)
+        # 5: (arrival_to_eu, arrival_back, load, status, pending)
         out = []
         if isinstance(value, list):
             for s in value:
-                if isinstance(s, list) and len(s) == 5:
+                if isinstance(s, list) and len(s) == 7:
+                    arrival_to_eu = _from_iso(s[0]) if s[0] else None
+                    arrival_back = _from_iso(s[1]) if s[1] else None
+                    load = deepcopy(s[2]) if isinstance(s[2], dict) else {}
+                    status = s[3]
+                    pending = s[4]
+                    name = s[5]
+                    ship_type = s[6]
+                    out.append((arrival_to_eu, arrival_back, load, status, pending, name, ship_type))
+
+                elif isinstance(s, list) and len(s) == 6:
+                    arrival_to_eu = _from_iso(s[0]) if s[0] else None
+                    arrival_back = _from_iso(s[1]) if s[1] else None
+                    load = deepcopy(s[2]) if isinstance(s[2], dict) else {}
+                    status = s[3]
+                    pending = s[4]
+                    name = s[5]
+                    out.append((arrival_to_eu, arrival_back, load, status, pending, name))
+
+                elif isinstance(s, list) and len(s) == 5:
                     arrival_to_eu = _from_iso(s[0]) if s[0] else None
                     arrival_back = _from_iso(s[1]) if s[1] else None
                     load = deepcopy(s[2]) if isinstance(s[2], dict) else {}
                     status = s[3]
                     pending = s[4]
                     out.append((arrival_to_eu, arrival_back, load, status, pending))
+
                 else:
                     out.append(s)
         return out

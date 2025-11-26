@@ -5,49 +5,122 @@ from datetime import timedelta
 import random
 from functools import partial
 
-from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES, SHIP_STATUS_IN_EUROPE_PORT, SHIP_STATUS_RETURNING, SHIP_STATUS_IN_PORT, SHIP_STATUS_TO_EUROPE, SHIP_STATUS_KEYS, RESOURCE_DISPLAY_KEYS
+from constants import MAX_SHIP_CARGO, EUROPE_PRICES, RESOURCES, STATES, SHIP_STATUS_IN_EUROPE_PORT, SHIP_STATUS_RETURNING, SHIP_STATUS_IN_PORT, SHIP_STATUS_TO_EUROPE, SHIP_STATUS_KEYS, RESOURCE_DISPLAY_KEYS, SHIP_NAMES_BY_STATE, SHIP_TYPES, BUILDINGS
+from tooltip import Tooltip
 
 
 class ShipsMixin:
     def ships_menu(self):
 
+        self._ensure_ship_names()
         win = self.create_window(self.loc.t("screen.ships.title"), key="screen.ships")
+        win.geometry("800x600")
 
-        # fonty spójne z resztą UI (misje)
-        title_font = getattr(self, "top_title_font", ("Cinzel", 16, "bold"))
-        info_font = getattr(self, "top_info_font", ("EB Garamond Italic", 14))
-        small_info_font = (info_font[0], max(10, info_font[1] - 2))
-        small_info_bold = (info_font[0], max(10, info_font[1] - 2), "bold")
+        info_font = ("EB Garamond", 15)
+        small_info_font = ("EB Garamond", 13)
+        small_info_bold = ("EB Garamond", 13, "bold")
 
-        ttk.Label(win, text=self.loc.t("screen.ships.header"), font=title_font).pack(pady=10)
+        # ======= SCROLLOWANY GRID STATKÓW =======
+        outer = ttk.Frame(win)
+        outer.pack(fill="both", expand=True)
+        outer.columnconfigure(0, weight=1)
+        outer.rowconfigure(0, weight=1)
 
-        for i, (arrival_to_eu, arrival_back, load, status, pending) in enumerate(self.ships):
+        # wysokość na min. 2 wiersze (każdy frame ~170-190px)
+        self.ships_canvas = tk.Canvas(
+            outer, height=380, highlightthickness=0,
+            bg=self.style.lookup("TFrame", "background")
+        )
+        self.ships_canvas.grid(row=0, column=0, sticky="nsew")
+
+        self.ships_scroll = ttk.Scrollbar(outer, orient="vertical", command=self.ships_canvas.yview)
+        self.ships_scroll.grid(row=0, column=1, sticky="ns")
+        self.ships_canvas.configure(yscrollcommand=self.ships_scroll.set)
+
+        ships_frame = ttk.Frame(self.ships_canvas)
+        ships_win = self.ships_canvas.create_window((0, 0), window=ships_frame, anchor="nw")
+
+        for c in range(3):
+            ships_frame.columnconfigure(c, weight=1)
+
+        scroll_needed = {"value": False}
+
+        def _on_frame_configure(_evt=None):
+            bbox = self.ships_canvas.bbox("all")
+            if not bbox:
+                self.ships_canvas.configure(scrollregion=(0, 0, 0, 0))
+                scroll_needed["value"] = False
+                if self.ships_scroll.winfo_ismapped():
+                    self.ships_scroll.grid_remove()
+                return
+
+            self.ships_canvas.configure(scrollregion=bbox)
+            content_h = bbox[3] - bbox[1]
+            canvas_h = self.ships_canvas.winfo_height()
+
+            if content_h <= canvas_h + 2:
+                scroll_needed["value"] = False
+                self.ships_canvas.yview_moveto(0)
+                if self.ships_scroll.winfo_ismapped():
+                    self.ships_scroll.grid_remove()
+            else:
+                scroll_needed["value"] = True
+                if not self.ships_scroll.winfo_ismapped():
+                    self.ships_scroll.grid()
+
+        def _on_canvas_configure(evt):
+            self.ships_canvas.itemconfig(ships_win, width=evt.width)
+
+        ships_frame.bind("<Configure>", _on_frame_configure)
+        self.ships_canvas.bind("<Configure>", _on_canvas_configure)
+
+        def _on_mousewheel(evt):
+            if not scroll_needed["value"]:
+                return
+            self.ships_canvas.yview_scroll(int(-1 * (evt.delta / 120)), "units")
+
+        self.ships_canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        # ======= LISTA DO WYŚWIETLENIA (testowo 5 statków) =======
+        display_ships = list(self.ships)
+
+        # ======= RENDER 3-KOLUMNOWY =======
+        for i, (arrival_to_eu, arrival_back, load, status, pending, ship_name, ship_type) in enumerate(display_ships):
+            row, col = divmod(i, 3)
             is_flagship = (i == self.flagship_index)
-            frame_title_key = "screen.ships.ship_frame_flagship" if is_flagship else "screen.ships.ship_frame"
-            frame = ttk.LabelFrame(
-                win,
-                text=self.loc.t(frame_title_key, num=i + 1)
-            )
-            frame.pack(fill="x", padx=20, pady=5)
 
-            if pending > 0:
-                ttk.Label(
-                    frame,
-                    text=self.loc.t("screen.ships.pending_colonists", pending=pending),
-                    foreground="purple",
-                    font=small_info_bold
-                ).pack(anchor="w")
+            title = ship_name + (" ★" if is_flagship else "")
+            frame = ttk.LabelFrame(ships_frame, text="")
+            frame.grid(row=row, column=col, sticky="nsew", padx=6, pady=6, ipadx=6, ipady=4)
+
+            name_font = (info_font[0], info_font[1], "bold")
+            ttk.Label(frame, text=title, font=name_font).pack(anchor="w")
 
             status_key = SHIP_STATUS_KEYS.get(status, status)
 
+            if status == "building":
+                status_key = "ship.status.building"
+
             ttk.Label(
                 frame,
-                text=self.loc.t(
-                    "screen.ships.status_line",
-                    status=self.loc.t(status_key)
-                ),
+                text=self.loc.t("screen.ships.status_line", status=self.loc.t(status_key)),
                 font=small_info_bold
             ).pack(anchor="w")
+
+            stype_key = SHIP_TYPES.get(ship_type, SHIP_TYPES["galleon"])["name_key"]
+            ttk.Label(
+                frame,
+                text=self.loc.t("screen.ships.type_line", type=self.loc.t(stype_key)),
+                font=small_info_font
+            ).pack(anchor="w")
+
+            if status == "building" and arrival_to_eu:
+                ttk.Label(
+                    frame,
+                    text=self.loc.t("screen.ships.building_until", date=arrival_to_eu.strftime("%d %b %Y")),
+                    font=small_info_font,
+                    foreground="DarkOrange"
+                ).pack(anchor="w")
 
             # Pokazuj odpowiednie daty w zależności od statusu
             if status == SHIP_STATUS_TO_EUROPE and arrival_to_eu:
@@ -140,10 +213,232 @@ class ShipsMixin:
             font=info_font
         ).pack(pady=10)
 
+        ttk.Button(win, text=self.loc.t("ui.build_ship"), command=lambda: self.open_build_ship_menu(win)).pack(pady=(8, 2))
         ttk.Button(win, text=self.loc.t("ui.close"), command=win.destroy).pack(pady=5)
 
         # wyśrodkuj okno statków
         self.center_window(win)
+
+    def _ensure_ship_names(self):
+        """Dla nowych gier i starych savów: dopina nazwy i typy do statków jeśli ich brak."""
+        used = []
+        new_list = []
+        for ship in self.ships:
+            # nowy format: (arrival_to_eu, arrival_back, load, status, pending, name, ship_type)
+            if len(ship) == 7:
+                new_list.append(ship);
+                used.append(ship[5]);
+                continue
+
+            # format po dodaniu nazw (len==6) → dopnij ship_type
+            if len(ship) == 6:
+                arrival_to_eu, arrival_back, load, status, pending, name = ship
+                ship_type = "galleon"  # default dla starych save’ów
+                new_list.append((arrival_to_eu, arrival_back, load, status, pending, name, ship_type))
+                used.append(name)
+                continue
+
+            # stary format: (arrival_to_eu, arrival_back, load, status, pending)
+            arrival_to_eu, arrival_back, load, status, pending = ship
+            name = self.get_random_ship_name(self.state, used)
+            used.append(name)
+            ship_type = "galleon"  # na start największa jednostka jak dotąd
+            new_list.append((arrival_to_eu, arrival_back, load, status, pending, name, ship_type))
+
+        self.ships = new_list
+
+    def open_build_ship_menu(self, parent_win):
+        build_win = self.create_window(self.loc.t("screen.build_ship.title"), key="screen.build_ship")
+        build_win.geometry("600x900")
+
+        info_font = ("EB Garamond", 15)
+        small_info_font = ("EB Garamond", 13)
+
+        outer = ttk.Frame(build_win)
+        outer.pack(fill="both", expand=True, padx=12, pady=10)
+
+        ttk.Label(outer, text=self.loc.t("screen.build_ship.header"), font=info_font).pack(anchor="center", pady=(0, 10))
+
+        list_frame = ttk.Frame(outer)
+        list_frame.pack(fill="both", expand=True)
+
+        for stype, data in SHIP_TYPES.items():
+            # karta o stałej wielkości
+            card = ttk.Frame(list_frame, relief="groove", borderwidth=2)
+            card.pack(fill="x", pady=6, padx=6)
+            card.pack_propagate(False)
+            card.configure(height=250)  # stała wysokość, możesz zmienić np. 160
+
+            # tytuł typu na górze, wyśrodkowany i pogrubiony
+            title = ttk.Label(
+                card,
+                text=self.loc.t(data["name_key"]),
+                font=("Cinzel", 15, "bold")
+            )
+            title.pack(anchor="center", pady=(6, 4))
+
+            cap = data.get("capacity", 0)
+            spd = data.get("speed", 1.0)
+            crew = data.get("crew", 0)
+            days = data.get("build_time", 0)
+
+            cost_str = ", ".join(
+                f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)}: {a}"
+                for r, a in data.get("cost", {}).items()
+            )
+            # --- wymagania przystani dla danego typu ---
+            harbor_lvl = self._get_best_harbor_level()
+
+            # wylicz req_lvl identycznie jak _harbor_allows_ship
+            if "required_harbor_level" in data:
+                req_lvl = int(data["required_harbor_level"])  # 1-based
+            elif "tier" in data:
+                req_lvl = max(1, int(data["tier"]))  # tier 1 -> lvl 1
+            else:
+                # fallback: kolejność w SHIP_TYPES (pierwszy typ = tier 1)
+                types_order = list(SHIP_TYPES.keys())
+                tier = types_order.index(stype) + 1 if stype in types_order else 1
+                req_lvl = max(1, tier)  # tier 1 -> lvl 1
+
+            # wyciągnij name_key wymaganej przystani / upgrade
+            harbor_def = BUILDINGS.get("harbor", {})
+            if req_lvl <= 0:
+                required_harbor_key = harbor_def.get("name_key", "building.harbor.name")
+            else:
+                upgrades = harbor_def.get("upgrades", [])
+                idx = min(req_lvl - 1, len(upgrades) - 1) if upgrades else 0
+                required_harbor_key = upgrades[idx].get("name_key", harbor_def.get("name_key", "building.harbor.name"))
+
+            has_required_harbor = harbor_lvl >= req_lvl
+
+            # linia o przystani (kolorowana)
+            ttk.Label(
+                card,
+                text=self.loc.t("screen.build_ship.required_harbor", harbor=self.loc.t(required_harbor_key)),
+                font=small_info_font,
+                foreground=("red" if not has_required_harbor else "black"),
+                justify="left"
+            ).pack(anchor="w", padx=10)
+
+            info_text = (
+                f"{self.loc.t('screen.build_ship.capacity_lbl')}: {cap}\n"
+                f"{self.loc.t('screen.build_ship.speed_lbl')}: x{spd}\n"
+                f"{self.loc.t('screen.build_ship.crew_lbl')}: {crew}\n"
+                f"{self.loc.t('screen.build_ship.time_lbl')}: {days} {self.loc.t('ui.days')}\n"
+                f"{self.loc.t('screen.build_ship.cost_lbl')}: {cost_str}"
+            )
+
+            ttk.Label(card, text=info_text, font=small_info_font, justify="left").pack(anchor="w", padx=10)
+
+            btn = ttk.Button(
+                card,
+                text=self.loc.t("ui.build"),
+                command=lambda t=stype, w=build_win: self.start_build_ship(t, w, parent_win)
+            )
+            btn.pack(pady=6)
+
+            Tooltip(btn, self.loc.t("tooltip.build_ship_takes_people", crew=data.get("crew", 0)))
+
+        ttk.Button(build_win, text=self.loc.t("ui.cancel"), command=build_win.destroy).pack(pady=6)
+        self.center_window(build_win)
+
+    def _get_best_harbor_level(self):
+        """Zwraca najwyższy poziom przystani w kolonii albo -1 jeśli brak."""
+        best = -1
+        for b in getattr(self, "buildings", []):
+            base_id = b.get("base")
+            if base_id == "harbor":
+                best = max(best, b.get("level", 0))
+        return best
+
+    def _harbor_allows_ship(self, ship_type):
+        """
+        True jeśli gracz ma przystań i jej poziom pozwala na budowę tego typu statku.
+        Obsługuje dwa warianty:
+          - jeśli SHIP_TYPES[type] ma pole required_harbor_level -> używa go
+          - jeśli nie ma, bierze pole tier (1..3), a wymagany poziom = tier-1
+          - jeśli nie ma ani required_harbor_level ani tier, to traktuje kolejność
+            w SHIP_TYPES jako tier 1..N
+        """
+        data = SHIP_TYPES.get(ship_type, {})
+        harbor_lvl = self._get_best_harbor_level()
+
+        if harbor_lvl < 0:
+            return False, "no_harbor", {}
+
+        if "required_harbor_level" in data:
+            req_lvl = int(data["required_harbor_level"])
+        elif "tier" in data:
+            req_lvl = max(1, int(data["tier"]))
+        else:
+            # fallback: kolejność w SHIP_TYPES (pierwszy typ = tier 1)
+            types_order = list(SHIP_TYPES.keys())
+            tier = types_order.index(ship_type) + 1 if ship_type in types_order else 1
+            req_lvl = max(1, tier)
+
+        if harbor_lvl < req_lvl:
+            return False, "harbor_too_low", {"need": req_lvl, "have": harbor_lvl}
+
+        return True, None, {}
+
+    def start_build_ship(self, ship_type, build_win, parent_win):
+        self._ensure_ship_names()
+        data = SHIP_TYPES.get(ship_type)
+        if not data:
+            return
+
+        ok, err, ctx = self._harbor_allows_ship(ship_type)
+        if not ok:
+            if err == "no_harbor":
+                self.log(self.loc.t("log.no_harbor_for_ship"), "red")
+            else:
+                self.log(self.loc.t("log.harbor_level_too_low", level_needed=ctx["need"], level_have=ctx["have"]), "red")
+            return
+
+        # 1) sprawdź surowce
+        cost = data.get("cost", {})
+        missing = {r: a - self.resources.get(r, 0) for r, a in cost.items() if self.resources.get(r, 0) < a}
+        if missing:
+            miss_str = ", ".join(
+                f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(r, r), default=r)}: {v}"
+                for r, v in missing.items()
+            )
+            self.log(self.loc.t("log.not_enough_resources_for_ship", missing=miss_str), "red")
+            return
+
+        # 2) sprawdź wolnych ludzi (u Ciebie free_workers() jest w main)
+        crew_needed = data.get("crew", 0)
+        free_now = self.free_workers()
+        if free_now < crew_needed:
+            self.log(self.loc.t("log.not_enough_free_workers_for_ship", needed=crew_needed, free=free_now), "red")
+            return
+
+        # odejmij koszt
+        for r, a in cost.items():
+            self.resources[r] -= a
+
+        # zabierz ludzi z puli na czas budowy
+        self.people -= crew_needed
+
+        # budowa: arrival_to_eu = data ukończenia
+        finish_date = self.current_date + timedelta(days=data.get("build_time", 1))
+
+        used = [s[5] for s in self.ships if len(s) >= 6]
+        name = self.get_random_ship_name(self.state, used)
+
+        self.ships.append((finish_date, None, {}, "building", 0, name, ship_type))
+        self.log(self.loc.t("log.ship_build_started", name=name, days=data.get("build_time", 1)), "blue")
+
+        try:
+            build_win.destroy()
+        except Exception:
+            pass
+        try:
+            parent_win.destroy()
+        except Exception:
+            pass
+        self.ships_menu()
+
 
     def calculate_load_time(self, load):
         return 1 + (sum(load.values()) // 500)
@@ -154,7 +449,17 @@ class ShipsMixin:
             base = int(base / STATES[self.state]["speed"])
         return base
 
+    def get_random_ship_name(self, state_key, used=None):
+        """Losuje nazwę statku dla danego państwa, unikając już użytych."""
+        pool = SHIP_NAMES_BY_STATE.get(state_key, [])
+        if not pool:
+            return f"Ship {random.randint(1, 999)}"
+        used = set(used or [])
+        candidates = [n for n in pool if n not in used]
+        return random.choice(candidates if candidates else pool)
+
     def send_ship(self, load):
+        self._ensure_ship_names()
         total_units = sum(load.values())
         if total_units > MAX_SHIP_CARGO:
             self.log(
@@ -169,7 +474,7 @@ class ShipsMixin:
             return False
 
         # zachowaj ewentualnych oczekujących kolonistów przypiętych do tego statku
-        old_arrival_to_eu, old_arrival_back, old_load, old_status, pending = self.ships[free_ship]
+        old_arrival_to_eu, old_arrival_back, old_load, old_status, pending, ship_name, ship_type  = self.ships[free_ship]
 
         mission_contribution = {}
 
@@ -205,7 +510,7 @@ class ShipsMixin:
         arrival_to_europe = self.current_date + timedelta(days=days_to_europe)
         arrival_back = arrival_to_europe + timedelta(days=days_in_europe + days_back)
 
-        self.ships[free_ship] = (arrival_to_europe, arrival_back, load.copy(), SHIP_STATUS_TO_EUROPE, pending)
+        self.ships[free_ship] = (arrival_to_europe, arrival_back, load.copy(), SHIP_STATUS_TO_EUROPE, pending, ship_name, ship_type)
         self.auto_sail_timer = None
 
         self.log(
@@ -407,7 +712,14 @@ class ShipsMixin:
         self.center_window(load_win)
 
     def process_arriving_ships(self):
-        for i, (arrival_to_eu, arrival_back, load, status, pending) in enumerate(self.ships):
+        self._ensure_ship_names()
+        for i, (arrival_to_eu, arrival_back, load, status, pending, ship_name, ship_type) in enumerate(self.ships):
+
+            # 0) budowa statku skończona
+            if status == "building" and arrival_to_eu and self.current_date >= arrival_to_eu:
+                self.ships[i] = (None, None, {}, SHIP_STATUS_IN_PORT, pending, ship_name, ship_type)
+                self.log(self.loc.t("log.ship_built", name=ship_name), "green")
+                continue
 
             # 1. Statek dotarł do Europy → ROZŁADUNEK + MISJA + 7 DNI POSTOJU
             if status == SHIP_STATUS_TO_EUROPE and arrival_to_eu and self.current_date >= arrival_to_eu:
@@ -445,7 +757,7 @@ class ShipsMixin:
                         self.log(
                             self.loc.t(
                                 "log.ship_unloaded_in_europe",
-                                num=i + 1,
+                                ship_name=ship_name,
                                 cargo=excess_str,
                                 gold=gold
                             ),
@@ -455,9 +767,9 @@ class ShipsMixin:
 
                 # Statek pusty, czeka 7 dni
                 departure_date = arrival_to_eu + timedelta(days=7)
-                self.ships[i] = (arrival_to_eu, departure_date, {}, SHIP_STATUS_IN_EUROPE_PORT, pending)
+                self.ships[i] = (arrival_to_eu, departure_date, {}, SHIP_STATUS_IN_EUROPE_PORT, pending, ship_name, ship_type)
                 self.log(
-                    self.loc.t("log.ship_waiting_in_europe", num=i + 1),
+                    self.loc.t("log.ship_waiting_in_europe", ship_name=ship_name),
                     "blue"
                 )
 
@@ -465,11 +777,11 @@ class ShipsMixin:
             elif status == SHIP_STATUS_IN_EUROPE_PORT    and self.current_date >= arrival_back:
                 days_back = random.randint(60, 90)
                 return_date = self.current_date + timedelta(days=days_back)
-                self.ships[i] = (None, return_date, {}, SHIP_STATUS_RETURNING, pending)
+                self.ships[i] = (None, return_date, {}, SHIP_STATUS_RETURNING, pending, ship_name, ship_type)
                 self.log(
                     self.loc.t(
                         "log.ship_sailed_from_europe",
-                        num=i + 1,
+                        ship_name=ship_name,
                         date=return_date.strftime("%d %b %Y")
                     ),
                     "blue"
@@ -484,11 +796,11 @@ class ShipsMixin:
                         "green"
                     )
                     pending = 0  # zeruj po wysadzeniu
-                self.ships[i] = (None, None, {}, SHIP_STATUS_IN_PORT, 0)
+                self.ships[i] = (None, None, {}, SHIP_STATUS_IN_PORT, 0, ship_name, ship_type)
                 self.auto_sail_timer = self.current_date + timedelta(days=14)
 
                 self.log(
-                    self.loc.t("log.ship_returned_ready", num=i + 1),
+                    self.loc.t("log.ship_returned_ready", ship_name=ship_name),
                     "blue"
                 )
                 self.play_sound("ship_arrived")

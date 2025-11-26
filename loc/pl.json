@@ -665,11 +665,11 @@
   "screen.load_ship.mission_progress": "Postęp misji",
   "screen.load_ship.exceeded_by": "Przekroczono o {over}!",
 
-  "log.ship_unloaded_in_europe": "Statek {num} rozładowany w Europie: {cargo} → {gold} dukatów",
-  "log.ship_waiting_in_europe": "Statek {num} czeka 7 dni w porcie europejskim...",
-  "log.ship_sailed_from_europe": "Statek {num} wypłynął z Europy → szacowany powrót: {date}",
+  "log.ship_unloaded_in_europe": "Statek {ship_name} rozładowany w Europie: {cargo} → {gold} dukatów",
+  "log.ship_waiting_in_europe": "Statek {ship_name} czeka 7 dni w porcie europejskim...",
+  "log.ship_sailed_from_europe": "Statek {ship_name} wypłynął z Europy → szacowany powrót: {date}",
   "log.colonists_arrived": "Przybyło {pending} nowych kolonistów z Europy!",
-  "log.ship_returned_ready": "Statek {num} wrócił do kolonii. Gotowy do kolejnej podróży.",
+  "log.ship_returned_ready": "Statek {ship_name} wrócił do kolonii. Gotowy do kolejnej podróży.",
 
   "ui.gift_cost_line": "Dar: koszt 10 złota + 250 żywności + 20 srebra + 15 stali",
 
@@ -812,5 +812,41 @@
   "ui.delete": "Usuń",
   "ui.ok": "OK",
 
-  "log.save_done": "Zapisano grę jako: {name}."
+  "log.save_done": "Zapisano grę jako: {name}.",
+
+  "ship_type.sloop.name": "Slup",
+"ship_type.brig.name": "Bryg",
+"ship_type.galleon.name": "Galeon",
+
+"building.harbor.upgrade.trade_dock": "Przystań handlowa",
+"building.harbor.upgrade.colonial_shipyard": "Stocznia kolonialna",
+"building.harbor.upgrade.naval_arsenal": "Arsenał morski",
+  "screen.ships.type_line": "Typ: {type}",
+
+  "ui.build_ship": "Buduj statek",
+  "screen.build_ship.title": "Budowa statku",
+  "screen.build_ship.header": "Wybierz typ statku do budowy",
+  "screen.build_ship.stats_line": "Ładowność: {capacity} | Prędkość: x{speed} | Załoga: {crew}",
+  "screen.build_ship.cost_line": "Koszt: {cost} | Czas budowy: {days} dni",
+  "screen.ships.building_until": "Budowa do: {date}",
+
+  "ship.status.building": "w budowie",
+
+  "log.not_enough_resources_for_ship": "Brakuje surowców do budowy statku: {missing}.",
+  "log.not_enough_free_workers_for_ship": "Za mało wolnych ludzi do budowy statku (potrzeba {needed}, wolnych {free}).",
+  "log.ship_build_started": "Rozpoczęto budowę statku {name}. Zakończenie za {days} dni.",
+  "log.ship_built": "Statek {name} został ukończony i jest gotowy w porcie.",
+  "tooltip.build_ship_takes_people": "Rozpoczęcie budowy zabierze {crew} ludzi z puli mieszkańców.",
+
+  "screen.build_ship.capacity_lbl": "Ładowność",
+"screen.build_ship.speed_lbl": "Szybkość",
+"screen.build_ship.crew_lbl": "Załoga",
+"screen.build_ship.time_lbl": "Czas budowy",
+"screen.build_ship.cost_lbl": "Koszt",
+"ui.days": "dni",
+  "log.no_harbor_for_ship": "Nie możesz budować statków bez przystani.",
+"log.harbor_level_too_low": "Twoja przystań ma za niski poziom. Wymagany: {level_needed}, posiadany: {level_have}.",
+  "screen.build_ship.required_harbor": "Wymagana przystań: {harbor}"
+
+
 }

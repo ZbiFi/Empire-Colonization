@@ -734,8 +734,35 @@ BUILDINGS = {
         "base_prod": {"food": 2},
         "requires_adjacent_settlement": True,
         "allowed_terrain": ["sea"],
-        "upgrades": [],
         "name_key": "building.harbor.name",
+
+        # kolejne poziomy przystani (format jak w innych budynkach)
+        "upgrades": [
+            {
+                "cost": {"wood": 180, "iron": 70},
+                "build_time": 18,
+                "prod": {"food": 2},
+                "workers": 3,
+                "name_key": "building.harbor.upgrade.trade_dock",
+                "allows_ship_tiers": [1],  # od poziomu 1: sloop
+            },
+            {
+                "cost": {"wood": 360, "iron": 140, "steel": 30},
+                "build_time": 22,
+                "prod": {"food": 2.5},
+                "workers": 4,
+                "name_key": "building.harbor.upgrade.colonial_shipyard",
+                "allows_ship_tiers": [1, 2],  # od poziomu 2: sloop + brig
+            },
+            {
+                "cost": {"wood": 650, "iron": 240, "steel": 80},
+                "build_time": 28,
+                "prod": {"food": 3},
+                "workers": 5,
+                "name_key": "building.harbor.upgrade.naval_arsenal",
+                "allows_ship_tiers": [1, 2, 3],  # od poziomu 3: wszystkie (w tym galleon)
+            },
+        ],
     },
 
     "district": {
@@ -1005,10 +1032,117 @@ SHIP_STATUS_IN_PORT = "in_port"
 SHIP_STATUS_TO_EUROPE = "to_europe"
 SHIP_STATUS_IN_EUROPE_PORT = "in_europe_port"
 SHIP_STATUS_RETURNING = "returning"
+SHIP_STATUS_BUILDING = "building"
 
 SHIP_STATUS_KEYS = {
     SHIP_STATUS_IN_PORT: "ship.status.in_port",
     SHIP_STATUS_TO_EUROPE: "ship.status.to_europe",
     SHIP_STATUS_IN_EUROPE_PORT: "ship.status.in_europe_port",
     SHIP_STATUS_RETURNING: "ship.status.returning",
+    SHIP_STATUS_BUILDING: "ship.status.building",
 }
+
+SHIP_NAMES_BY_STATE = {
+    "portugal": [
+        "São Gabriel","São Rafael","Berrio","Flor do Mar","Santa Catarina do Monte Sinai",
+        "Nossa Senhora da Conceição","Bom Jesus","Trindade","Esperança","Santa Cruz",
+        "Nossa Senhora da Ajuda","São João Baptista","Santo António","Vitória","Infante"
+    ],
+    "spain": [
+        "Santa María","Pinta","Niña","San Salvador","Concepción",
+        "Trinidad","Santiago","Victoria","San Juan","San Pedro",
+        "San Cristóbal","Santa Ana","Buenaventura","Nuestra Señora del Rosario","San Miguel"
+    ],
+    "england": [
+        "Golden Hind","Mary Rose","Ark Royal","Revenge","Elizabeth Bonaventure",
+        "Swiftsure","Defiance","Triumph","Lion","Hope",
+        "Seahorse","Sovereign","Mermaid","Endeavour","Providence"
+    ],
+    "france": [
+        "La Belle","La Dauphine","L’Espérance","La Victoire","Saint-Louis",
+        "Saint-Michel","La Perle","La Royale","La Renommée","La Fortune",
+        "L’Aigle","La Sirène","La Constance","Le Phénix","La Vaillante"
+    ],
+    "netherlands": [
+        "Batavia","Amsterdam","Hollandia","Zeemeeuw","Oranje",
+        "Nieuw Hoorn","Zwarte Leeuw","Gelderland","Valk","Eendracht",
+        "Koningin","Witte Walvis","Vrijheid","Dolfijn","Sint Nicolaas"
+    ],
+    "sweden": [
+        "Vasa","Äpplet","Kronan","Solen","Göta Lejon",
+        "Fenix","Draken","Nordstjärnan","Tre Kronor","Gyllene Hjorten",
+        "Svea","Gripen","Äran","Freja","Falken"
+    ],
+    "denmark": [
+        "Christianus Quintus","Dannebrog","Elefanten","Svanen","Freden",
+        "Havfruen","Nordsøen","Kongen","Æren","Fortuna",
+        "Hvide Ørn","Søløven","Tordenskjold","Jylland","Fredericus"
+    ],
+    "venice": [
+        "San Marco","La Serenissima","Leone di Venezia","Santa Giustina","Bucintoro",
+        "Fede","Fortuna","Gondoliera","Stella del Mare","Mediterranea",
+        "San Giorgio","Aurora","Doge","Santa Lucia","Vittoria"
+    ],
+    "genoa": [
+        "San Giorgio","Grifone","La Superba","Santa Fede","Andrea Doria",
+        "San Lorenzo","Aurora","Vittoria","Stella Ligure","Nostra Signora",
+        "Tempesta","Castelletto","Marina","San Matteo","Providenza"
+    ],
+    "poland": [
+        "Batory","Jagiellon","Wawel","Orzeł Biały","Gryf",
+        "Złota Róża","Krakus","Wanda","Wisła","Baltica",
+        "Lech","Pogoń","Hetman","Korona","Żubr"
+    ],
+    "brandenburg": [
+        "Adler","Hohenzollern","Kurfürst","Preußen","Berlin",
+        "Potsdam","Friedrich","Walhalla","Schwan","Brandenburgia",
+        "Greif","Eisvogel","Löwe","Schild","Havel"
+    ],
+}
+
+# Tier 1–3 (obecny statek w grze traktujemy jako Tier 3)
+SHIP_TYPES = {
+    "sloop": {  # Tier 1
+        "name_key": "ship_type.sloop.name",
+        "capacity": 450,   # mała ładowność
+        "speed": 1.30,     # szybki (krótsze rejsy)
+        "build_time": 250,
+        "crew": 18,        # mała załoga
+        "cost": {          # koszt budowy/kupna
+            "wood": 2200,
+            "iron": 350,
+            "ducats": 1200
+        }
+    },
+    "brig": {  # Tier 2
+        "name_key": "ship_type.brig.name",
+        "capacity": 900,   # średnia
+        "speed": 1.00,     # bazowa
+        "build_time": 360,
+        "crew": 35,
+        "cost": {
+            "wood": 4400,
+            "iron": 600,
+            "steel": 100,
+            "ducats": 2600
+        }
+    },
+    "galleon": {  # Tier 3 (największy, obecny)
+        "name_key": "ship_type.galleon.name",
+        "capacity": 1500,  # to jest Twoje obecne MAX_SHIP_CARGO
+        "speed": 0.80,     # wolniejszy, ale potężny
+        "build_time": 720,
+        "crew": 60,
+        "cost": {
+            "wood": 7200,
+            "iron": 1200,
+            "steel": 700,
+            "ducats": 5200
+        }
+    }
+}
+
+# kolejność / tierowanie do UI
+SHIP_TYPE_ORDER = ["sloop", "brig", "galleon"]
+SHIP_TYPE_TIER = {"sloop": 1, "brig": 2, "galleon": 3}
+SHIP_STATUS_KEYS["building"] = "ship.status.building"

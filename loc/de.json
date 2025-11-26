@@ -568,11 +568,11 @@
   "screen.load_ship.capacity_label": "Kapazität:",
   "screen.load_ship.mission_progress": "Missionsfortschritt",
   "screen.load_ship.exceeded_by": "Um {over} überschritten!",
-  "log.ship_unloaded_in_europe": "Schiff {num} in Europa entladen: {cargo} → {gold} Dukaten",
-  "log.ship_waiting_in_europe": "Schiff {num} wartet 7 Tage im europäischen Hafen...",
-  "log.ship_sailed_from_europe": "Schiff {num} lief aus Europa aus → voraussichtliche Rückkehr: {date}",
+  "log.ship_unloaded_in_europe": "Schiff {ship_name} in Europa entladen: {cargo} → {gold} Dukaten",
+  "log.ship_waiting_in_europe": "Schiff {ship_name} wartet 7 Tage im europäischen Hafen...",
+  "log.ship_sailed_from_europe": "Schiff {ship_name} lief aus Europa aus → voraussichtliche Rückkehr: {date}",
   "log.colonists_arrived": "{pending} neue Kolonisten aus Europa eingetroffen!",
-  "log.ship_returned_ready": "Schiff {num} kehrte in die Kolonie zurück, bereit für die nächste Reise.",
+  "log.ship_returned_ready": "Schiff {ship_name} kehrte in die Kolonie zurück, bereit für die nächste Reise.",
   "ui.gift_cost_line": "Geschenk: kostet 10 Gold + 250 Nahrung + 20 Silber + 15 Stahl",
   "screen.native_trade.title": "Handel mit {tribe}",
   "screen.native_trade.relations_line": "Beziehungen zu {tribe}: {rel}/100",
@@ -704,5 +704,37 @@
 "ui.delete": "Löschen",
 "ui.ok": "OK",
 
-"log.save_done": "Spiel gespeichert als: {name}."
+"log.save_done": "Spiel gespeichert als: {name}.",
+  "ship_type.sloop.name": "Sloop",
+"ship_type.brig.name": "Brigg",
+"ship_type.galleon.name": "Galeone",
+
+"building.harbor.upgrade.trade_dock": "Handelshafen",
+"building.harbor.upgrade.colonial_shipyard": "Koloniale Werft",
+"building.harbor.upgrade.naval_arsenal": "Marinearsenal",
+  "screen.ships.type_line": "Typ: {type}",
+
+    "ui.build_ship": "Schiff bauen",
+  "screen.build_ship.title": "Schiffsbau",
+  "screen.build_ship.header": "Wähle einen Schiffstyp zum Bauen",
+  "screen.build_ship.stats_line": "Kapazität: {capacity} | Geschwindigkeit: x{speed} | Besatzung: {crew}",
+  "screen.build_ship.cost_line": "Kosten: {cost} | Bauzeit: {days} Tage",
+  "screen.ships.building_until": "Bau bis: {date}",
+
+  "ship.status.building": "im Bau",
+
+  "log.not_enough_resources_for_ship": "Nicht genügend Rohstoffe zum Schiffsbau: {missing}.",
+  "log.not_enough_free_workers_for_ship": "Nicht genug freie Leute zum Schiffsbau (benötigt {needed}, frei {free}).",
+  "log.ship_build_started": "Schiffsbau gestartet: {name}. Fertig in {days} Tagen.",
+  "log.ship_built": "Das Schiff {name} wurde fertiggestellt und ist im Hafen bereit.",
+  "tooltip.build_ship_takes_people": "Der Baubeginn entzieht {crew} Personen aus der Bevölkerung.",
+
+  "screen.build_ship.capacity_lbl": "Kapazität",
+"screen.build_ship.speed_lbl": "Geschwindigkeit",
+"screen.build_ship.crew_lbl": "Besatzung",
+"screen.build_ship.time_lbl": "Bauzeit",
+"screen.build_ship.cost_lbl": "Kosten",
+"ui.days": "Tage",
+"log.no_harbor_for_ship": "Du brauchst einen Hafen, um Schiffe zu bauen.",
+"log.harbor_level_too_low": "Dein Hafenlevel ist zu niedrig. Benötigt: {level_needed}, vorhanden: {level_have}."
 }

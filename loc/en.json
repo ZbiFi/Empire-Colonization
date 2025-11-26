@@ -568,11 +568,11 @@
   "screen.load_ship.capacity_label": "Capacity:",
   "screen.load_ship.mission_progress": "Mission progress",
   "screen.load_ship.exceeded_by": "Exceeded by {over}!",
-  "log.ship_unloaded_in_europe": "Ship {num} unloaded in Europe: {cargo} → {gold} ducats",
-  "log.ship_waiting_in_europe": "Ship {num} waits 7 days in European port...",
-  "log.ship_sailed_from_europe": "Ship {num} sailed from Europe → estimated return: {date}",
+  "log.ship_unloaded_in_europe": "Ship {ship_name} unloaded in Europe: {cargo} → {gold} ducats",
+  "log.ship_waiting_in_europe": "Ship {ship_name} waits 7 days in European port...",
+  "log.ship_sailed_from_europe": "Ship {ship_name} sailed from Europe → estimated return: {date}",
   "log.colonists_arrived": "{pending} new colonists arrived from Europe!",
-  "log.ship_returned_ready": "Ship {num} returned to the colony, ready for another voyage.",
+  "log.ship_returned_ready": "Ship {ship_name} returned to the colony, ready for another voyage.",
   "ui.gift_cost_line": "Gift: cost 10 gold + 250 food + 20 silver + 15 steel",
   "screen.native_trade.title": "Trade with {tribe}",
   "screen.native_trade.relations_line": "Relations with {tribe}: {rel}/100",
@@ -706,5 +706,37 @@
 "ui.delete": "Delete",
 "ui.ok": "OK",
 
-"log.save_done": "Game saved as: {name}."
+"log.save_done": "Game saved as: {name}.",
+  "ship_type.sloop.name": "Sloop",
+"ship_type.brig.name": "Brig",
+"ship_type.galleon.name": "Galleon",
+
+"building.harbor.upgrade.trade_dock": "Trade Dock",
+"building.harbor.upgrade.colonial_shipyard": "Colonial Shipyard",
+"building.harbor.upgrade.naval_arsenal": "Naval Arsenal",
+  "screen.ships.type_line": "Type: {type}",
+
+    "ui.build_ship": "Build ship",
+  "screen.build_ship.title": "Ship construction",
+  "screen.build_ship.header": "Choose a ship type to build",
+  "screen.build_ship.stats_line": "Capacity: {capacity} | Speed: x{speed} | Crew: {crew}",
+  "screen.build_ship.cost_line": "Cost: {cost} | Build time: {days} days",
+  "screen.ships.building_until": "Building until: {date}",
+
+  "ship.status.building": "building",
+
+  "log.not_enough_resources_for_ship": "Not enough resources to build a ship: {missing}.",
+  "log.not_enough_free_workers_for_ship": "Not enough free people to build a ship (needed {needed}, free {free}).",
+  "log.ship_build_started": "Ship construction started: {name}. It will be ready in {days} days.",
+  "log.ship_built": "Ship {name} has been completed and is ready in port.",
+  "tooltip.build_ship_takes_people": "Starting construction will remove {crew} people from your population.",
+
+  "screen.build_ship.capacity_lbl": "Capacity",
+"screen.build_ship.speed_lbl": "Speed",
+"screen.build_ship.crew_lbl": "Crew",
+"screen.build_ship.time_lbl": "Build time",
+"screen.build_ship.cost_lbl": "Cost",
+"ui.days": "days",
+  "log.no_harbor_for_ship": "You need a harbor to build ships.",
+"log.harbor_level_too_low": "Your harbor level is too low. Required: {level_needed}, current: {level_have}."
 }
