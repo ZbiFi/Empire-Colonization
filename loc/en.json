@@ -729,5 +729,15 @@
   "log.no_harbor_for_ship": "You need a harbor to build ships.",
 "log.harbor_level_too_low": "Your harbor level is too low. Required: {level_needed}, current: {level_have}.",
   "screen.build_ship.required_harbor": "Required harbor: {harbor}",
-  "log.overcrowding": "Overcrowding: {excess} people above housing limit – they consume +50% food."
+  "log.overcrowding": "Overcrowding: {excess} people above housing limit – they consume +50% food.",
+  "building.granary.name": "Granary",
+"building.granary.upgrade.storehouse": "Stone Storehouse",
+"building.granary.upgrade.barn_complex": "Barn Complex",
+"building.granary.upgrade.royal_granary": "Royal Granary",
+
+  "building.warehouse.name": "Warehouse",
+"building.warehouse.upgrade.merchant_warehouse": "Merchant Warehouse",
+"building.warehouse.upgrade.customs_warehouse": "Customs Warehouse",
+"building.warehouse.upgrade.colonial_depot": "Colonial Depot",
+  "log.no_storage_space": "No storage space for {res} – production halted."
 }

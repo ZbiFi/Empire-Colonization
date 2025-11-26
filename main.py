@@ -644,6 +644,35 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.auto_sail_timer = self.current_date + timedelta(days=14)
         self.main_game()
 
+    def calculate_storage_limits(self):
+        """
+        Zwraca (food_limit, goods_limit).
+        Bazowo 1000/1000, potem dodaje bonusy ze spichlerzy/magazynów i ich ulepszeń.
+        """
+        food_limit = BASE_FOOD_LIMIT
+        goods_limit = BASE_GOODS_LIMIT
+
+        for b in self.buildings:
+            if b.get("is_district"):
+                continue
+
+            base_key = b["base"]
+            level = b.get("level", 0)
+            base_def = BUILDINGS.get(base_key, {})
+
+            # bonus z poziomu bazowego (jeśli istnieje w definicji)
+            food_limit += base_def.get("food_limit", 0)
+            goods_limit += base_def.get("goods_limit", 0)
+
+            # bonus z ulepszeń (jeśli istnieją)
+            upgrades = base_def.get("upgrades", [])
+            if level > 0 and upgrades:
+                up_def = upgrades[min(level - 1, len(upgrades) - 1)]
+                food_limit += up_def.get("food_limit", 0)
+                goods_limit += up_def.get("goods_limit", 0)
+
+        return food_limit, goods_limit
+
     def order_colonists(self, state):
         self.loc.t("ui.order_colonists")
         if state != self.state:
@@ -1037,13 +1066,37 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
                     daily_net[res] -= amt * eff
 
             # ograniczamy dzienne zużycie do dostępnych zasobów
+            food_limit, goods_limit = self.calculate_storage_limits()
+
+            # żeby nie spamować co turę tym samym
+            if not hasattr(self, "_full_storage_logged"):
+                self._full_storage_logged = set()
+
             for res, change in daily_net.items():
                 if change < 0:
                     available = self.resources.get(res, 0)
                     to_consume = min(available, -change)
                     self.resources[res] -= to_consume
+
                 elif change > 0:
-                    self.resources[res] += change
+                    cur = self.resources.get(res, 0)
+
+                    # rozróżnienie food vs goods
+                    limit = food_limit if res == "food" else goods_limit
+
+                    if cur >= limit:
+                        # produkcja staje – nic nie dodajemy
+                        # log tylko raz na dany surowiec na dzień
+                        key = (self.current_date, res)
+                        if key not in self._full_storage_logged:
+                            res_name = self.loc.t(RESOURCE_DISPLAY_KEYS.get(res, res), default=res)
+                            self.log(self.loc.t("log.no_storage_space", res=res_name), "DarkOrange")
+                            self._full_storage_logged.add(key)
+                        continue
+
+                    # jak jest miejsce częściowo, to dotnij produkcję do limitu
+                    addable = min(change, limit - cur)
+                    self.resources[res] = cur + addable
 
             # --- czas i misje ---
             self.current_date += timedelta(days=1)
@@ -1074,10 +1127,31 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         free = self.free_workers()
         self.work_lbl.config(text=self.loc.t("ui.free_workers_label", free=free), foreground=("goldenrod" if free > 0 else "black"))
 
+        food_limit, goods_limit = self.calculate_storage_limits()
+
         for res, lbl in self.res_labels.items():
             res_key = RESOURCE_DISPLAY_KEYS.get(res, res)
             res_name = self.loc.t(res_key, default=res)
-            lbl.config(text=f"{res_name}: {int(self.resources[res])}")
+
+            cur = int(self.resources.get(res, 0))
+
+            # jeśli nie chcesz limitu dla dukatów, zostaw jak było
+            if res == "ducats":
+                lbl.config(text=f"{res_name}: {cur}", foreground="black")
+                continue
+
+            limit = food_limit if res == "food" else goods_limit
+            lbl.config(text=f"{res_name}: {cur} / {limit}")
+
+            # kolory progowe
+            if cur > limit:
+                color = "red"
+            elif cur >= 0.8 * limit:
+                color = "#FF9000"
+            else:
+                color = "black"
+
+            lbl.config(foreground=color)
 
         building_data = self.calculate_production()
         net_total = {r: 0 for r in RESOURCES}

@@ -5,6 +5,9 @@ import random
 START_YEAR_MIN = 1492
 START_YEAR_MAX = 1742
 
+BASE_FOOD_LIMIT = 1000
+BASE_GOODS_LIMIT = 1000
+
 # Konfiguracja mapy
 MAP_SIZE = 8
 
@@ -773,6 +776,77 @@ BUILDINGS = {
         "allowed_terrain": ["forest", "field", "hills"],
         "upgrades": [],
         "name_key": "building.district.name",
+    },
+
+    "granary": {
+        "base_cost": {"wood": 120, "skins": 30},
+        "build_time": 14,
+        "base_workers": 0,
+        "allowed_terrain": ["settlement", "district"],
+        "requires_settlement": True,
+
+        # NOWY EFEKT: ekstra pojemność na żywność w kolonii
+        "storage": {"foods_limit": 1000},
+
+        "upgrades": [
+            {
+                "cost": {"wood": 200, "iron": 80},
+                "build_time": 18,
+                "workers": 0,
+                "storage": {"foods_limit": 2000},
+                "name_key": "building.granary.upgrade.storehouse",
+            },
+            {
+                "cost": {"wood": 300, "iron": 100, "steel": 50},
+                "build_time": 26,
+                "workers": 0,
+                "storage": {"foods_limit": 3500},
+                "name_key": "building.granary.upgrade.barn_complex",
+            },
+            {
+                "cost": {"wood": 400, "iron": 200, "steel": 120},
+                "build_time": 40,
+                "workers": 0,
+                "storage": {"foods_limit": 5000},
+                "name_key": "building.granary.upgrade.royal_granary",
+            },
+        ],
+        "name_key": "building.granary.name",
+    },
+    "warehouse": {
+        "base_cost": {"wood": 120, "iron": 30},
+        "build_time": 14,
+        "base_workers": 0,
+        "allowed_terrain": ["settlement", "district"],
+        "requires_settlement": True,
+
+        # NOWY EFEKT: pojemność na towary (bez food/ducats)
+        "storage": {"goods_limit": 1000},
+
+        "upgrades": [
+            {
+                "cost": {"wood": 200, "iron": 80},
+                "build_time": 18,
+                "workers": 0,
+                "storage": {"goods_limit": 2000},
+                "name_key": "building.warehouse.upgrade.merchant_warehouse",
+            },
+            {
+                "cost": {"wood": 300, "iron": 100, "steel": 50},
+                "build_time": 26,
+                "workers": 0,
+                "storage": {"goods_limit": 3500},
+                "name_key": "building.warehouse.upgrade.customs_warehouse",
+            },
+            {
+                "cost": {"wood": 400, "iron": 200, "steel": 120},
+                "build_time": 40,
+                "workers": 0,
+                "storage": {"goods_limit": 5000},
+                "name_key": "building.warehouse.upgrade.colonial_depot",
+            },
+        ],
+        "name_key": "building.warehouse.name",
     },
 }
 

@@ -857,6 +857,18 @@
   "log.no_harbor_for_ship": "Nie możesz budować statków bez przystani.",
 "log.harbor_level_too_low": "Twoja przystań ma za niski poziom. Wymagany: {level_needed}, posiadany: {level_have}.",
   "screen.build_ship.required_harbor": "Wymagana przystań: {harbor}",
-"log.overcrowding": "Przeludnienie: {excess} osób ponad limit mieszkaniowy – zużywają +50% pożywienia."
+"log.overcrowding": "Przeludnienie: {excess} osób ponad limit mieszkaniowy – zużywają +50% pożywienia.",
+
+  "building.granary.name": "Spichlerz",
+"building.granary.upgrade.storehouse": "Spichrz murowany",
+"building.granary.upgrade.barn_complex": "Zespół stodół",
+"building.granary.upgrade.royal_granary": "Spichlerz królewski",
+
+  "building.warehouse.name": "Magazyn",
+"building.warehouse.upgrade.merchant_warehouse": "Magazyn kupiecki",
+"building.warehouse.upgrade.customs_warehouse": "Magazyn celny",
+"building.warehouse.upgrade.colonial_depot": "Skład kolonialny",
+
+  "log.no_storage_space": "Brak miejsca na {res} – produkcja wstrzymana."
 
 }

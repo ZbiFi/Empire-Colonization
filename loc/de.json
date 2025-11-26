@@ -729,5 +729,15 @@
 "log.no_harbor_for_ship": "Du brauchst einen Hafen, um Schiffe zu bauen.",
 "log.harbor_level_too_low": "Dein Hafenlevel ist zu niedrig. Benötigt: {level_needed}, vorhanden: {level_have}.",
   "screen.build_ship.required_harbor": "Erforderlicher Hafen: {harbor}",
-  "log.overcrowding": "Überbevölkerung: {excess} Personen über dem Wohnlimit – sie verbrauchen +50% Nahrung."
+  "log.overcrowding": "Überbevölkerung: {excess} Personen über dem Wohnlimit – sie verbrauchen +50% Nahrung.",
+  "building.granary.name": "Kornspeicher",
+"building.granary.upgrade.storehouse": "Gemauerter Speicher",
+"building.granary.upgrade.barn_complex": "Scheunenkomplex",
+"building.granary.upgrade.royal_granary": "Königlicher Kornspeicher",
+
+  "building.warehouse.name": "Lagerhaus",
+"building.warehouse.upgrade.merchant_warehouse": "Kaufmannslager",
+"building.warehouse.upgrade.customs_warehouse": "Zolllager",
+"building.warehouse.upgrade.colonial_depot": "Kolonialdepot",
+  "log.no_storage_space": "Kein Lagerplatz für {res} – Produktion gestoppt."
 }
