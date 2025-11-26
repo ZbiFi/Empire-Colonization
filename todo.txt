@@ -41,12 +41,12 @@ tile dla przystani
                     DONE !!! NIE DZIAŁAJA QUESTY JAK POWINNY!!!!!!
                     DONE !!!! handel z limitami i produkcją u indian
 automatyczny handel
-4. zrobić coś z nadmiarem żarcia i drewna
+        DONE?? 4. zrobić coś z nadmiarem żarcia i drewna
                     DONE !!! 5. budowa statków
                     DONE!!!!! endgame screen, jak się przegra
 3a) eventy losowe - plaga, pozar, wypadki whatever, piractwo
-?budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
-?magazyn -> podobnie ale z surowcami
+        DONE ?? ?budynek spichlerz - by zarcie się nie psuło z czasem powyzej jakiejs wartosci
+        DONE ???magazyn -> podobnie ale z surowcami
                     DONE !!! BUG z przesuwaniem dni - nadto jest liczona produkcja
 
 <EVENTY>
