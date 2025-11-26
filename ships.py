@@ -509,7 +509,7 @@ class ShipsMixin:
 
         if total_units > max_cargo:
             self.log(
-                self.loc.t("log.too_much_cargo", max_cargo=max_cargo, total=total_units),
+                self.loc.t("ui.too_much_cargo", max_cargo=max_cargo, total=total_units),
                 "red"
             )
             return False
@@ -593,7 +593,7 @@ class ShipsMixin:
             if total > max_cargo:
                 self.log(
                     self.loc.t(
-                        "log.too_much_cargo",
+                        "ui.too_much_cargo",
                         max_cargo=max_cargo,
                         total=total
                     ),

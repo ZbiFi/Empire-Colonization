@@ -69,6 +69,7 @@
   "ui.none": "Brak",
   "ui.not_enough_ducats": "Za mało dukatów! Potrzeba: {cost}",
   "ui.num_colonists": "Liczba kolonistów:",
+  "ui.order": "Zamów",
   "ui.order_colonists": "Zamów kolonistów z Europy",
   "ui.order_colonists_title": "Zamówienie kolonistów",
   "ui.order_new_colonists": "Zamów nowych kolonistów",
@@ -630,8 +631,8 @@
 
   "ui.empty_cargo": "Pusty ładunek!",
   "ui.too_much_cargo": "Za dużo! Max: {max_cargo} (masz {total})",
-  "royal_mission_done": "MISJA KRÓLEWSKA WYKONANA!",
-
+  "log.royal_mission_done": "MISJA KRÓLEWSKA WYKONANA!",
+"log.royal_mission_failed": "MISJA KRÓLEWSKA NIE WYKONANA W TERMINIE! – reputacja spada o {penalty}.",
     "screen.ships.title": "Statki",
   "screen.ships.header": "STATKI HANDLOWE",
 
@@ -640,6 +641,7 @@
 
   "screen.ships.pending_colonists": "Oczekiwani koloniści: {pending}",
   "screen.ships.status_line": "Status: {status}",
+  "log.colonists_delivered_soon": "Kolonizatorzy ({amt}) zostaną dostarczeni najbliższym statkiem z Europy.",
 
   "screen.ships.to_europe_date": "Do Europy: {date}",
   "screen.ships.return_date": "Powrót: {date}",
@@ -699,6 +701,9 @@
   "screen.trade.summary_net_ducats": "Bilans: {sign}{net} dukatów",
   "log.trade_not_enough_to_sell": "Za mało {res}, aby sprzedać!",
   "log.trade_not_enough_ducats": "Za mało dukatów na tę transakcję!",
+  "log.colonists_ordered_ducats": "Zamówiono {amt} kolonistów – zapłacono {cost} dukatów.",
+  "ui.not_enough_reputation": "Za mało reputacji! Potrzeba: {cost}.",
+  "log.colonists_ordered_rep": "Zamówiono {amt} kolonistów – zapłacono {cost} reputacji.",
   "screen.trade.net_loss": "strata",
   "log.europe_trade_result": "Handel z {state}: {net_word} {amount} dukatów.",
   "log.europe_relations_change": "Relacje z {state}: +{rep_change} (nowe: {new_rel}/100).",
@@ -735,6 +740,9 @@
   "debug.native_stock_info": "stan {stock}, prod {prod}/d",
   "screen.missions.item_line": "{tribe}: {name}",
 
+  "screen.native_menu.title": "Handel z Indianami",
+  "ui.rep_cost_fixed": "Koszt reputacji",
+  "ui.ducat_cost_fixed": "Koszt dukatów",
   "screen.diplomacy.rep_cost": "Koszt reputacji: {rep_cost}",
   "screen.diplomacy.gold_cost": "Koszt dukatów: {gold_cost}",
 
@@ -846,7 +854,7 @@
 "ui.days": "dni",
   "log.no_harbor_for_ship": "Nie możesz budować statków bez przystani.",
 "log.harbor_level_too_low": "Twoja przystań ma za niski poziom. Wymagany: {level_needed}, posiadany: {level_have}.",
-  "screen.build_ship.required_harbor": "Wymagana przystań: {harbor}"
-
+  "screen.build_ship.required_harbor": "Wymagana przystań: {harbor}",
+"log.overcrowding": "Przeludnienie: {excess} osób ponad limit mieszkaniowy – zużywają +50% pożywienia."
 
 }

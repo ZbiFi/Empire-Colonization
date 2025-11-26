@@ -285,7 +285,7 @@ class BuildingsMixin:
             cost = {k: int(v * mult) for k, v in cost.items()}
 
         if not self.can_afford(cost):
-            self.log(self.loc.t("ui.not_enough_resources"), "red")
+            self.log(self.loc.t("log.not_enough_resources"), "red")
             return
         if self.free_workers() < workers_needed:
             self.log(self.loc.t("ui.not_enough_workers"), "red")

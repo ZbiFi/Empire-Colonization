@@ -14,7 +14,7 @@ DEFAULT_LANG_FILES = {
     "de": LOC_DIR / "de.json",
 }
 
-# Regex na loc.t("key") / self.loc.t('key')
+# Regex na loc t("key") / self loc t('key')
 LOC_T_RE = re.compile(
     r"""(?:self\.)?loc\.t\(\s*(?:[fr]?)?["']([^"']+)["']""",
     re.MULTILINE

@@ -261,7 +261,8 @@ class RelationsMixin:
         ale zamiast dukatów jest bilans ilościowy (value units)."""
 
         trade_win = self.create_window(
-            self.loc.t("screen.native_trade.title", tribe=tribe), key="screen.native_trade"
+            self.loc.t("screen.native_trade.title", tribe=self.tribe_name(tribe)),
+            key="screen.native_trade"
         )
         trade_win.geometry("800x800")  # stały rozmiar
         trade_win.resizable(False, False)

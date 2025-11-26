@@ -645,7 +645,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.main_game()
 
     def order_colonists(self, state):
-        self.loc.t("tooltip.order_colonists")
+        self.loc.t("ui.order_colonists")
         if state != self.state:
             self.log(self.loc.t("ui.order_only_own_state"), "red")
             return
@@ -712,7 +712,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # === Koszty ===
         cost_frame = ttk.Frame(win)
         cost_frame.pack(pady=10, fill="x", padx=20)
-
         rep_cost_lbl = ttk.Label(cost_frame, text=self.loc.t("ui.rep_cost_fixed"), foreground="purple", font=small_info_font)
         gold_cost_lbl = ttk.Label(cost_frame, text=self.loc.t("ui.ducat_cost_fixed"), foreground="gold", font=small_info_font)
         rep_cost_lbl.pack(anchor="w")
@@ -751,17 +750,17 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             if method == "reputation":
                 cost = amt * 10
                 if self.europe_relations[self.state] < cost:
-                    self.log(self.loc.t("ui.not_enough_reputation"), "red")
+                    self.log(self.loc.t("ui.not_enough_reputation", cost=cost), "red")
                     return
                 self.europe_relations[self.state] -= cost
-                self.log(self.loc.t("log.colonists_ordered_rep"), "purple")
+                self.log(self.loc.t("log.colonists_ordered_rep", amt=amt, cost=cost), "purple")
             else:
                 cost = amt * 1000
                 if self.resources["ducats"] < cost:
-                    self.log(self.loc.t("ui.not_enough_ducats"), "red")
+                    self.log(self.loc.t("ui.not_enough_ducats", cost=cost), "red")
                     return
                 self.resources["ducats"] -= cost
-                self.log(self.loc.t("log.colonists_ordered_ducats"), "purple")
+                self.log(self.loc.t("log.colonists_ordered_ducats", amt=amt, cost=cost), "purple")
 
             # Znajdź statek do transportu
             target_ship = None
@@ -787,7 +786,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
             a_eu, a_back, load, st, pend, name, stype = current
             self.ships[target_ship] = (a_eu, a_back, load, st, pend + amt, name, stype)
 
-            self.log(self.loc.t("log.colonists_delivered_soon"), "blue")
+            self.log(self.loc.t("log.colonists_delivered_soon", amt=amt), "blue")
             win.destroy()
 
         ttk.Button(btn_frame, text=self.loc.t("ui.order"), command=confirm_order).pack(side="left", padx=8)
@@ -944,9 +943,6 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.update_log_display()
 
     def advance_date(self, days):
-        # if days > 1 and self.free_workers() < 1:
-        #     self.log(self.loc.t("ui.not_enough_people"), "red")
-        #     return
 
         # Liczymy dzień po dniu, ale śmierć z głodu losujemy zbiorczo
         initial_food = self.resources["food"]
@@ -982,7 +978,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         # przeludnienie — tylko log (brak wypędzania)
         if max_excess > 0:
             self.log(
-                self.loc.t("log.overcrowding"),
+                self.loc.t("log.overcrowding", excess=max_excess),
                 "orange"
             )
 
@@ -1051,15 +1047,15 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
 
             # --- czas i misje ---
             self.current_date += timedelta(days=1)
-            # self.log(self.loc.t("log.days_passed"), "blue")
 
             # sprawdź misje indiańskie każdego dnia
             self.try_generate_native_missions()
 
         if self.current_mission is not None and self.current_mission[0] < self.current_date:
             end, req, sent, diff, text, idx = self.current_mission
-            self.log(self.loc.t("log.royal_mission_failed"), "red")
-            self.europe_relations[self.state] = max(0, self.europe_relations[self.state] - 10 * diff)
+            rep_penalty = 10 * diff
+            self.log(self.loc.t("log.royal_mission_failed", penalty=rep_penalty), "red")
+            self.europe_relations[self.state] = max(0, self.europe_relations[self.state] - rep_penalty)
             self.current_mission = None
 
     def update_display(self):

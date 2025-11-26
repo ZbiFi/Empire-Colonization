@@ -69,6 +69,7 @@
   "ui.none": "None",
   "ui.not_enough_ducats": "Not enough ducats! Needed: {cost}",
   "ui.num_colonists": "Number of colonists:",
+  "ui.order": "Order",
   "ui.order_colonists": "Order colonists from Europe",
   "ui.order_colonists_title": "Colonist order",
   "ui.order_new_colonists": "Order new colonists",
@@ -523,7 +524,7 @@
   "mission.already_done": "Mission already completed!",
   "mission.royal.default_name": "Royal mission",
   "mission.royal.header": "✦ ROYAL MISSION ✦",
-  "mission.native.header": "✦ NATIVE MISSIONS ✦",
+  "mission.native.header": "✦ INDIAN MISSIONS ✦",
   "mission.royal.none_active": "No active royal mission.",
   "mission.royal.remaining_days": "Remaining: {days} days",
   "mission.royal.pay_cost": "Cost to pay with ducats: {ducats_cost}",
@@ -532,7 +533,7 @@
   "mission.royal.not_enough_ducats": "Not enough ducats! Needed: {cost}",
   "mission.royal.request": "His Royal Majesty {monarch} demands for {missionName}: {resources}. Deadline: {date} (1 year).",
   "mission.royal.counter": "Royal missions completed: {completed} / {to_win}",
-  "mission.native.none_active": "No active native missions.",
+  "mission.native.none_active": "No active Indian missions.",
   "mission.native.deadline": "Deadline: {date} ({days} days left)",
   "mission.native.not_enough_resources": "You lack the resources to fulfil the mission from {tribe}: {missing}",
   "mission.native.done_log": "Mission from {tribe} fulfilled! Reward: +{reward} reputation.",
@@ -543,13 +544,15 @@
   "screen.victory.quit_button": "Quit game",
   "ui.empty_cargo": "Empty cargo!",
   "ui.too_much_cargo": "Too much! Max: {max_cargo} (you have {total})",
-  "royal_mission_done": "ROYAL MISSION COMPLETED!",
+  "log.royal_mission_done": "ROYAL MISSION COMPLETED!",
+  "log.royal_mission_failed": "ROYAL MISSION NOT COMPLETED IN TIME! – reputation decreases by {penalty}.",
   "screen.ships.title": "Ships",
   "screen.ships.header": "TRADE SHIPS",
   "screen.ships.ship_frame": "Ship {num}",
   "screen.ships.ship_frame_flagship": "Ship {num} (flagship)",
   "screen.ships.pending_colonists": "Waiting colonists: {pending}",
   "screen.ships.status_line": "Status: {status}",
+  "log.colonists_delivered_soon": "Colonists ({amt}) will be delivered by the next ship from Europe.",
   "screen.ships.to_europe_date": "To Europe: {date}",
   "screen.ships.return_date": "Return: {date}",
   "screen.ships.waiting_in_europe": "Waiting in port: {days} days",
@@ -600,6 +603,9 @@
   "screen.trade.summary_net_ducats": "Balance: {sign}{net} ducats",
   "log.trade_not_enough_to_sell": "Not enough {res} to sell!",
   "log.trade_not_enough_ducats": "Not enough ducats for this transaction!",
+  "log.colonists_ordered_ducats": "Ordered {amt} colonists – paid {cost} ducats.",
+  "ui.not_enough_reputation": "Not enough reputation! Required: {cost}.",
+"log.colonists_ordered_rep": "Ordered {amt} colonists – paid {cost} reputation.",
   "screen.trade.net_loss": "loss",
   "log.europe_trade_result": "Trade with {state}: {net_word} {amount} ducats.",
   "log.europe_relations_change": "Relations with {state}: +{rep_change} (new: {new_rel}/100).",
@@ -632,6 +638,9 @@
   "log.native_rel_change": "Relations with {tribe}: +{rep_change} (new: {new_rel}/100).",
   "debug.native_stock_info": "stock {stock}, prod {prod}/d",
   "screen.missions.item_line": "{tribe}: {name}",
+  "screen.native_menu.title": "Trade with the Indians",
+  "ui.rep_cost_fixed": "Reputation cost",
+  "ui.ducat_cost_fixed": "Ducat cost",
   "screen.diplomacy.rep_cost": "Reputation cost: {rep_cost}",
   "screen.diplomacy.gold_cost": "Ducat cost: {gold_cost}",
   "screen.death.title": "GAME OVER",
@@ -640,28 +649,21 @@
   "screen.death.quit_button": "Quit game",
   "screen.settings.title": "Settings",
   "screen.settings.header": "SETTINGS",
-
   "settings.language.title": "Language",
   "settings.language.label": "Choose language:",
-
   "settings.music.title": "Music",
   "settings.music.volume": "Music volume:",
-
   "settings.sfx.title": "Sounds",
   "settings.sfx.volume": "Sounds volume:",
-
   "settings.gameplay.title": "Gameplay",
   "settings.gameplay.start_date": "Start date:",
-
   "settings.start_date.random": "Random",
   "settings.start_date.1492": "1492 (Discovery Era)",
   "settings.start_date.1607": "1607 (Early Colonies)",
   "settings.start_date.1700": "1700 (Late Colonies)",
-
   "settings.ui.title": "Interface",
   "settings.ui.scale": "UI scale:",
   "ui.load_game": "Load",
-
   "ui.game_menu.title": "Game menu",
   "ui.game_menu.continue": "Continue",
   "ui.game_menu.save": "Save",
@@ -669,15 +671,11 @@
   "ui.game_menu.options": "Options",
   "ui.game_menu.quit": "Quit",
   "ui.game_menu.tooltip": "Game menu",
-
   "ui.confirm_exit.title": "Exit",
   "ui.confirm_exit.question": "Are you sure you want to quit?",
-
   "ui.yes": "YES",
   "ui.no": "NO",
-
   "ui.buildings_btn": "Buildings",
-
   "ui.building_col_name": "Building",
   "ui.building_col_workers": "Workers",
   "ui.building_col_status": "Production",
@@ -685,52 +683,42 @@
   "ui.building_col_area": "Area",
   "screen.buildings_overview.title": "Buildings",
   "tooltip.free_workers_info": "People are employed in buildings or take part in explorations",
-
   "screen.save.title": "Save game",
 "screen.load.title": "Load game",
 "screen.save.name_label": "Save name:",
 "screen.save.no_name_title": "No name",
 "screen.save.no_name_text": "Please enter a save name.",
 "screen.save.new_meta": "New save",
-
 "screen.edit_save.title": "Edit save",
 "screen.edit_save.label": "Change save name:",
-
 "screen.delete_save.title": "Delete save",
 "screen.delete_save.q1": "Are you sure you want to delete this save?",
 "screen.delete_save.q2": "This action is permanent. Delete anyway?",
-
 "ui.save": "Save",
 "ui.load": "Load",
 "ui.edit": "Edit",
 "ui.delete": "Delete",
 "ui.ok": "OK",
-
 "log.save_done": "Game saved as: {name}.",
   "ship_type.sloop.name": "Sloop",
 "ship_type.brig.name": "Brig",
 "ship_type.galleon.name": "Galleon",
-
 "building.harbor.upgrade.trade_dock": "Trade Dock",
 "building.harbor.upgrade.colonial_shipyard": "Colonial Shipyard",
 "building.harbor.upgrade.naval_arsenal": "Naval Arsenal",
   "screen.ships.type_line": "Type: {type}",
-
     "ui.build_ship": "Build ship",
   "screen.build_ship.title": "Ship construction",
   "screen.build_ship.header": "Choose a ship type to build",
   "screen.build_ship.stats_line": "Capacity: {capacity} | Speed: x{speed} | Crew: {crew}",
   "screen.build_ship.cost_line": "Cost: {cost} | Build time: {days} days",
   "screen.ships.building_until": "Building until: {date}",
-
   "ship.status.building": "building",
-
   "log.not_enough_resources_for_ship": "Not enough resources to build a ship: {missing}.",
   "log.not_enough_free_workers_for_ship": "Not enough free people to build a ship (needed {needed}, free {free}).",
   "log.ship_build_started": "Ship construction started: {name}. It will be ready in {days} days.",
   "log.ship_built": "Ship {name} has been completed and is ready in port.",
   "tooltip.build_ship_takes_people": "Starting construction will remove {crew} people from your population.",
-
   "screen.build_ship.capacity_lbl": "Capacity",
 "screen.build_ship.speed_lbl": "Speed",
 "screen.build_ship.crew_lbl": "Crew",
@@ -738,5 +726,7 @@
 "screen.build_ship.cost_lbl": "Cost",
 "ui.days": "days",
   "log.no_harbor_for_ship": "You need a harbor to build ships.",
-"log.harbor_level_too_low": "Your harbor level is too low. Required: {level_needed}, current: {level_have}."
+"log.harbor_level_too_low": "Your harbor level is too low. Required: {level_needed}, current: {level_have}.",
+  "screen.build_ship.required_harbor": "Required harbor: {harbor}",
+  "log.overcrowding": "Overcrowding: {excess} people above housing limit – they consume +50% food."
 }
