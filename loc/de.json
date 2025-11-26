@@ -577,6 +577,7 @@
   "log.colonists_arrived": "{pending} neue Kolonisten aus Europa eingetroffen!",
   "log.ship_returned_ready": "Schiff {ship_name} kehrte in die Kolonie zurück, bereit für die nächste Reise.",
   "ui.gift_cost_line": "Geschenk: kostet 10 Gold + 250 Nahrung + 20 Silber + 15 Stahl",
+  "screen.exploration.title": "Erkundung",
   "screen.native_trade.title": "Handel mit {tribe}",
   "screen.native_trade.relations_line": "Beziehungen zu {tribe}: {rel}/100",
   "screen.native_trade.prices_line": "Preise hängen von der Reputation ab (verkauf x{sell_mod:.2f}, kauf x{buy_mod:.2f}).",

@@ -106,7 +106,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.state = None
         self.location = None
         self.current_date = None
-        self.people = 10
+        self.people = 100
         self.busy_people = 0
         self.days_passed = 0
 

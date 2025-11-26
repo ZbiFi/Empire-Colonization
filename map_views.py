@@ -955,18 +955,50 @@ class MapUIMixin:
 
                     # --- NIEODKRYTE jak w eksploracji ---
                     if not cell["discovered"]:
-                        neighbors = [
-                            (y + dy, x + dx)
-                            for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
-                            if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
-                        ]
-                        if any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors):
+                        # najpierw zawsze rysujemy tło terra incognita
+                        try:
+                            if (not hasattr(self, "terra_incognita_img")
+                                    or cell_size not in self.terra_incognita_img):
+                                path = self.resource_path("img/tiles/terra_incognita.png")
+                                base = Image.open(path)
+                                img = base.resize((cell_size, cell_size), Image.LANCZOS)
+
+                                if not hasattr(self, "terra_incognita_img"):
+                                    self.terra_incognita_img = {}
+                                self.terra_incognita_img[cell_size] = ImageTk.PhotoImage(img)
+
+                            canvas.create_image(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                anchor="nw",
+                                image=self.terra_incognita_img[cell_size]
+                            )
+
+                        except Exception:
+                            # fallback – szary kwadrat
                             canvas.create_rectangle(
                                 offset_x + x * cell_size,
                                 offset_y + y * cell_size,
                                 offset_x + (x + 1) * cell_size,
                                 offset_y + (y + 1) * cell_size,
                                 fill="#888888",
+                                outline="gray",
+                            )
+
+                        # potem sprawdzamy czy pole jest "przy odkrytym" -> wtedy overlay eksploracji
+                        neighbors = [
+                            (y + dy, x + dx)
+                            for dy, dx in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                            if 0 <= y + dy < self.map_size and 0 <= x + dx < self.map_size
+                        ]
+                        is_frontier = any(self.map_grid[ny][nx]["discovered"] for ny, nx in neighbors)
+
+                        if is_frontier:
+                            canvas.create_rectangle(
+                                offset_x + x * cell_size,
+                                offset_y + y * cell_size,
+                                offset_x + (x + 1) * cell_size,
+                                offset_y + (y + 1) * cell_size,
                                 outline="yellow",
                                 width=2
                             )
@@ -977,6 +1009,7 @@ class MapUIMixin:
                                 fill="white",
                                 font=tile_q_font
                             )
+
                         continue
 
                     # --- ODKRYTE pola: rysunek terenu jak 1:1 z obu map ---
@@ -1088,7 +1121,6 @@ class MapUIMixin:
 
                 confirm = self.create_window(self.loc.t("screen.exploration.confirm_title"), key="screen.exploration_confirm")
                 bg = self.style.lookup("TFrame", "background")
-
                 ttk.Label(confirm, text=self.loc.t("screen.exploration.confirm_send_to", y=y, x=x),
                           font=title_font, background=bg).pack(pady=10)
                 ttk.Label(confirm, text=self.loc.t("screen.exploration.confirm_time_cost", days=days, food=cost_food, wood=cost_wood),
@@ -1116,6 +1148,7 @@ class MapUIMixin:
 
                 ttk.Button(confirm, text=self.loc.t("ui.send"), command=do_explore).pack(side="left", padx=10, pady=10)
                 ttk.Button(confirm, text=self.loc.t("ui.cancel"), command=confirm.destroy).pack(side="right", padx=10, pady=10)
+                self.center_window(confirm)
                 return
 
             # --- klik w ODKRYTE pole w trybie budowy ---

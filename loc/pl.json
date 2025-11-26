@@ -675,6 +675,8 @@
 
   "ui.gift_cost_line": "Dar: koszt 10 złota + 250 żywności + 20 srebra + 15 stali",
 
+  "screen.exploration.title": "Eksploracja",
+
   "screen.native_trade.title": "Handel z {tribe}",
   "screen.native_trade.relations_line": "Relacje z {tribe}: {rel}/100",
   "screen.native_trade.prices_line": "Ceny zależą od reputacji (sprzedaż x{sell_mod:.2f}, kupno x{buy_mod:.2f}).",
