@@ -54,5 +54,5 @@ automatyczny handel
 
 
 TO EXE
-pyinstaller --noconsole --onefile --name ImperiumKolonii --add-data "fonts;fonts" --add-data "img;img" --add-data "sounds;sounds" main.py
+pyinstaller --noconsole --onefile --name ImperiumKolonii --add-data "fonts;fonts" --add-data "img;img" --add-data "sounds;sounds" --add-data "loc;loc" main.py
 

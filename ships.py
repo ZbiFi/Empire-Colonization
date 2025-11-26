@@ -196,7 +196,8 @@ class ShipsMixin:
                     mission_part = {k: v for k, v in load.items() if k in req}
                     if mission_part:
                         mission_str = ", ".join(
-                            f"{k}: {v} (wysłano {sent.get(k, 0)}/{req[k]})"
+                            f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(k, k), default=k)}: {v} "
+                            f"(wysłano {sent.get(k, 0)}/{req[k]})"
                             for k, v in mission_part.items()
                         )
                         ttk.Label(
@@ -479,14 +480,28 @@ class ShipsMixin:
         candidates = [n for n in pool if n not in used]
         return random.choice(candidates if candidates else pool)
 
-    def send_ship(self, load):
+    def send_ship(self, load, ship_idx=None):
         self._ensure_ship_names()
         total_units = sum(load.values())
 
-        free_ship = next((i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT), None)
-        if free_ship is None:
-            self.log(self.loc.t("log.no_free_ship"), "red")
-            return False
+        # jeśli wskazano konkretny statek – użyj go
+        if ship_idx is not None:
+            free_ship = ship_idx
+            if free_ship < 0 or free_ship >= len(self.ships):
+                self.log(self.loc.t("log.no_free_ship"), "red")
+                return False
+            if self.ships[free_ship][3] != SHIP_STATUS_IN_PORT:
+                self.log(self.loc.t("log.no_free_ship"), "red")
+                return False
+        else:
+            # fallback: pierwszy wolny (jak było)
+            free_ship = next(
+                (i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT),
+                None
+            )
+            if free_ship is None:
+                self.log(self.loc.t("log.no_free_ship"), "red")
+                return False
 
         # pojemność wynika z typu tego konkretnego statku
         ship_type = self.ships[free_ship][6]
@@ -498,34 +513,10 @@ class ShipsMixin:
                 "red"
             )
             return False
-        if free_ship is None:
-            self.log(self.loc.t("log.no_free_ship"), "red")
-            return False
 
-        # zachowaj ewentualnych oczekujących kolonistów przypiętych do tego statku
-        old_arrival_to_eu, old_arrival_back, old_load, old_status, pending, ship_name, ship_type  = self.ships[free_ship]
+        old_arrival_to_eu, old_arrival_back, old_load, old_status, pending, ship_name, ship_type = self.ships[free_ship]
 
-        mission_contribution = {}
-
-        if self.current_mission and free_ship == self.flagship_index:
-            end, req, sent, diff, text, idx = self.current_mission
-            mission_completed_before = all(sent.get(r, 0) >= req[r] for r in req)
-
-            for res in req:
-                if res in load:
-                    needed = req[res] - sent.get(res, 0)
-                    if needed > 0:
-                        contrib = min(load[res], needed)
-                        mission_contribution[res] = contrib
-                        sent[res] = sent.get(res, 0) + contrib
-
-            if not mission_completed_before and all(sent.get(r, 0) >= req[r] for r in req):
-                self.log(self.loc.t("log.royal_mission_completed_after_arrival"), "DarkOrange")
-                self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
-                self.current_mission = None
-                self.mission_multiplier *= 0.9
-                self.last_mission_date = self.current_date
-                self.complete_royal_mission()
+        # >>> NIE LICZYMY MISJI TUTAJ <<<
 
         for r, a in load.items():
             self.resources[r] -= a
@@ -539,7 +530,11 @@ class ShipsMixin:
         arrival_to_europe = self.current_date + timedelta(days=days_to_europe)
         arrival_back = arrival_to_europe + timedelta(days=days_in_europe + days_back)
 
-        self.ships[free_ship] = (arrival_to_europe, arrival_back, load.copy(), SHIP_STATUS_TO_EUROPE, pending, ship_name, ship_type)
+        self.ships[free_ship] = (
+            arrival_to_europe, arrival_back, load.copy(),
+            SHIP_STATUS_TO_EUROPE, pending, ship_name, ship_type
+        )
+
         self.auto_sail_timer = None
 
         self.log(
@@ -552,15 +547,6 @@ class ShipsMixin:
             ),
             "blue"
         )
-
-        if mission_contribution:
-            end, req, sent, diff, text, idx = self.current_mission if self.current_mission else (None, {}, {}, 0, "", 0)
-            contrib_str = ", ".join(
-                f"{k}: {v}/{req[k]}" for k, v in mission_contribution.items() if k in req
-            )
-            if contrib_str:
-                self.loc.t("log.mission_contribution", cargo=contrib_str)
-
         return True
 
     def open_load_menu(self, ship_idx, parent):
@@ -614,7 +600,7 @@ class ShipsMixin:
                     "red"
                 )
                 return
-            if self.send_ship(load):
+            if self.send_ship(load, ship_idx=ship_idx):
                 parent.destroy()
                 load_win.destroy()
 
@@ -758,29 +744,38 @@ class ShipsMixin:
                 if load:
                     excess = load.copy()
 
-                    # === MISJA KRÓLEWSKA (tylko na flagowcu) ===
-                    if i == self.flagship_index and self.current_mission:
+                    # === MISJA KRÓLEWSKA (ładunek z każdego statku) ===
+                    if self.current_mission:
                         _, req, sent, diff, text, idx = self.current_mission
+
                         for res in req:
-                            if res in load:
-                                sent_in_load = min(load[res], req[res] - sent.get(res, 0))
-                                if sent_in_load > 0:
-                                    sent[res] = sent.get(res, 0) + sent_in_load
-                                    excess[res] -= sent_in_load
+                            if res in excess:  # <--- operujemy na excess
+                                needed = req[res] - sent.get(res, 0)
+                                if needed > 0:
+                                    take = min(excess[res], needed)
+                                    sent[res] = sent.get(res, 0) + take
+                                    excess[res] -= take
                                     if excess[res] <= 0:
                                         del excess[res]
 
+                        # misja kończy się dopiero po realnym dopłynięciu
                         if all(sent.get(r, 0) >= req[r] for r in req):
                             self.log(self.loc.t("log.royal_mission_done"), "DarkOrange")
-                            self.europe_relations[self.state] = min(100, self.europe_relations[self.state] + 10 * diff)
+                            self.europe_relations[self.state] = min(
+                                100,
+                                self.europe_relations[self.state] + 10 * diff
+                            )
                             self.current_mission = None
                             self.mission_multiplier *= 0.9
                             self.last_mission_date = self.current_date
                             self.complete_royal_mission()
 
-                    # === SPRZEDAŻ NADMIARU ===
+                    # === SPRZEDAŻ NADMIARU (tylko to, co zostało po misji) ===
                     sell_mult = self.get_europe_sell_mult_for_player()
-                    gold = round(sum(a * EUROPE_PRICES.get(r, 0) * sell_mult for r, a in load.items()))
+                    gold = round(
+                        sum(a * EUROPE_PRICES.get(r, 0) * sell_mult for r, a in excess.items())
+                    )
+
                     if gold > 0:
                         excess_str = ", ".join(
                             f"{self.loc.t(RESOURCE_DISPLAY_KEYS.get(k, k), default=k)}: {v}"
@@ -829,7 +824,10 @@ class ShipsMixin:
                     )
                     pending = 0  # zeruj po wysadzeniu
                 self.ships[i] = (None, None, {}, SHIP_STATUS_IN_PORT, 0, ship_name, ship_type)
-                self.auto_sail_timer = self.current_date + timedelta(days=14)
+                if i == self.flagship_index:
+                    self.auto_sail_timer = self.current_date + timedelta(days=14)
+                else:
+                    self.auto_sail_timer = None  # albo zostaw bez zmian, ale nie ustawiaj tu timera
 
                 self.log(
                     self.loc.t("log.ship_returned_ready", ship_name=ship_name),
@@ -858,7 +856,8 @@ class ShipsMixin:
 
     def auto_send_empty_ship(self):
         if self.auto_sail_timer and self.current_date >= self.auto_sail_timer:
-            free_ship = next((i for i, s in enumerate(self.ships) if s[3] == SHIP_STATUS_IN_PORT), None)
-            if free_ship is not None:
-                self.send_ship({})
-                self.auto_sail_timer = None
+            i = self.flagship_index
+            # auto tylko jeśli flagowiec stoi w porcie
+            if i is not None and self.ships[i][3] == SHIP_STATUS_IN_PORT:
+                self.send_ship({}, ship_idx=i)
+            self.auto_sail_timer = None

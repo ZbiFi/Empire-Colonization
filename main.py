@@ -114,7 +114,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.resources = {r: 0 for r in RESOURCES}
 
         self.resources["food"] = 100000
-        self.resources["wood"] = 1000
+        self.resources["wood"] = 10000
         self.resources["skins"] = 1000
         self.resources["clothes"] = 1000
         self.resources["herbs"] = 1000
@@ -128,7 +128,7 @@ class ColonySimulator(MissionsMixin, ShipsMixin, RelationsMixin, BuildingsMixin,
         self.resources["coal"] = 1000
         self.resources["silver"] = 1000
         self.resources["gold"] = 1000
-        self.resources["ducats"] = 1000
+        self.resources["ducats"] = 10000
 
         # self.resources["food"] = 1000
         # self.resources["wood"] = 50
